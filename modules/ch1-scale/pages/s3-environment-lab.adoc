@@ -12,11 +12,375 @@ WARNING: Not started  yet.
 
 == Before you begin
 
-Describe requirements, such as customer portal accounts, Red Hat Developer free sub, already configured machines, access to container registries, etc.
+You need a customer portal account with access to a Red Hat Enterprise Linux (RHEL) subscription.
+It could be a https://developers.redhat.com/products/rhel/download[Red Hat Developer program] free subscription, if you use the https://github.com/flightctl/flightctl-rpm[upstream packages] from the https://github.com/flightctl/flightctl[Flight Control^] project.
+
+WARNING: Be aware that, as time passes, there might be significant differences between newer upstream releases and the supported Red Hat product releases.
+
+IMPORTANT: The GA release of Edge Manager requires either a Red Hat Device Edge or RHEL with Edge Manager subscription and it is NOT included with the developer program individual subscription.
+
+You need a _development machine_ running RHEL, to which you have unrestricted sudo access, and enough capacity to run a few local VMs.
+
+You also need a _server machine_ running RHEL, to which you also have unrestricted sudo access.
+
+Both your _development machine_ and _server machine_ require internet access to download RPM packages and container images.
+
+If you are using the course classroom, your _development machine_ is the `workstation` VM.
+Log in as the user `student` with password `student`.
+From that machine, you may start SSH sessions to the `servera` VM, which is your _server_ machine, using the same user.
+Alternatively, you can open a shell or a console directly on the `servera` VM.
 
 == Instructions
 
-High-level summary of what you will perform in this lab, but more detailed than the objective.
+You can adapt the instructions in this course to any environment where you can install RPM packages, run Podman containers, and create VMs using libvirt.
+With a bit more effort, you could run everything on a Windows or MacOS workstation, using a single large VM running RHEL and nested virtualization, or a few smaller VMs, but this course does *NOT* provide instructions for doing so.
+
+This course was tested using a Red Hat Learning Environment (ROL) classroom which was originally created for another quick course series.
+There was no customization for the specific needs of Edge Manager, and there was no attempt at providing all requirements to install Edge Manager in disconnected mode.
+
+IMPORTANT: Some of the requirements of Edge Manager can be satisfied by the existing RPM package and container image mirrors in the ROL classroom, but some of them require internet access, a valid Red Hat login, and Red Hat subscription entitlements.
+
+If this is your first time using a ROL classroom, please refer to https://redhatquickcourses.github.io/rhde-rhem-devices/rhde-rhem-devices/1/ch1-intro/s3-classroom-lab.html[the previous course] for a gentler introduction to the classroom environment and to tasks such as installing and configuring Red Hat Edge Manager.
+
+Here the focus is on quickly having the environment ready for the tasks of this course, by re-creating some of the outcomes from the previous course.
+If you are proceeding directly after completing the previous course, without destroying and re-creating its classroom environment, you will skip most steps here.
+
+1. On your _development machine_, download the sample code for this course.
+
+.. Using a shell on your _development machine_ (which is the `workstation VM`), ensure you are on your home directory.
+All labs start from there, but they will use different work directories, so this course starts all labs from the same reference point.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *cd*
+--
+
+.. Verify if you already have the the samples repository.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *ls rhde-rhem-samples*
+LICENSE  README.md  antora.yml  config  enroll  modules  webapp
+--
+
+.. If you do, enter the samples repository and update it, just in case. 
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *cd rhde-rhem-samples*
+$ *git pull*
+Already up to date.
+$ *cd*
+--
+
+.. If you do not.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *ls rhde-rhem-samples*
+ls: cannot access 'rhde-rhem-samples': No such file or directory
+--
+Then clone the course samples repository.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *git clone https://github.com/RedHatQuickCourses/rhde-rhem-samples.git*
+Cloning into 'rhde-rhem-samples'...
+...
+--
+
+2. Install tools for managing containers and VMs on your _development machine_.
+
+.. Install the `container-tools` meta-package.
+Altough the `workstation` VM has Podman preinstalled, you will need the full suite of container tools in this course.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *sudo dnf install skopeo buildah*
+...
+Complete!
+--
+
+.. Install the libvirt tools and enable its QEMU socket service.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *sudo dnf install qemu-kvm libvirt virt-install virt-viewer*
+...
+Complete!
+$ *sudo systemctl enable virtqemud.socket --now*
+Created symlink /etc/systemd/system/multi-user.target.wants/virtqemud.socket → /usr/lib/systemd/system/virtqemud.socket.
+--
+
+.. Check that your unprivileged user can connect using the libvirt session interface.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *virsh uri*
+qemu:///session
+$ *virsh nodeinfo*
+CPU model:           x86_64
+...
+--
+
+3. Configure your _development machine_ to access RPM packages and container images from Red Hat, over the internet.
+
+.. Register your _development machine_ with the Red Hat subscription manager.
++
+If you are using the upstream Flight Control packages, you can use the login from a free Red Hat Developer subscription for individuals.
++
+NOTE: The `workstation` VM is preconfigured with access to a private mirror containing RHEL 10 packages, but it will need RHEL 9 packages to build bootc container images for edge devices that will be managed by Edge Manager.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *sudo subscription-manager register*
+...
+The registered system name is: workstation
+--
+
+.. Log in on the Red Hat container registry.
++
+Use the same Red Hat login that you used with subscription manager.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *podman login registry.redhat.io*
+...
+Login Succeeded!
+--
+
+.. Verify that you can access the bootc image builder container image.
+You may get a different hash, because the container image was updated since these instructions were written.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *skopeo inspect --format '{{.Digest}}' docker://registry.redhat.io/rhel9/bootc-image-builder:9.6*
+sha256:f5e1860fae45c9d01fb612fcfad6c1d3a93e9ea4533bf01ea1c4d47ae2226580
+--
+
+.. Download the bootc image builder to the container storage of the root user.
++
+You will run bootc image builder as root, so you must log in again on the Red Hat container registry.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *sudo podman login registry.redhat.io*
+...
+Login Succeeded!
+$ *podman pull docker://registry.redhat.io/rhel9/bootc-image-builder:9.6*
+...
+Storing signatures
+a93aa271855242ac292133fb261c2132dd88859abb7edc29fb5681d30db422f2
+--
+
+4. Install the Edge Manager services on your _server machine_.
+
+.. Open an SSH session or a terminal on your _server machine_.
+Make sure your current shell is on the right machine before you proceed.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *hostname*
+servera
+--
+
+.. Install the container tools on your _server machine_.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *sudo dnf install podman skopeo*
+...
+Complete!
+--
+
+.. Enable the Flight Control repository from EPEL.
++
+[source,subs="verbatim,quotes"]
+--
+$ *sudo dnf config-manager --add-repo https://rpm.flightctl.io/flightctl-epel.repo*
+Adding repo from: https://rpm.flightctl.io/flightctl-epel.repo
+--
++
+NOTE: There is no need to register `servera` because the Flight Control services package contains no dependencies other than a container engine (Podman) and the classroom environment contains a mirror of the RHEL 10 packages, which the `sererva` machine is preconfigured to use.
++
+////
+Attempt at using product packages online
+
+$ sudo subscription-manager register
+...
+The registered system name is: servera
+$ sudo subscription-manager repos --enable edge-manager-1.0-for-rhel-9-x86_64-rpms
+Repository 'edge-manager-1.0-for-rhel-9-x86_64-rpms' is enabled for this system.
+$ sudo podman login registry.redhat.io
+...
+Login Succeeded!
+
+There's an edge-manager-1.0-for-rhel-10-x86_64-rpms for use at workstation -- or mirroring into the classroom. But I cannot install the CLI from it. That may be a problem for building device images. It seems the rhel-10 repo is empty, but worstation refuses to enable the rhel-9 package to install the CLI. If I download the package from servera and scp it to workstation, then it works fine.
+////
+
+.. Install the Edge Manager services.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *sudo dnf install -y flightctl-services-1.0.2*
+...
+Complete!
+--
++
+NOTE: If you want to try the current latest release from the upstream project, remove the version component `-1.0.2` from the package `flightctl-services` in the command above.
+
+.. Start the Edge Manager services.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *sudo systemctl enable --now flightctl.target*
+Created symlink '/etc/systemd/system/multi-user.target.wants/flightctl.target' → '/usr/lib/systemd/system/flightctl.target'.
+--
+
+.. Verify that the Edge Manager services are up and running.
++
+Be patient, it may take a while until all container images required by Edge Manager are downloaded from the internet and it initializes its database and cache services.
+When it is all done, it is expected that some services will display `exited` as their substatus.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ **sudo systemctl list-units 'flightctl*' --all**
+  UNIT                                 LOAD   ACTIVE SUB     DESCRIPTION                                             
+  flightctl-alert-exporter.service     loaded active running Flight Control Alert Exporter service
+  flightctl-alertmanager-proxy.service loaded active running Flight Control Alertmanager Proxy service
+  flightctl-alertmanager.service       loaded active running Flight Control Alertmanager service
+  flightctl-api-init.service           loaded active exited  Flight Control API Initialization
+  flightctl-api.service                loaded active running Flight Control API server
+  flightctl-certs-init.service         loaded active exited  Flight Control Certificates Initialization
+  flightctl-cli-artifacts-init.service loaded active exited  Flight Control CLI Artifacts Certificates Initialization
+  flightctl-cli-artifacts.service      loaded active running Flight Control CLI Artifacts service
+  flightctl-db-migrate.service         loaded active exited  Flight Control Database Migration service
+  flightctl-db-users-init.service      loaded active exited  Flight Control Database Users Initialization
+  flightctl-db-wait.service            loaded active exited  Flight Control Database Wait
+  flightctl-db.service                 loaded active running PostgreSQL Database for Flightctl
+  flightctl-kv.service                 loaded active running Flight Control Key Value service
+  flightctl-network.service            loaded active exited  flightctl-network.service
+  flightctl-pam-issuer.service         loaded active running Flight Control PAM OIDC Issuer server
+  flightctl-periodic.service           loaded active running Flight Control Periodic service
+  flightctl-ui-init.service            loaded active exited  Flight Control UI Initialization
+  flightctl-ui.service                 loaded active running Flight Control UI
+  flightctl-worker.service             loaded active running Flight Control Worker service                           
+  flightctl.target                     loaded active active  Flight Control Services Group
+
+Legend: LOAD   → Reflects whether the unit definition was properly loaded.
+        ACTIVE → The high-level unit activation state, i.e. generalization of SUB.
+        SUB    → The low-level unit activation state, values depend on unit type.
+
+20 loaded units listed.
+To show all installed unit files use 'systemctl list-unit-files'.
+--
+
+.. If you experience errors, or it seems that the Edge Manager services are taking too long to start, refer to the https://redhatquickcourses.github.io/rhde-rhem-devices/rhde-rhem-devices/1/ch2-deploy/s2-install-lab.html[previous course^] for troubleshooting hints.
+
+5. For simplicity, configure local users for the Edge Manager services, on the PAM issuer container.
+
+.. Create groups which correspond to the `admin`, `operator`, and `viewer` roles.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *sudo podman exec -i flightctl-pam-issuer groupadd flightctl-admin*
+$ *sudo podman exec -i flightctl-pam-issuer groupadd flightctl-operator*
+$ *sudo podman exec -i flightctl-pam-issuer groupadd flightctl-viewer*
+--
+
+.. Create a user named `student` and grant it the `operator` role.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *sudo podman exec flightctl-pam-issuer adduser student*
+$ *sudo podman exec -i flightctl-pam-issuer sh -c 'echo "student:student" | chpasswd'*
+$ *sudo podman exec -i flightctl-pam-issuer usermod -aG flightctl-operator student*
+--
+
+.. Create a user named `admin` and grant it the `admin` role.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *sudo podman exec flightctl-pam-issuer adduser admin*
+$ *sudo podman exec -i flightctl-pam-issuer sh -c 'echo "admin:redhat" | chpasswd'*
+$ *sudo podman exec -i flightctl-pam-issuer usermod -aG flightctl-admin admin*
+--
+
+.. Verify you have the required users and groups on the PAM issuer container.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *sudo podman exec -i flightctl-pam-issuer groups student*
+student : student flightctl-operator
+$ *sudo podman exec -i flightctl-pam-issuer groups admin*
+admin : admin flightctl-admin
+--
+
+6. Install the Edge Manager CLI on your _development machine_
+
+.. Make sure your current shell is on the right machine.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *hostname*
+workstation
+--
+.. Enable the flight repository from EPEL and install its CLI package.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *sudo dnf config-manager --add-repo https://rpm.flightctl.io/flightctl-epel.repo*
+Adding repo from: https://rpm.flightctl.io/flightctl-epel.repo
+$ *sudo dnf install flightctl-cli*
+...
+Complete!
+--
+
+.. Verify that the `flightctl` command is in your command PATH.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *flightctl version*
+Client Version: v1.0.0
+Server Version: Could not read server version
+You must log in to view the server version. Please use the 'login' command to authenticate before proceeding
+--
+
+.. Copy the self-signed certificate of the Edge Manager server and add it to the system's trusted CA set.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *scp servera:/etc/flightctl/pki/ca-bundle.crt ~*
+ca-bundle.crt             100% 1222   128.6KB/s   00:00
+$ *sudo cp ca-bundle.crt /etc/pki/ca-trust/source/anchors/*
+$ *sudo update-ca-trust extract*
+--
+
+.. Log in on the Edge Manager server.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *flightctl login -u admin -p redhat https://servera.lab.example.com:3443*
+Auto-selected organization: 00000000-0000-0000-0000-000000000000 Default
+Login successful.
+--
+
+.. Verify that the CLI can now get the server's version, and that there are no managed devices yet.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *flightctl version*
+Client Version: v1.0.0
+Server Version: v1.0.0
+$ *flightctl get device*
+NAME    ALIAS   OWNER   SYSTEM  UPDATED APPLICATIONS
+--
+
+7. Create a device image for enrollment.
++
+Maybe this lab is getting too big and needs splitting?
+
+
 
 1. Task or outcome.
 
