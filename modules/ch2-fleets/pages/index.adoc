@@ -1,0 +1,9 @@
+= Creating and Managing Device Fleets
+
+Goal::
+
+Create and Manage Device Fleets
+
+WARNING: Not started  yet.
+
+This chapter introduces the fleet concept in Red Hat Edge Manager and demonstrates how to organize, configure, and manage groups of edge devices efficiently.

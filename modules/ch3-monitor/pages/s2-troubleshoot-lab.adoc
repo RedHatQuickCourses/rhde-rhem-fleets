@@ -1,0 +1,51 @@
+:time_estimate: 5
+
+= Lab: Troubleshoot Device and Fleet Issues
+
+_Estimated reading time: *{time_estimate} minutes*._
+
+Objective::
+
+Practice troubleshooting by creating scenarios with configuration differences and health issues, then extract diagnostic information using RHEM tools.
+
+WARNING: Not started  yet.
+
+== Before you begin
+
+Describe requirements, such as customer portal accounts, Red Hat Developer free sub, already configured machines, access to container registries, etc.
+
+== Instructions
+
+High-level summary of what you will perform in this lab, but more detailed than the objective.
+
+1. Task or outcome.
+
+.. Something to do, using a graphical or web UI.
+Click menu:Save As[] to save your work.
+
+.. More things to do
+
+2. Task or outcome.
+
+.. Something to do, using a shell.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *command --options fixed-arguments _variable-arguments_*
+output of the command
+highlight *something* in the output
+--
+
+
+.. More things to do.
+Press kbd:[Ctrl+C] to interrupt.
+
+Summary of what you acomplished.
+
+== What's next
+
+With a solid understanding of monitoring and troubleshooting devices and fleets, the next chapter explores how to deploy and manage containerized applications on your device fleets using Quadlets.
+
+////
+Create scenarios where devices have differences of configuration and health issues, and show how to get that information from RHEM. Most bullets are ideas, to be improved and detailed during course development time. Use a selector on metadata.owner to list all devices from a fleet. List all devices using a given bootc image (get devices from different fleets). Create a condition in a device (ex: disk full) and show how many devices in a fleet have a condition. Power down a device, or disconnect it from the virtual network, and verify that it's offline on RHEM. Focus on features of the RHEM CLI and webUI themselves, but find a good scenario which requires extracting raw JSON or YAML data and processing with a tool such as jq.
+////

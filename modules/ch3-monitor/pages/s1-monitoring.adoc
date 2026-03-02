@@ -1,0 +1,27 @@
+:time_estimate: 5
+
+= Monitoring Device and Fleet Status
+
+_Estimated reading time: *{time_estimate} minutes*._
+
+Objective::
+
+Learn how to get reports of device and fleet status and health, and use field selectors to extract data from Red Hat Edge Manager.
+
+WARNING: Not started  yet.
+
+== Heading
+
+Lorem ipsum
+
+== Another heading
+
+Lorem ipsum
+
+== What's Next
+
+In the next section, you will create troubleshooting scenarios and practice extracting health and status information from devices and fleets using the RHEM CLI and web UI.
+
+////
+Get reports of device and fleet status and health. Status and conditions of device and fleet resources. Using field selectors to extract data from RHEM. Mention OTEL for more advanced scenarios and integration with external monitoring. Focus on OS image and system configurations; applications will be covered by the third course.
+////

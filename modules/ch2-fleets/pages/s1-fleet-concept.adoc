@@ -1,0 +1,27 @@
+:time_estimate: 5
+
+= Understanding the Fleet Concept in RHEM
+
+_Estimated reading time: *{time_estimate} minutes*._
+
+Objective::
+
+Learn how Red Hat Edge Manager organizes devices into fleets using labels and understand the GitOps approach to fleet configuration.
+
+WARNING: Not started  yet.
+
+== Heading
+
+Lorem ipsum
+
+== Another heading
+
+Lorem ipsum
+
+== What's Next
+
+In the next section, you will configure device fleets, assign devices to them, and observe how fleet-based configuration management works in practice.
+
+////
+The fleet concept in RHEM and how it organizes devices by means of labels. Devices can belong to only a single fleet at a time. Assign labels to devices at enrollment time or after. Gitops with RHEM and the git configuration provider.
+////

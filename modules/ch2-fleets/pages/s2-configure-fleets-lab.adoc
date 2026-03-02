@@ -1,0 +1,51 @@
+:time_estimate: 5
+
+= Lab: Configure and Manage Device Fleets
+
+_Estimated reading time: *{time_estimate} minutes*._
+
+Objective::
+
+Configure multiple device fleets and assign devices to them using fleet-level configurations.
+
+WARNING: Not started  yet.
+
+== Before you begin
+
+Describe requirements, such as customer portal accounts, Red Hat Developer free sub, already configured machines, access to container registries, etc.
+
+== Instructions
+
+High-level summary of what you will perform in this lab, but more detailed than the objective.
+
+1. Task or outcome.
+
+.. Something to do, using a graphical or web UI.
+Click menu:Save As[] to save your work.
+
+.. More things to do
+
+2. Task or outcome.
+
+.. Something to do, using a shell.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *command --options fixed-arguments _variable-arguments_*
+output of the command
+highlight *something* in the output
+--
+
+
+.. More things to do.
+Press kbd:[Ctrl+C] to interrupt.
+
+Summary of what you acomplished.
+
+== What's next
+
+Now that you have organized your devices into fleets, the next chapter explores how to monitor device and fleet status, troubleshoot issues, and extract meaningful data from Red Hat Edge Manager.
+
+////
+Configure fleets and assign devices to fleets. Need at least two fleets and a number of devices on each fleet. Have preseeded fleet configurations in a git repository, so learners can just refer to them. Show that, once a device belongs to a fleet, no configuration cannot be set at the device level. All configurations must come from the fleet. The changes, at an individual device level, from joining a fleet are essentially the same as if a device were updated or repurposed.
+////

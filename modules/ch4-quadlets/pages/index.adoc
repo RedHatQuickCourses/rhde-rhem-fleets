@@ -1,0 +1,9 @@
+= Configuring and Managing Quadlet Applications
+
+Goal::
+
+Configure and Manage Quadlet Applications
+
+WARNING: Not started  yet.
+
+This chapter demonstrates how to deploy and manage containerized applications on device fleets using Red Hat Edge Manager's Quadlet application type and Podman with systemd.

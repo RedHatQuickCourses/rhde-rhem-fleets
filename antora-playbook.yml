@@ -1,6 +1,6 @@
 site:
-  title: FIXME Course Title
-  start_page: REPLACEREPONAME::index.adoc
+  title: Managing Edge Device Fleets and Applications with Red Hat Edge Manager
+  start_page: rhde-rhem-fleets::index.adoc
 
 content:
   sources:

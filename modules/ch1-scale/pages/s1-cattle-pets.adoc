@@ -1,0 +1,27 @@
+:time_estimate: 5
+
+= Cattle vs Pets: Managing Edge Devices at Scale
+
+_Estimated reading time: *{time_estimate} minutes*._
+
+Objective::
+
+Understand why edge devices are best managed as sets instead of individually and learn different approaches for managing applications in edge environments.
+
+WARNING: Not started  yet.
+
+== Heading
+
+Lorem ipsum
+
+== Another heading
+
+Lorem ipsum
+
+== What's Next
+
+Now that you understand the fundamental approaches to managing edge devices and applications, the next section provides a quiz to review and assess your knowledge of Red Hat Edge Manager fundamentals from the previous course.
+
+////
+Why edge devices and edge servers are best managed as sets instead of individually (cattle vs pet) Approaches for managing applications in edge devices: The appliance approach vs separation of concerns, or managing applications as part of the OS image vs as separate entities, with their own lifecycle.
+////

@@ -1,5 +1,5 @@
-name: REPLACEREPONAME
-title: FIXME Course Title
+name: rhde-rhem-fleets
+title: Managing Edge Device Fleets and Applications with Red Hat Edge Manager
 version: 1
 asciidoc:
   attributes:
@@ -7,7 +7,7 @@ asciidoc:
 nav:
 - modules/ROOT/nav.adoc
 - modules/LABENV/nav.adoc
-- modules/chapter1/nav.adoc
-- modules/chapter2/nav.adoc
-- modules/chapter3/nav.adoc
-- modules/appendix/nav.adoc
+- modules/ch1-scale/nav.adoc
+- modules/ch2-fleets/nav.adoc
+- modules/ch3-monitor/nav.adoc
+- modules/ch4-quadlets/nav.adoc

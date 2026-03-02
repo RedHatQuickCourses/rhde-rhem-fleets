@@ -1,0 +1,51 @@
+:time_estimate: 5
+
+= Lab: Deploy Applications to a Fleet
+
+_Estimated reading time: *{time_estimate} minutes*._
+
+Objective::
+
+Deploy a containerized application to a device fleet and observe its rollout and operation.
+
+WARNING: Not started  yet.
+
+== Before you begin
+
+Describe requirements, such as customer portal accounts, Red Hat Developer free sub, already configured machines, access to container registries, etc.
+
+== Instructions
+
+High-level summary of what you will perform in this lab, but more detailed than the objective.
+
+1. Task or outcome.
+
+.. Something to do, using a graphical or web UI.
+Click menu:Save As[] to save your work.
+
+.. More things to do
+
+2. Task or outcome.
+
+.. Something to do, using a shell.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *command --options fixed-arguments _variable-arguments_*
+output of the command
+highlight *something* in the output
+--
+
+
+.. More things to do.
+Press kbd:[Ctrl+C] to interrupt.
+
+Summary of what you acomplished.
+
+== What's next
+
+Congratulations! You have completed this course and learned how to configure, manage, and monitor edge device fleets and deploy containerized applications using Red Hat Edge Manager.
+
+////
+Deploy an application in a fleet If the applications are not preloaded in a private container registry, build them from Containerfiles and publish in the private registry. Alternatively copy (mirror) the application from a public registry to the private registry and mention its Containerfile in the course samples public git repo. Observe as the application is rolled out (as part of a configuration update) to the fleet and verify the applications actually running on individual devices. In addition to check app rollout from RHEM, use podman and systemd on individual devices and show the quadlets and other specialized system units.
+////

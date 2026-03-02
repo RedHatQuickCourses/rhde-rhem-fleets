@@ -1,0 +1,9 @@
+= Monitoring and Troubleshooting Devices and Fleets
+
+Goal::
+
+Monitor and Troubleshoot Devices and Fleets
+
+WARNING: Not started  yet.
+
+This chapter covers how to monitor device and fleet health, extract status information, and troubleshoot configuration issues using Red Hat Edge Manager's reporting capabilities.

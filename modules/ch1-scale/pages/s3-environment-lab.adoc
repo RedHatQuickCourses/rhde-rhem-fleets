@@ -1,0 +1,51 @@
+:time_estimate: 5
+
+= Lab: Prepare the Classroom Environment
+
+_Estimated reading time: *{time_estimate} minutes*._
+
+Objective::
+
+Set up and configure the classroom environment for practicing Red Hat Edge Manager fleet management.
+
+WARNING: Not started  yet.
+
+== Before you begin
+
+Describe requirements, such as customer portal accounts, Red Hat Developer free sub, already configured machines, access to container registries, etc.
+
+== Instructions
+
+High-level summary of what you will perform in this lab, but more detailed than the objective.
+
+1. Task or outcome.
+
+.. Something to do, using a graphical or web UI.
+Click menu:Save As[] to save your work.
+
+.. More things to do
+
+2. Task or outcome.
+
+.. Something to do, using a shell.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *command --options fixed-arguments _variable-arguments_*
+output of the command
+highlight *something* in the output
+--
+
+
+.. More things to do.
+Press kbd:[Ctrl+C] to interrupt.
+
+Summary of what you acomplished.
+
+== What's next
+
+With your environment prepared and test devices enrolled, the next chapter explores how to organize and manage these devices efficiently using Red Hat Edge Manager's fleet concept.
+
+////
+Prepare the classroom environment, if it is a new one. That is, learners are not continuing from the previous course on the same virtual labs. Deploy RHEM. Create sample bootc container images. Publish the bootc images in a private container registry. Create a sample ISO installation image. Create a few test VMs using virt-install. Enroll the test VMs. Application images should be preseeded in a private or public container registry.
+////
