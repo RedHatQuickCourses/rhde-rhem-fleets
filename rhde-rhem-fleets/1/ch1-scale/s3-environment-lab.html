@@ -260,6 +260,18 @@ Some of the requirements of Edge Manager can be satisfied by the existing RPM pa
 <p>Here the focus is on quickly having the environment ready for the tasks of this course, by re-creating some of the outcomes from the previous course.
 If you are proceeding directly after completing the previous course, without destroying and re-creating its classroom environment, you will skip most steps here.</p>
 </div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+Add verification checks and explicit instructions so learners doing all courses in a row know what to skip.
+</td>
+</tr>
+</table>
+</div>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
@@ -674,9 +686,268 @@ NAME    ALIAS   OWNER   SYSTEM  UPDATED APPLICATIONS</code></pre>
 </div>
 </li>
 <li>
-<p>Create a device image for enrollment.</p>
+<p>Create an enrollment image for provisioning managed devices and enrolling them using late binding.</p>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p>Copy example files and scripts for creating the enrollment image to a work directory.
+Then make the work directory your current directory.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>cp -r rhde-rhem-samples/enroll temp-enroll</strong>
+$ <strong>cd temp-enroll</strong></code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Review the <code>Containerfile</code> that builds a minimal enrollment image.
+If you need explanations about what is included in this image, please review the <a href="https://redhatquickcourses.github.io/rhde-rhem-devices/rhde-rhem-devices/1/ch3-enroll/s2-enroll-lab.html">previous course</a>.</p>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+If you want to try with the current latest release of the upstream project, edit your Containerfile to remove the version component <code>-1.0.0</code> from the package <code>flightctl-agent</code>.
+</td>
+</tr>
+</table>
+</div>
+</li>
+<li>
+<p>Copy the CA certificate of the private container registry.
+Notice that the last argument of the <code>scp</code> command is a period, for the current directory.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>scp student@utility:/opt/registry/certs/domain.crt .</strong>
+domain.crt</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Build the bootc container image.
+Notice that the <code>podman build</code> command finishes with a period.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>podman build -t rhem-enroll .</strong>
+STEP 1/2: FROM registry.redhat.io/rhel9/rhel-bootc:9.6
+...
+Successfully tagged localhost/rhem-enroll:latest
+503f839113b376c55ceee225a8cbfdc9bf1496f3342385ce171f2cf2e01f1333</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Publish the container image in the private registry.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>podman login -u student -p redhat registry.lab.example.com:5000</strong>
+Login Succeeded!
+$ <strong>skopeo copy containers-storage:localhost/rhem-enroll:latest docker://registry.lab.example.com:5000/rhem-enroll:v1.0</strong>
+...
+Writing manifest to image destination</code></pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>Create an installable ISO containing the bootc container image from the previous step.</p>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p>Pull your bootc container image to the container storage of the root user.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>sudo podman login -u student -p redhat registry.lab.example.com:5000</strong>
+Login Succeeded!
+$ <strong>sudo podman pull registry.lab.example.com:5000/rhem-enroll:v1.0</strong>
+...
+Writing manifest to image destination
+503f839113b376c55ceee225a8cbfdc9bf1496f3342385ce171f2cf2e01f1333</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Review the <code>config.toml</code> file, which embeds a kickstart script for unattended installation of RHEL.</p>
+</li>
+<li>
+<p>Set the initial user password in your kickstart script.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>sed -i 's/REPLACE_WITH_PASSWD/redhat123/' config.toml</strong></code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Generate an SSH key and embed it in your kickstart script.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>ssh-keygen -N '' -f edge-key -C 'initial key for edge devices'</strong>
+Generating public/private rsa key pair.
+...
+$ <strong>SSH_PUB_KEY=$( cat edge-key.pub )</strong>
+$ <strong>sed -i "s|REPLACE_WITH_SSH_KEY|$SSH_PUB_KEY|" config.toml</strong></code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Retrieve the enrollment configuration and certificate from Edge Manager and embed it in your kickstart script.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl certificate request --expiration=365d --output=embedded &gt; config.yaml</strong>
+Creating new ECDSA key pair and writing to "client-enrollment.key".
+Submitting certificate signing request "client-enrollment-ddbfd221"... success.
+Waiting for certificate to be approved and issued.... success.
+$ <strong>sed -i -e '/REPLACE_WITH_CONFIG_YAML/r config.yaml' -e '/REPLACE_WITH_CONFIG_YAML/d' config.toml</strong></code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Review your <code>config.toml</code> file to be sure that all <code>REPLACE_WITH</code> markers are gone.</p>
+</li>
+<li>
+<p>Create a temporary directory and use the provided script to invoke bootc image builder to produce an installable ISO image.
+Use your Red Hat login to access the Red Hat registry as the <code>root</code> user.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>mkdir output</strong>
+$ <strong>bash bib-iso.sh</strong>
+...
+Build complete!
+Results saved in .</code></pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>Provision and enroll two VMs which stand-in for managed devices.</p>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+If you need help understand and troubleshooting managed device enrollment, please refer to the <a href="https://redhatquickcourses.github.io/rhde-rhem-devices/rhde-rhem-devices/1/ch3-enroll/s2-enroll-lab.html" target="_blank" rel="noopener">first course</a>.
+</td>
+</tr>
+</table>
+</div>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p>Copy the generated ISO image file to a more recognizable name, outside the temporary directory.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>cp output/bootiso/install.iso rhem-enroll.iso</strong></code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Use the provided script to invoke <code>virt-install</code> to create a local test VM, booting it from the ISO.</p>
 <div class="paragraph">
-<p>Maybe this lab is getting too big and needs splitting?</p>
+<p>At the end of the instalation, press <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>]</kbd></span> to leave the text console of the VM and return to your host shell.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>bash virt-install.sh 1</strong>
+Creating VM edge-1, use port 8122 for SSH.
+...
+Domain creation completed.
+Restarting guest.
+Running text console command: virsh --connect qemu:///session console edge-1
+Connected to domain 'edge-1'
+Escape character is ^] (Ctrl + ])</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Verify that there is an enrollment request that is pending.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl get enrollmentrequest</strong>
+NAME                                                    APPROVAL        APPROVER        APPROVED LABELS
+1u63hvsgtua9tjjbmla9bgh5h2s77cb8esepphnf68m3ocf8qfng    Pending         &lt;none&gt;</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Approve the enrollment request, setting a few labels on the managed device.</p>
+<div class="paragraph">
+<p>Be sure you use the same UUID you got from the previous step to refer to the enrollment request.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl approve enrollmentrequest <em>1u63hvsgtua9tjjbmla9bgh5h2s77cb8esepphnf68m3ocf8qfng</em> -l alias=edge-1 -l rhel=9.6 -l type=noapps</strong></code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Verify that the enrollment request now is set to approved and there is a managed device.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl get enrollmentrequest</strong>
+NAME                                                    APPROVAL        APPROVER        APPROVED LABELS
+1u63hvsgtua9tjjbmla9bgh5h2s77cb8esepphnf68m3ocf8qfng    Approved        admin           alias=edge-1,rhel=9.6,type=noapps
+$ <strong>flightctl get device -o wide</strong>
+NAME                                                    ALIAS   OWNER   SYSTEM  UPDATED         APPLICATIONS    LABELS
+1u63hvsgtua9tjjbmla9bgh5h2s77cb8esepphnf68m3ocf8qfng    edge-1  &lt;none&gt;  Online  OutOfDate       NoApplications  alias=edge-1,rhel=9.6,type=noapps</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Wait a few moments while the Edge Manager agent finishes synchronizing the device with the configurations set by Edge Manager.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl get device -o wide</strong>
+NAME                                                    ALIAS   OWNER   SYSTEM  UPDATED         APPLICATIONS    LABELS
+1u63hvsgtua9tjjbmla9bgh5h2s77cb8esepphnf68m3ocf8qfng    edge-1  &lt;none&gt;  Online  UpToDate        NoApplications  alias=edge-1,rhel=9.6,type=noapp</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Repeat the process to create and enroll a second local test VM.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>bash virt-install.sh 2</strong>
+Creating VM edge-2, use port 8122 for SSH.
+...
+Domain creation completed.
+Restarting guest.
+Running text console command: virsh --connect qemu:///session console edge-2
+Connected to domain 'edge-2'
+Escape character is ^] (Ctrl + ])
+kbd:[Ctrl+\]]
+$ <strong>flightctl get enrollmentrequest</strong>
+NAME                                                    APPROVAL        APPROVER        APPROVED LABELS
+{edge-2-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}    Pending         &lt;none&gt;</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Approve the enrollment of your second local test VM.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl approve enrollmentrequest <em>{edge-2-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}</em> -l alias=edge-2 -l rhel=9.6 -l type=noapps</strong></code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Wait until your second managed device is <code>UpToDate</code>.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl get device -o wide</strong>
+NAME                                                    ALIAS   OWNER   SYSTEM  UPDATED         APPLICATIONS    LABELS
+{edge-1-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}    edge-2  &lt;none&gt;  Online  UpToDate        NoApplications  alias=edge-2,rhel=9.6,type=noapp</code></pre>
+</div>
+</div>
+</li>
+</ol>
 </div>
 </li>
 <li>
