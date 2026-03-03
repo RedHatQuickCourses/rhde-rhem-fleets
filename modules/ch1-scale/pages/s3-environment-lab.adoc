@@ -45,6 +45,8 @@ If this is your first time using a ROL classroom, please refer to https://redhat
 Here the focus is on quickly having the environment ready for the tasks of this course, by re-creating some of the outcomes from the previous course.
 If you are proceeding directly after completing the previous course, without destroying and re-creating its classroom environment, you will skip most steps here.
 
+IMPORTANT: Add verification checks and explicit instructions so learners doing all courses in a row know what to skip.
+
 1. On your _development machine_, download the sample code for this course.
 
 .. Using a shell on your _development machine_ (which is the `workstation VM`), ensure you are on your home directory.
@@ -376,11 +378,284 @@ $ *flightctl get device*
 NAME    ALIAS   OWNER   SYSTEM  UPDATED APPLICATIONS
 --
 
-7. Create a device image for enrollment.
+7. Create an enrollment image for provisioning managed devices and enrolling them using late binding.
+
+.. Copy example files and scripts for creating the enrollment image to a work directory.
+Then make the work directory your current directory.
 +
-Maybe this lab is getting too big and needs splitting?
+[source,console,subs="verbatim,quotes"]
+--
+$ *cp -r rhde-rhem-samples/enroll temp-enroll*
+$ *cd temp-enroll*
+--
++
+////
+Trying to build from the product repos:
+# RUN dnf -y config-manager --add-repo https://rpm.flightctl.io/flightctl-epel.repo && \
+RUN sudo subscription-manager repos --enable edge-manager-1.0-for-rhel-9-x86_64-rpms && \
+subscription-manager is operating in container mode. Use your host system to manage subscriptions.
 
+So I need to subscribe workstation (which failed) or provide a local mirror of the repo and /etc/yum.conf.d files
+student@workstation:~/temp-enroll$ sudo subscription-manager repos --enable edge-manager-1.0-for-rhel-9-x86_64-rpms
+Error: 'edge-manager-1.0-for-rhel-9-x86_64-rpms' does not match a valid repository ID. Use "subscription-manager repos --list" to see valid repositories.
 
+But it worked for servera (which is on RHEL 9) :-(
+
+Trying with local files as a workaround
+# RUN dnf -y config-manager --add-repo https://rpm.flightctl.io/flightctl-epel.repo && \
+#    dnf -y install flightctl-agent-1.0.2 && \
+ADD edge-manager-1.0-for-rhel-9-x86_64-rpms /tmp/rhem-rpms
+RUN dnf -y install \
+    /tmp/rhem-rpms/Packages/f/flightctl-agent-1.0.2-1.el9em.x86_64.rpm \
+    /tmp/rhem-rpms/Packages/f/flightctl-selinux-1.0.2-1.el9em.noarch.rpm && \
+    dnf clean all && \
+////
+
+.. Review the `Containerfile` that builds a minimal enrollment image.
+If you need explanations about what is included in this image, please review the https://redhatquickcourses.github.io/rhde-rhem-devices/rhde-rhem-devices/1/ch3-enroll/s2-enroll-lab.html[previous course].
++
+NOTE: If you want to try with the current latest release of the upstream project, edit your Containerfile to remove the version component `-1.0.0` from the package `flightctl-agent`.
+
+.. Copy the CA certificate of the private container registry.
+Notice that the last argument of the `scp` command is a period, for the current directory.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *scp student@utility:/opt/registry/certs/domain.crt .*
+domain.crt
+--
+
+.. Build the bootc container image.
+Notice that the `podman build` command finishes with a period.
++
+[source,console,subs="verbatim,quotes,attributes"]
+--
+$ *podman build -t rhem-enroll .*
+STEP 1/2: FROM registry.redhat.io/rhel9/rhel-bootc:9.6
+...
+Successfully tagged localhost/rhem-enroll:latest
+{rhem-enroll-v1-shaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}
+--
+
+.. Publish the container image in the private registry.
++
+[source,console,subs="verbatim,quotes,attributes"]
+--
+$ *podman login -u student -p redhat registry.lab.example.com:5000*
+Login Succeeded!
+$ *skopeo copy containers-storage:localhost/rhem-enroll:latest docker://registry.lab.example.com:5000/rhem-enroll:v1.0*
+...
+Writing manifest to image destination
+--
+
+8. Create an installable ISO containing the bootc container image from the previous step.
+
+.. Pull your bootc container image to the container storage of the root user.
++
+[source,console,subs="verbatim,quotes,attributes"]
+--
+$ *sudo podman login -u student -p redhat registry.lab.example.com:5000*
+Login Succeeded!
+$ *sudo podman pull registry.lab.example.com:5000/rhem-enroll:v1.0*
+...
+Writing manifest to image destination
+{rhem-enroll-v1-shaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}
+--
+
+.. Review the `config.toml` file, which embeds a kickstart script for unattended installation of RHEL.
+
+.. Set the initial user password in your kickstart script.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *sed -i 's/REPLACE_WITH_PASSWD/redhat123/' config.toml*
+--
+
+.. Generate an SSH key and embed it in your kickstart script.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *ssh-keygen -N '' -f edge-key -C 'initial key for edge devices'*
+Generating public/private rsa key pair.
+...
+$ *SSH_PUB_KEY=$( cat edge-key.pub )*
+$ *sed -i "s|REPLACE_WITH_SSH_KEY|$SSH_PUB_KEY|" config.toml*
+--
+
+.. Retrieve the enrollment configuration and certificate from Edge Manager and embed it in your kickstart script.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *flightctl certificate request --expiration=365d --output=embedded > config.yaml*
+Creating new ECDSA key pair and writing to "client-enrollment.key".
+Submitting certificate signing request "client-enrollment-ddbfd221"... success.
+Waiting for certificate to be approved and issued.... success.
+$ *sed -i -e '/REPLACE_WITH_CONFIG_YAML/r config.yaml' -e '/REPLACE_WITH_CONFIG_YAML/d' config.toml*
+--
+
+.. Review your `config.toml` file to be sure that all `REPLACE_WITH` markers are gone.
+
+.. Create a temporary directory and use the provided script to invoke bootc image builder to produce an installable ISO image.
+Use your Red Hat login to access the Red Hat registry as the `root` user.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *mkdir output*
+$ *bash bib-iso.sh*
+...
+Build complete!
+Results saved in .
+--
++
+////
+////
+
+9. Provision and enroll two VMs which stand-in for managed devices.
++
+NOTE: If you need help understand and troubleshooting managed device enrollment, please refer to the https://redhatquickcourses.github.io/rhde-rhem-devices/rhde-rhem-devices/1/ch3-enroll/s2-enroll-lab.html[first course^].
+
+.. Copy the generated ISO image file to a more recognizable name, outside the temporary directory.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *cp output/bootiso/install.iso rhem-enroll.iso*
+--
+
+.. Use the provided script to invoke `virt-install` to create a local test VM, booting it from the ISO.
++
+At the end of the instalation, press kbd:[Ctrl+\]] to leave the text console of the VM and return to your host shell.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *bash virt-install.sh 1*
+Creating VM edge-1, use port 8122 for SSH.
+...
+Domain creation completed.
+Restarting guest.
+Running text console command: virsh --connect qemu:///session console edge-1
+Connected to domain 'edge-1'
+Escape character is ^] (Ctrl + ])
+--
+
+.. Verify that there is an enrollment request that is pending.
++
+[source,console,subs="verbatim,quotes,attributes"]
+--
+$ *flightctl get enrollmentrequest*
+NAME                                                    APPROVAL        APPROVER        APPROVED LABELS
+{edge-1-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}    Pending         <none>
+--
+
+.. Approve the enrollment request, setting a few labels on the managed device.
++
+Be sure you use the same UUID you got from the previous step to refer to the enrollment request.
++
+[source,console,subs="verbatim,quotes,attributes"]
+--
+$ *flightctl approve enrollmentrequest _{edge-1-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}_ -l alias=edge-1 -l rhel=9.6 -l type=noapps*
+--
++
+// There's no output from the approve command
+
+.. Verify that the enrollment request now is set to approved and there is a managed device.
++
+[source,console,subs="verbatim,quotes,attributes"]
+--
+$ *flightctl get enrollmentrequest*
+NAME                                                    APPROVAL        APPROVER        APPROVED LABELS
+{edge-1-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}    Approved        admin           alias=edge-1,rhel=9.6,type=noapps
+$ *flightctl get device -o wide*
+NAME                                                    ALIAS   OWNER   SYSTEM  UPDATED         APPLICATIONS    LABELS
+{edge-1-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}    edge-1  <none>  Online  OutOfDate       NoApplications  alias=edge-1,rhel=9.6,type=noapps
+--
+
+.. Wait a few moments while the Edge Manager agent finishes synchronizing the device with the configurations set by Edge Manager.
++
+[source,console,subs="verbatim,quotes,attributes"]
+--
+$ *flightctl get device -o wide*
+NAME                                                    ALIAS   OWNER   SYSTEM  UPDATED         APPLICATIONS    LABELS
+{edge-1-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}    edge-1  <none>  Online  UpToDate        NoApplications  alias=edge-1,rhel=9.6,type=noapp
+--
+
+.. Repeat the process to create and enroll a second local test VM.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *bash virt-install.sh 2*
+Creating VM edge-2, use port 8122 for SSH.
+...
+Domain creation completed.
+Restarting guest.
+Running text console command: virsh --connect qemu:///session console edge-2
+Connected to domain 'edge-2'
+Escape character is ^] (Ctrl + ])
+kbd:[Ctrl+\]]
+$ *flightctl get enrollmentrequest*
+NAME                                                    APPROVAL        APPROVER        APPROVED LABELS
+{edge-2-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}    Pending         <none>
+--
++
+////
+Strange error with user mode networking :-(
+Because I have a registered workstation VM?
+
+student@workstation:~/temp-enroll$ bash virt-install.sh 1
+Creating VM edge-1, use port 8122 for SSH.
+
+Starting install...
+Retrieving 'vmlinuz'                                                                                                                                                                                       |  14 MB  00:00:00     
+Retrieving 'initrd.img'                                                                                                                                                                                    | 149 MB  00:00:00     
+Allocating 'edge-1.qcow2'                                                                                                                                                                                  |  20 GB  00:00:00     
+Removing disk 'edge-1.qcow2'                                                                                                                                                                               |         00:00:00     
+ERROR    internal error: Child process (passt --one-off --socket /run/user/1000/libvirt/qemu/run/passt/1-edge-1-net0.socket --pid /run/user/1000/libvirt/qemu/run/passt/1-edge-1-net0-passt.pid --tcp-ports 8122:22 --tcp-ports 8108:80) unexpected exit status 126: libvirt:  error : cannot execute binary passt: Permission denied
+
+Domain installation does not appear to have been successful.
+If it was, you can restart your domain by running:
+  virsh --connect qemu:///session start edge-1
+otherwise, please restart your installation.
+student@workstation:~/temp-enroll$ which passt
+/usr/bin/passt
+student@workstation:~/temp-enroll$ ls -l $(which passt)
+-rwxr-xr-x. 1 root root 256784 Feb 28  2025 /usr/bin/passt
+
+Tried to install the passt-selinux package and it failed to install its policy module.
+Guess I'll have to re-create without using online package repos :-(
+
+Coud just dnf update workstation, but that would put me on RHEL 10.0. Given that I'm already past RHEM issues (I guess) and virt-install was working before, I'll assume my issue is somewhere else other than RHEL updates. Or it is with mixing DVD and online repos: some parts are updated, others are not. 
+
+Maybe I should restart from upstream packages -- so I'm on the same ground as previous course.
+I think I tried 1.0.2 upstream and from a package mirror already, and it was fine.
+
+Downgrading passt to the DVD package worked at dnf install time (unlike the update) but it didn't work for virt-install.
+
+Try workaround fix offered by gnome
+$ cat ~/passt-selinux-fix.sh 
+ ausearch -c 'rpc-virtqemud' --raw | audit2allow -M my-rpcvirtqemud
+semodule -i my-rpcvirtqemud.pp
+
+Seems to have worked, so I can continue development... not quite. I have an edge-1 VM but it cannot enroll to edge manager and I cannot SSH into it.
+netstat shows no open ports (from port-forward) and there's a bunch of other AVC errors.
+Guess my classroom is botched.. I hope it's not the mixed RHEL customizations. :-(
+
+Deleting the classroom... must start with a user-mode passt VM test.
+////
+
+.. Approve the enrollment of your second local test VM.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *flightctl approve enrollmentrequest _{edge-2-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}_ -l alias=edge-2 -l rhel=9.6 -l type=noapps*
+--
+
+.. Wait until your second managed device is `UpToDate`.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *flightctl get device -o wide*
+NAME                                                    ALIAS   OWNER   SYSTEM  UPDATED         APPLICATIONS    LABELS
+{edge-1-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}    edge-2  <none>  Online  UpToDate        NoApplications  alias=edge-2,rhel=9.6,type=noapp
+--
 
 1. Task or outcome.
 
