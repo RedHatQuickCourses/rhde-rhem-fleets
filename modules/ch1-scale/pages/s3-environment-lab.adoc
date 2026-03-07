@@ -32,35 +32,42 @@ Alternatively, you can open a shell or a console directly on the `servera` VM.
 
 == Instructions
 
+You will verify that Edge Manager is installed and running on your _server machine_; that you can log in on Edge Manager from your _development machine_; and also that you have all files required to provision and enroll new managed devices, such as: a custom bootc container image, SSH keys, and a custom installation ISO.
+
+All that should be already available, if you are contining straight from the https://redhatquickcourses.github.io/rhde-rhem-devices/[first course] without deleting and creating a new classroom environment, and you would skip most steps on this lab.
+In that case, this lab also provides some cleaning intructions, so you are not impacted by left overs from the first course.
+
+If you are starting from a new classroom environment, this lab provides step-by-step instructions to prepare all the necessary prerequisites for this course.
+
 You can adapt the instructions in this course to any environment where you can install RPM packages, run Podman containers, and create VMs using libvirt.
 With a bit more effort, you could run everything on a Windows or MacOS workstation, using a single large VM running RHEL and nested virtualization, or a few smaller VMs, but this course does *NOT* provide instructions for doing so.
 
 This course was tested using a Red Hat Learning Environment (ROL) classroom which was originally created for another quick course series.
 There was no customization for the specific needs of Edge Manager, and there was no attempt at providing all requirements to install Edge Manager in disconnected mode.
 
-IMPORTANT: Some of the requirements of Edge Manager can be satisfied by the existing RPM package and container image mirrors in the ROL classroom, but some of them require internet access, a valid Red Hat login, and Red Hat subscription entitlements.
+NOTE: Some of the requirements of Edge Manager can be satisfied by the existing RPM package and container image mirrors in the ROL classroom, but some of them require internet access, a valid Red Hat login, and Red Hat subscription entitlements.
 
-If this is your first time using a ROL classroom, please refer to https://redhatquickcourses.github.io/rhde-rhem-devices/rhde-rhem-devices/1/ch1-intro/s3-classroom-lab.html[the previous course] for a gentler introduction to the classroom environment and to tasks such as installing and configuring Red Hat Edge Manager.
+If this is your first time using a ROL classroom, please refer to https://redhatquickcourses.github.io/rhde-rhem-devices/rhde-rhem-devices/1/ch1-intro/s3-classroom-lab.html[the previous course] for an introduction to the classroom environment and for more detail about prerequisite tasks such as: installing and configuring Red Hat Edge Manager, and enrolling managed devices.
 
-Here the focus is on quickly having the environment ready for the tasks of this course, by re-creating some of the outcomes from the previous course.
-If you are proceeding directly after completing the previous course, without destroying and re-creating its classroom environment, you will skip most steps here.
+[IMPORTANT]
+====
+The classroom environment has an issue which requires restoring SELinux context labels on the `worstation` VM.
 
-IMPORTANT: Add verification checks and explicit instructions so learners doing all courses in a row know what to skip.
+Perform the following to fix the issue before you attempt any lab of this course.
 
+[source,console,subs="verbatim,quotes"]
+--
+$ *sudo fixfiles -F onboot*
+$ *sudo shutdown -r now*
+--
+====
 1. On your _development machine_, download the sample code for this course.
 
-.. Using a shell on your _development machine_ (which is the `workstation VM`), ensure you are on your home directory.
-All labs start from there, but they will use different work directories, so this course starts all labs from the same reference point.
+.. Ensure that you are on your home directory and verify if you have the course samples repository.
 +
 [source,console,subs="verbatim,quotes"]
 --
 $ *cd*
---
-
-.. Verify if you already have the the samples repository.
-+
-[source,console,subs="verbatim,quotes"]
---
 $ *ls rhde-rhem-samples*
 LICENSE  README.md  antora.yml  config  enroll  modules  webapp
 --
@@ -75,14 +82,14 @@ Already up to date.
 $ *cd*
 --
 
-.. If you do not.
+.. If you do not, clone the course samples repository.
 +
 [source,console,subs="verbatim,quotes"]
 --
+$ *cd*
 $ *ls rhde-rhem-samples*
 ls: cannot access 'rhde-rhem-samples': No such file or directory
 --
-Then clone the course samples repository.
 +
 [source,console,subs="verbatim,quotes"]
 --
@@ -91,10 +98,27 @@ Cloning into 'rhde-rhem-samples'...
 ...
 --
 
-2. Install tools for managing containers and VMs on your _development machine_.
+2. Install tools for managing containers and VMs.
 
-.. Install the `container-tools` meta-package.
-Altough the `workstation` VM has Podman preinstalled, you will need the full suite of container tools in this course.
+.. Verify that the `podman` and `skopeo` commands are available.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *which podman*
+/usr/bin/podman
+$ *which skopeo*
+/usr/bin/skopeo
+--
+
+.. If any of them is not, install the corresponding package.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *which podman*
+/usr/bin/which: no podman in (/home/student/.local/bin:/home/student/bin:/home/student/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin)
+$ *which skopeo*
+/usr/bin/which: no podman in (/home/student/.local/bin:/home/student/bin:/home/student/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin)
+--
 +
 [source,console,subs="verbatim,quotes"]
 --
@@ -103,7 +127,21 @@ $ *sudo dnf install skopeo buildah*
 Complete!
 --
 
-.. Install the libvirt tools and enable its QEMU socket service.
+.. Verify that libvirt tools are available.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *which virsh*
+/usr/bin/virsh
+--
+
+.. If they are not, install the libvirt tools and enable its QEMU socket service.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *which virsh*
+/usr/bin/which: no virsh in (/home/student/.local/bin:/home/student/bin:/home/student/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin)
+--
 +
 [source,console,subs="verbatim,quotes"]
 --
@@ -125,18 +163,35 @@ CPU model:           x86_64
 ...
 --
 
-3. Configure your _development machine_ to access RPM packages and container images from Red Hat, over the internet.
-
-.. Register your _development machine_ with the Red Hat subscription manager.
-+
-If you are using the upstream Flight Control packages, you can use the login from a free Red Hat Developer subscription for individuals.
+3. Enable access RPM packages and container images from Red Hat, over the internet.
 +
 NOTE: The `workstation` VM is preconfigured with access to a private mirror containing RHEL 10 packages, but it will need RHEL 9 packages to build bootc container images for edge devices that will be managed by Edge Manager.
+
+.. Verify that your _development machine_ is registered with Red Hat.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *sudo subscription-manager status*
+...
+The registered system name is: workstation
+--
+
+.. If it is not, register your _development machine_ using a valid Red Hat account, such as a free Red Hat Developer account.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *sudo subscription-manager status*
++-------------------------------------------+
+   System Status Details
++-------------------------------------------+
+Overall Status: Not registered
+--
 +
 [source,console,subs="verbatim,quotes"]
 --
 $ *sudo subscription-manager register*
 ...
+The system has been registered with ID: aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee
 The registered system name is: workstation
 --
 
@@ -150,6 +205,8 @@ $ *podman login registry.redhat.io*
 ...
 Login Succeeded!
 --
++
+//TODO update to use the package mirror and containers in the private registry
 
 .. Verify that you can access the bootc image builder container image.
 You may get a different hash, because the container image was updated since these instructions were written.
@@ -160,7 +217,7 @@ $ *skopeo inspect --format '{{.Digest}}' docker://registry.redhat.io/rhel9/bootc
 sha256:f5e1860fae45c9d01fb612fcfad6c1d3a93e9ea4533bf01ea1c4d47ae2226580
 --
 
-.. Download the bootc image builder to the container storage of the root user.
+.. Download the bootc image builder container image to the container storage of the root user.
 +
 You will run bootc image builder as root, so you must log in again on the Red Hat container registry.
 +
@@ -186,7 +243,26 @@ $ *hostname*
 servera
 --
 
-.. Install the container tools on your _server machine_.
+.. Verify that the Red Hat Edge Manager services are installed and active.
+If they are, you can skip to *step 5*.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *sudo rpm -q flightctl-services*
+flightctl-services-1.0.2-1.el9.x86_64
+$ *sudo systemctl is-active flightctl-target*
+active
+--
+
+.. If they are not, install the container tools on your _server machine_.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *sudo rpm -q flightctl-services*
+package flightctl-services is not installed
+$ *sudo systemctl is-active flightctl-target*
+inactive
+--
 +
 [source,console,subs="verbatim,quotes"]
 --
@@ -195,30 +271,46 @@ $ *sudo dnf install podman skopeo*
 Complete!
 --
 
-.. Enable the Flight Control repository from EPEL.
+.. If you want to use packages from the upstream Flight Control project, enable its repository from EPEL.
 +
-[source,subs="verbatim,quotes"]
+[source,console,subs="verbatim,quotes"]
 --
 $ *sudo dnf config-manager --add-repo https://rpm.flightctl.io/flightctl-epel.repo*
 Adding repo from: https://rpm.flightctl.io/flightctl-epel.repo
 --
 +
-NOTE: There is no need to register `servera` because the Flight Control services package contains no dependencies other than a container engine (Podman) and the classroom environment contains a mirror of the RHEL 10 packages, which the `sererva` machine is preconfigured to use.
-+
-////
-Attempt at using product packages online
+NOTE: In this case, there is no need to register `servera` because the Flight Control services package contains no dependencies other than a container engine (Podman) and the classroom environment contains a mirror of the RHEL 9 packages, which the `servera` VM is preconfigured to use.
 
-$ sudo subscription-manager register
+.. Alternatively, register your _server machine_ with Red Hat subscription manager and log in on the Red Hat container registries as the `root` user.
++
+NOTE: This requires using a Red Hat login entitled to a Red Hat Device Edge product subscription or other product subscription which provides Red Hat Edge Manager packages.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *sudo subscription-manager register*
 ...
 The registered system name is: servera
-$ sudo subscription-manager repos --enable edge-manager-1.0-for-rhel-9-x86_64-rpms
+$ *sudo subscription-manager repos --enable edge-manager-1.0-for-rhel-9-x86_64-rpms*
 Repository 'edge-manager-1.0-for-rhel-9-x86_64-rpms' is enabled for this system.
-$ sudo podman login registry.redhat.io
+$ *sudo podman login registry.redhat.io*
 ...
 Login Succeeded!
+--
 
-There's an edge-manager-1.0-for-rhel-10-x86_64-rpms for use at workstation -- or mirroring into the classroom. But I cannot install the CLI from it. That may be a problem for building device images. It seems the rhel-10 repo is empty, but worstation refuses to enable the rhel-9 package to install the CLI. If I download the package from servera and scp it to workstation, then it works fine.
-////
+.. As a third alternative, use the offline mirror of the Red Hat Edge Manager package channel and log in on the Red Hat container registries.
++
+NOTE: This still requires a valid Red Hat log in, but it could be from a free Red Hat Developer account.
++
+IMPORTANT: Review this step after the classroom is updated.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *dnf confifg-manager --add-repo http://content.example.com/rhde9.6/x86_64/dvd/edge-manager*
+GRAB OUTPUT
+$ *sudo podman login registry.redhat.io*
+...
+Login Succeeded!
+--
 
 .. Install the Edge Manager services.
 +
@@ -229,7 +321,7 @@ $ *sudo dnf install -y flightctl-services-1.0.2*
 Complete!
 --
 +
-NOTE: If you want to try the current latest release from the upstream project, remove the version component `-1.0.2` from the package `flightctl-services` in the command above.
+NOTE: If you want to try the current latest release from either the upstream project or product, remove the version component `-1.0.2` from the package argument in the previous command.
 
 .. Start the Edge Manager services.
 +
@@ -279,9 +371,73 @@ To show all installed unit files use 'systemctl list-unit-files'.
 
 .. If you experience errors, or it seems that the Edge Manager services are taking too long to start, refer to the https://redhatquickcourses.github.io/rhde-rhem-devices/rhde-rhem-devices/1/ch2-deploy/s2-install-lab.html[previous course^] for troubleshooting hints.
 
-5. For simplicity, configure local users for the Edge Manager services, on the PAM issuer container.
+.. Download the Edge Manager CLI package, which you will copy to your _development machine_.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *dnf download flightctl-cli-1.0.2*
+...
+lightctl-cli-1.0.2-1.el9.x86_64.rpm 
+--
 
-.. Create groups which correspond to the `admin`, `operator`, and `viewer` roles.
+.. Download the Edge Manager agent package, which you will also copy to your _development machine_.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *dnf download flightctl-agent-1.0.2 flightctl-selinux-1.0.2*
+...
+(1/2): flightctl-agent-1.0.2-1.el9.x86_64.rpm
+(2/2): flightctl-selinux-1.0.2-1.el9.noarch.rpm
+--
+
+5. Install the Edge Manager CLI on your _development machine_.
+
+.. Verify that the `flightctl` command is availabe.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *which flightctl*
+/usr/bin/flightctl
+--
+
+.. If it is not, copy its package from your _server machine_ and install it.
++
+NOTE: Even if the CLI package is built for RHEL 9, it works on RHEL 10 also because
+the Edge Manager CLI is a static binary, with no dependencies on shared libraries.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *which flightctl*
+/usr/bin/which: no flightctl in (/home/student/.local/bin:/home/student/bin:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin)
+--
++
+[source,console,subs="verbatim,quotes"]
+--
+$ **scp servera:~/flightctl-cli*rpm ~/Downloads**
+GRAB OUTPUT
+$ **sudo dnf install ~/Downloads/flightctl-cli*rpm**
+...
+Complete!
+--
+
+6. Configure users for the Edge Manager services, on the its PAM issuer container.
+
+.. Verify that you can log in on Edge Manager, from your _development machine_, as a regular user and also as an administrator.
+If you do, you can skip to *step 7*
++
+IMPORTANT: If you see the prompt "Use insecure connections?" answer *N* and let the log in attempt fail.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *flightctl login -u student -p redhat https://servera.lab.example.com:3443*
+Auto-selected organization: 00000000-0000-0000-0000-000000000000 Default
+Login successful.
+$ *flightctl login -u admin -p redhat https://servera.lab.example.com:3443*
+Auto-selected organization: 00000000-0000-0000-0000-000000000000 Default
+Login successful.
+--
+
+.. If you cannot log in, switch to your _server machine_ and create groups which correspond to the `admin`, `operator`, and `viewer` roles.
 +
 [source,console,subs="verbatim,quotes"]
 --
@@ -318,37 +474,7 @@ $ *sudo podman exec -i flightctl-pam-issuer groups admin*
 admin : admin flightctl-admin
 --
 
-6. Install the Edge Manager CLI on your _development machine_
-
-.. Make sure your current shell is on the right machine.
-+
-[source,console,subs="verbatim,quotes"]
---
-$ *hostname*
-workstation
---
-.. Enable the flight repository from EPEL and install its CLI package.
-+
-[source,console,subs="verbatim,quotes"]
---
-$ *sudo dnf config-manager --add-repo https://rpm.flightctl.io/flightctl-epel.repo*
-Adding repo from: https://rpm.flightctl.io/flightctl-epel.repo
-$ *sudo dnf install flightctl-cli*
-...
-Complete!
---
-
-.. Verify that the `flightctl` command is in your command PATH.
-+
-[source,console,subs="verbatim,quotes"]
---
-$ *flightctl version*
-Client Version: v1.0.0
-Server Version: Could not read server version
-You must log in to view the server version. Please use the 'login' command to authenticate before proceeding
---
-
-.. Copy the self-signed certificate of the Edge Manager server and add it to the system's trusted CA set.
+.. Switch to your _development machine_ and copy the self-signed certificate of the Edge Manager server and add it to the system's trusted CA set.
 +
 [source,console,subs="verbatim,quotes"]
 --
@@ -358,7 +484,7 @@ $ *sudo cp ca-bundle.crt /etc/pki/ca-trust/source/anchors/*
 $ *sudo update-ca-trust extract*
 --
 
-.. Log in on the Edge Manager server.
+.. Verify that you can now log in on the Edge Manager server.
 +
 [source,console,subs="verbatim,quotes"]
 --
@@ -367,21 +493,53 @@ Auto-selected organization: 00000000-0000-0000-0000-000000000000 Default
 Login successful.
 --
 
-.. Verify that the CLI can now get the server's version, and that there are no managed devices yet.
+.. Verify that the CLI can now get the server's version.
 +
 [source,console,subs="verbatim,quotes"]
 --
 $ *flightctl version*
-Client Version: v1.0.0
-Server Version: v1.0.0
-$ *flightctl get device*
-NAME    ALIAS   OWNER   SYSTEM  UPDATED APPLICATIONS
+Client Version: v1.0.2
+Server Version: v1.0.2
 --
 
 7. Create an enrollment image for provisioning managed devices and enrolling them using late binding.
 
-.. Copy example files and scripts for creating the enrollment image to a work directory.
+.. On your _development machine_, verify that you already have the enrollment ISO and SSH key to provision managed devices.
+Look for files named `rhem-enroll.iso` and `edge-key` on the `temp-enroll` directory.
+If you do, you can skip to *step 9*
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *cd*
+$ *cd temp-enroll*
+$ *ls*
+Containerfile  bib-iso.sh  config.toml  config.yaml  edge-key  edge-key.pub  output  rhem-enroll.iso  virt-install.sh
+--
+
+.. If not, log in on your private registry and verify that the bootc enrollment image is available there.
+If it is, you can skip to *step 8*.
++
+[source,console,subs="verbatim,quotes,attributes"]
+--
+$ *podman login -u student -p redhat registry.lab.example.com:5000*
+Login Succeeded!
+$ *skopeo inspect --format '{{.Digest}}' docker://registry.lab.example.com:5000/rhem-enroll:v1.0*
+{rhem-enroll-v1-shaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}
+--
+
+.. If it is not, copy example files and scripts for creating the enrollment image to a work directory.
 Then make the work directory your current directory.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *cd*
+$ *cd temp-enroll*
+bash: cd: temp-enroll: No such file or directory
+$ *podman login -u student -p redhat registry.lab.example.com:5000*
+Login Succeeded!
+$ *skopeo inspect --format '{{.Digest}}' docker://registry.lab.example.com:5000/rhem-enroll:v1.0*
+FATA[0000] Error parsing image name "docker://registry.lab.example.com:5000/rhem-enroll:v1.0": reading manifest v1.0 in registry.lab.example.com:5000/rhem-enroll: manifest unknown
+--
 +
 [source,console,subs="verbatim,quotes"]
 --
@@ -404,17 +562,36 @@ But it worked for servera (which is on RHEL 9) :-(
 Trying with local files as a workaround
 # RUN dnf -y config-manager --add-repo https://rpm.flightctl.io/flightctl-epel.repo && \
 #    dnf -y install flightctl-agent-1.0.2 && \
-ADD edge-manager-1.0-for-rhel-9-x86_64-rpms /tmp/rhem-rpms
-RUN dnf -y install \
-    /tmp/rhem-rpms/Packages/f/flightctl-agent-1.0.2-1.el9em.x86_64.rpm \
-    /tmp/rhem-rpms/Packages/f/flightctl-selinux-1.0.2-1.el9em.noarch.rpm && \
+ADD rpms /tmp
+RUN ls /tmp/*rpm
+RUN dnf -y install /tmp/flightctl*.rpm && \
     dnf clean all && \
 ////
+
+.. Copy the agent package from your _server machine_, so you can include it on device images.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *mkdir rpms*
+$ **scp servera:~/flightctl-{agent,selinux}*rpm rpms**
+flightctl-agent-1.0.2-1.el9.x86_64.rpm
+flightctl-selinux-1.0.2-1.el9.x86_64.rpm
+--
 
 .. Review the `Containerfile` that builds a minimal enrollment image.
 If you need explanations about what is included in this image, please review the https://redhatquickcourses.github.io/rhde-rhem-devices/rhde-rhem-devices/1/ch3-enroll/s2-enroll-lab.html[previous course].
 +
-NOTE: If you want to try with the current latest release of the upstream project, edit your Containerfile to remove the version component `-1.0.0` from the package `flightctl-agent`.
+//TODO: adapt instructions for using online product packages [may not work with 1.0.0] and/or an offline mirror
++
+////
+Changes top the Containerfile to use offline copy of the package
+FROM registry.redhat.io/rhel9/rhel-bootc:9.6
+# RUN dnf -y config-manager --add-repo https://rpm.flightctl.io/flightctl-epel.repo && \
+#    dnf -y install flightctl-agent-1.0.2 && \
+ADD flightctl-agent-1.0.2-1.el9.x86_64.rpm /tmp
+RUN dnf -y install /tmp/flightctl-agent-1.0.2 && \
+    dnf clean all && \
+////
 
 .. Copy the CA certificate of the private container registry.
 Notice that the last argument of the `scp` command is a period, for the current directory.
@@ -506,19 +683,56 @@ $ *bash bib-iso.sh*
 Build complete!
 Results saved in .
 --
-+
-////
-////
-
-9. Provision and enroll two VMs which stand-in for managed devices.
-+
-NOTE: If you need help understand and troubleshooting managed device enrollment, please refer to the https://redhatquickcourses.github.io/rhde-rhem-devices/rhde-rhem-devices/1/ch3-enroll/s2-enroll-lab.html[first course^].
 
 .. Copy the generated ISO image file to a more recognizable name, outside the temporary directory.
 +
 [source,console,subs="verbatim,quotes"]
 --
 $ *cp output/bootiso/install.iso rhem-enroll.iso*
+--
+
+9. Provision and enroll two VMs which stand-in for managed devices.
++
+NOTE: If you need help understand and troubleshooting managed device enrollment, please refer to the https://redhatquickcourses.github.io/rhde-rhem-devices/rhde-rhem-devices/1/ch3-enroll/s2-enroll-lab.html[first course^].
+
+.. Verify that there are no managed devices in Edge Manager.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *flightctl get device*
+NAME    ALIAS   OWNER   SYSTEM  UPDATED APPLICATIONS
+--
+
+.. If there are any devices, decomission and delete each of them by running the following commands.
++
+NOTE: This and the next substeps ensure that labs from this course labs are not impacted by left overs from labs of the previous course.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *flightctl decomission _device-UUID_*
+GRAB OUTPUT
+$ *flightctl delete device _device-UUID_*
+GRAB OUTPUT
+--
+
+.. Verify that there are no local VMs.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *virsh list --all*
+ Id   Name   State
+--------------------
+--
+
+.. If there are any VMs, delete each of them by running the following commands.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *virsh destroy _vm_*
+GRAB OUTPUT
+$ *virsh undefine _vm_*
+GRAB OUTPUT
+$ *rm ~/.local/share/libvirt/images/_vm_.qcow2*
 --
 
 .. Use the provided script to invoke `virt-install` to create a local test VM, booting it from the ISO.
@@ -536,8 +750,12 @@ Running text console command: virsh --connect qemu:///session console edge-1
 Connected to domain 'edge-1'
 Escape character is ^] (Ctrl + ])
 --
++
+////
+Got AGAIN the SELinux error with passt. As if I had to fix labels everytime I create a classroom? Could it be the cloud-init settings?
+////
 
-.. Verify that there is an enrollment request that is pending.
+.. Verify that there is a pending enrollment request.
 +
 [source,console,subs="verbatim,quotes,attributes"]
 --
@@ -580,7 +798,7 @@ NAME                                                    ALIAS   OWNER   SYSTEM  
 
 .. Repeat the process to create and enroll a second local test VM.
 +
-[source,console,subs="verbatim,quotes"]
+[source,console,subs="verbatim,quotes,attributes"]
 --
 $ *bash virt-install.sh 2*
 Creating VM edge-2, use port 8122 for SSH.
@@ -593,68 +811,24 @@ Escape character is ^] (Ctrl + ])
 kbd:[Ctrl+\]]
 $ *flightctl get enrollmentrequest*
 NAME                                                    APPROVAL        APPROVER        APPROVED LABELS
-{edge-2-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}    Pending         <none>
+{edge-2-uuid-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}    Pending         <none>
 --
-+
-////
-Strange error with user mode networking :-(
-Because I have a registered workstation VM?
-
-student@workstation:~/temp-enroll$ bash virt-install.sh 1
-Creating VM edge-1, use port 8122 for SSH.
-
-Starting install...
-Retrieving 'vmlinuz'                                                                                                                                                                                       |  14 MB  00:00:00     
-Retrieving 'initrd.img'                                                                                                                                                                                    | 149 MB  00:00:00     
-Allocating 'edge-1.qcow2'                                                                                                                                                                                  |  20 GB  00:00:00     
-Removing disk 'edge-1.qcow2'                                                                                                                                                                               |         00:00:00     
-ERROR    internal error: Child process (passt --one-off --socket /run/user/1000/libvirt/qemu/run/passt/1-edge-1-net0.socket --pid /run/user/1000/libvirt/qemu/run/passt/1-edge-1-net0-passt.pid --tcp-ports 8122:22 --tcp-ports 8108:80) unexpected exit status 126: libvirt:  error : cannot execute binary passt: Permission denied
-
-Domain installation does not appear to have been successful.
-If it was, you can restart your domain by running:
-  virsh --connect qemu:///session start edge-1
-otherwise, please restart your installation.
-student@workstation:~/temp-enroll$ which passt
-/usr/bin/passt
-student@workstation:~/temp-enroll$ ls -l $(which passt)
--rwxr-xr-x. 1 root root 256784 Feb 28  2025 /usr/bin/passt
-
-Tried to install the passt-selinux package and it failed to install its policy module.
-Guess I'll have to re-create without using online package repos :-(
-
-Coud just dnf update workstation, but that would put me on RHEL 10.0. Given that I'm already past RHEM issues (I guess) and virt-install was working before, I'll assume my issue is somewhere else other than RHEL updates. Or it is with mixing DVD and online repos: some parts are updated, others are not. 
-
-Maybe I should restart from upstream packages -- so I'm on the same ground as previous course.
-I think I tried 1.0.2 upstream and from a package mirror already, and it was fine.
-
-Downgrading passt to the DVD package worked at dnf install time (unlike the update) but it didn't work for virt-install.
-
-Try workaround fix offered by gnome
-$ cat ~/passt-selinux-fix.sh 
- ausearch -c 'rpc-virtqemud' --raw | audit2allow -M my-rpcvirtqemud
-semodule -i my-rpcvirtqemud.pp
-
-Seems to have worked, so I can continue development... not quite. I have an edge-1 VM but it cannot enroll to edge manager and I cannot SSH into it.
-netstat shows no open ports (from port-forward) and there's a bunch of other AVC errors.
-Guess my classroom is botched.. I hope it's not the mixed RHEL customizations. :-(
-
-Deleting the classroom... must start with a user-mode passt VM test.
-////
 
 .. Approve the enrollment of your second local test VM.
 +
-[source,console,subs="verbatim,quotes"]
+[source,console,subs="verbatim,quotes,attributes"]
 --
-$ *flightctl approve enrollmentrequest _{edge-2-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}_ -l alias=edge-2 -l rhel=9.6 -l type=noapps*
+$ *flightctl approve enrollmentrequest _{edge-2-uuid-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}_ -l alias=edge-2 -l rhel=9.6 -l type=noapps*
 --
 
 .. Wait until your second managed device is `UpToDate`.
 +
-[source,console,subs="verbatim,quotes"]
+[source,console,subs="verbatim,quotes,attributes"]
 --
 $ *flightctl get device -o wide*
 NAME                                                    ALIAS   OWNER   SYSTEM  UPDATED         APPLICATIONS    LABELS
-{edge-1-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}    edge-2  <none>  Online  UpToDate        NoApplications  alias=edge-2,rhel=9.6,type=noapp
+{edge-1-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}    edge-1  <none>  Online  UpToDate        NoApplications  alias=edge-2,rhel=9.6,type=noapp
+{edge-2-uuid-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}    edge-2  <none>  Online  UpToDate        NoApplications  alias=edge-2,rhel=9.6,type=noapp
 --
 
 1. Task or outcome.
