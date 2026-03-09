@@ -8,7 +8,7 @@ Objective::
 
 Set up and configure the classroom environment for practicing Red Hat Edge Manager fleet management.
 
-WARNING: Not started  yet.
+WARNING: Work in Progress
 
 == Before you begin
 
@@ -49,6 +49,7 @@ NOTE: Some of the requirements of Edge Manager can be satisfied by the existing 
 
 If this is your first time using a ROL classroom, please refer to https://redhatquickcourses.github.io/rhde-rhem-devices/rhde-rhem-devices/1/ch1-intro/s3-classroom-lab.html[the previous course] for an introduction to the classroom environment and for more detail about prerequisite tasks such as: installing and configuring Red Hat Edge Manager, and enrolling managed devices.
 
+////
 [IMPORTANT]
 ====
 The classroom environment has an issue which requires restoring SELinux context labels on the `worstation` VM.
@@ -61,6 +62,22 @@ $ *sudo fixfiles -F onboot*
 $ *sudo shutdown -r now*
 --
 ====
+////
+
+[IMPORTANT]
+====
+The classroom environment has an issue which requires setting SELinux to permissive mode. This is something Red Hat do *NOT* advises doing to any production system, including developer machines and CI/CD servers.
+
+Perform the following before you attempt any lab of this course.
+
+[source,console,subs="verbatim,quotes"]
+--
+$ *sudo setenforce Permissive*
+--
+
+Note tat SELinux is still in enforcing mode on the _server machine_ and all test VMs which stand in for managed devices.
+====
+
 1. On your _development machine_, download the sample code for this course.
 
 .. Ensure that you are on your home directory and verify if you have the course samples repository.
@@ -250,7 +267,7 @@ If they are, you can skip to *step 5*.
 --
 $ *sudo rpm -q flightctl-services*
 flightctl-services-1.0.2-1.el9.x86_64
-$ *sudo systemctl is-active flightctl-target*
+$ *sudo systemctl is-active flightctl-api*
 active
 --
 
@@ -429,7 +446,7 @@ IMPORTANT: If you see the prompt "Use insecure connections?" answer *N* and let 
 +
 [source,console,subs="verbatim,quotes"]
 --
-$ *flightctl login -u student -p redhat https://servera.lab.example.com:3443*
+$ *flightctl login -u student -p student https://servera.lab.example.com:3443*
 Auto-selected organization: 00000000-0000-0000-0000-000000000000 Default
 Login successful.
 $ *flightctl login -u admin -p redhat https://servera.lab.example.com:3443*
@@ -753,6 +770,8 @@ Escape character is ^] (Ctrl + ])
 +
 ////
 Got AGAIN the SELinux error with passt. As if I had to fix labels everytime I create a classroom? Could it be the cloud-init settings?
+No, fix-files didn't fix it???
+Every reboot fix-files -v check shows a new list of files to relabel, but I get the same avc :-(
 ////
 
 .. Verify that there is a pending enrollment request.
@@ -770,7 +789,7 @@ Be sure you use the same UUID you got from the previous step to refer to the enr
 +
 [source,console,subs="verbatim,quotes,attributes"]
 --
-$ *flightctl approve enrollmentrequest _{edge-1-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}_ -l alias=edge-1 -l rhel=9.6 -l type=noapps*
+$ *flightctl approve enrollmentrequest -l alias=edge-2 -l rhel=9.6 -l type=noapps _{edge-1-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}_*
 --
 +
 // There's no output from the approve command
@@ -796,7 +815,7 @@ NAME                                                    ALIAS   OWNER   SYSTEM  
 {edge-1-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}    edge-1  <none>  Online  UpToDate        NoApplications  alias=edge-1,rhel=9.6,type=noapp
 --
 
-.. Repeat the process to create and enroll a second local test VM.
+.. Repeat the process to create a second local test VM.
 +
 [source,console,subs="verbatim,quotes,attributes"]
 --
@@ -809,16 +828,21 @@ Running text console command: virsh --connect qemu:///session console edge-2
 Connected to domain 'edge-2'
 Escape character is ^] (Ctrl + ])
 kbd:[Ctrl+\]]
-$ *flightctl get enrollmentrequest*
-NAME                                                    APPROVAL        APPROVER        APPROVED LABELS
-{edge-2-uuid-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}    Pending         <none>
 --
 
 .. Approve the enrollment of your second local test VM.
 +
 [source,console,subs="verbatim,quotes,attributes"]
 --
-$ *flightctl approve enrollmentrequest _{edge-2-uuid-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}_ -l alias=edge-2 -l rhel=9.6 -l type=noapps*
+$ *flightctl get enrollmentrequest*
+NAME                                                    APPROVAL        APPROVER        APPROVED LABELS
+{edge-2-uuid-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}    Pending         <none>
+{edge-1-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}    Approved        admin           alias=edge-1,rhel=9.6,type=noapps
+--
++
+[source,console,subs="verbatim,quotes,attributes"]
+--
+$ *flightctl approve enrollmentrequest -l alias=edge-2 -l rhel=9.6 -l type=noapps _{edge-2-uuid-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}_*
 --
 
 .. Wait until your second managed device is `UpToDate`.
@@ -827,33 +851,12 @@ $ *flightctl approve enrollmentrequest _{edge-2-uuid-bbbbbbbbbbbbbbbbbbbbbbbbbbb
 --
 $ *flightctl get device -o wide*
 NAME                                                    ALIAS   OWNER   SYSTEM  UPDATED         APPLICATIONS    LABELS
-{edge-1-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}    edge-1  <none>  Online  UpToDate        NoApplications  alias=edge-2,rhel=9.6,type=noapp
-{edge-2-uuid-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}    edge-2  <none>  Online  UpToDate        NoApplications  alias=edge-2,rhel=9.6,type=noapp
+{edge-1-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}    edge-1  <none>  Online  UpToDate        NoApplications  alias=edge-2,rhel=9.6,type=noapps
+{edge-2-uuid-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}    edge-2  <none>  Online  UpToDate        NoApplications  alias=edge-2,rhel=9.6,type=noapps
 --
 
-1. Task or outcome.
-
-.. Something to do, using a graphical or web UI.
-Click menu:Save As[] to save your work.
-
-.. More things to do
-
-2. Task or outcome.
-
-.. Something to do, using a shell.
-+
-[source,console,subs="verbatim,quotes"]
---
-$ *command --options fixed-arguments _variable-arguments_*
-output of the command
-highlight *something* in the output
---
-
-
-.. More things to do.
-Press kbd:[Ctrl+C] to interrupt.
-
-Summary of what you acomplished.
+You now have a minimaly configured Edge Manager service and two local VMs which act as managed devices, that are fully provisioned and enrolled into Edge Manager.
+This environment will be a starting point for the activities in the next chapters.
 
 == What's next
 
