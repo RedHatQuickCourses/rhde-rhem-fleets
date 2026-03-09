@@ -175,7 +175,7 @@
 <i class="fa icon-warning" title="Warning"></i>
 </td>
 <td class="content">
-Not started  yet.
+Work in Progress
 </td>
 </tr>
 </table>
@@ -234,6 +234,16 @@ Alternatively, you can open a shell or a console directly on the <code>servera</
 <h2 id="_instructions"><a class="anchor" href="#_instructions"></a>Instructions</h2>
 <div class="sectionbody">
 <div class="paragraph">
+<p>You will verify that Edge Manager is installed and running on your <em>server machine</em>; that you can log in on Edge Manager from your <em>development machine</em>; and also that you have all files required to provision and enroll new managed devices, such as: a custom bootc container image, SSH keys, and a custom installation ISO.</p>
+</div>
+<div class="paragraph">
+<p>All that should be already available, if you are contining straight from the <a href="https://redhatquickcourses.github.io/rhde-rhem-devices/">first course</a> without deleting and creating a new classroom environment, and you would skip most steps on this lab.
+In that case, this lab also provides some cleaning intructions, so you are not impacted by left overs from the first course.</p>
+</div>
+<div class="paragraph">
+<p>If you are starting from a new classroom environment, this lab provides step-by-step instructions to prepare all the necessary prerequisites for this course.</p>
+</div>
+<div class="paragraph">
 <p>You can adapt the instructions in this course to any environment where you can install RPM packages, run Podman containers, and create VMs using libvirt.
 With a bit more effort, you could run everything on a Windows or MacOS workstation, using a single large VM running RHEL and nested virtualization, or a few smaller VMs, but this course does <strong>NOT</strong> provide instructions for doing so.</p>
 </div>
@@ -241,11 +251,11 @@ With a bit more effort, you could run everything on a Windows or MacOS workstati
 <p>This course was tested using a Red Hat Learning Environment (ROL) classroom which was originally created for another quick course series.
 There was no customization for the specific needs of Edge Manager, and there was no attempt at providing all requirements to install Edge Manager in disconnected mode.</p>
 </div>
-<div class="admonitionblock important">
+<div class="admonitionblock note">
 <table>
 <tr>
 <td class="icon">
-<i class="fa icon-important" title="Important"></i>
+<i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
 Some of the requirements of Edge Manager can be satisfied by the existing RPM package and container image mirrors in the ROL classroom, but some of them require internet access, a valid Red Hat login, and Red Hat subscription entitlements.
@@ -254,11 +264,7 @@ Some of the requirements of Edge Manager can be satisfied by the existing RPM pa
 </table>
 </div>
 <div class="paragraph">
-<p>If this is your first time using a ROL classroom, please refer to <a href="https://redhatquickcourses.github.io/rhde-rhem-devices/rhde-rhem-devices/1/ch1-intro/s3-classroom-lab.html">the previous course</a> for a gentler introduction to the classroom environment and to tasks such as installing and configuring Red Hat Edge Manager.</p>
-</div>
-<div class="paragraph">
-<p>Here the focus is on quickly having the environment ready for the tasks of this course, by re-creating some of the outcomes from the previous course.
-If you are proceeding directly after completing the previous course, without destroying and re-creating its classroom environment, you will skip most steps here.</p>
+<p>If this is your first time using a ROL classroom, please refer to <a href="https://redhatquickcourses.github.io/rhde-rhem-devices/rhde-rhem-devices/1/ch1-intro/s3-classroom-lab.html">the previous course</a> for an introduction to the classroom environment and for more detail about prerequisite tasks such as: installing and configuring Red Hat Edge Manager, and enrolling managed devices.</p>
 </div>
 <div class="admonitionblock important">
 <table>
@@ -267,7 +273,20 @@ If you are proceeding directly after completing the previous course, without des
 <i class="fa icon-important" title="Important"></i>
 </td>
 <td class="content">
-Add verification checks and explicit instructions so learners doing all courses in a row know what to skip.
+<div class="paragraph">
+<p>The classroom environment has an issue which requires setting SELinux to permissive mode. This is something Red Hat do <strong>NOT</strong> advises doing to any production system, including developer machines and CI/CD servers.</p>
+</div>
+<div class="paragraph">
+<p>Perform the following before you attempt any lab of this course.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>sudo setenforce Permissive</strong></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Note tat SELinux is still in enforcing mode on the <em>server machine</em> and all test VMs which stand in for managed devices.</p>
+</div>
 </td>
 </tr>
 </table>
@@ -279,19 +298,11 @@ Add verification checks and explicit instructions so learners doing all courses 
 <div class="olist loweralpha">
 <ol class="loweralpha" type="a">
 <li>
-<p>Using a shell on your <em>development machine</em> (which is the <code>workstation VM</code>), ensure you are on your home directory.
-All labs start from there, but they will use different work directories, so this course starts all labs from the same reference point.</p>
+<p>Ensure that you are on your home directory and verify if you have the course samples repository.</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>cd</strong></code></pre>
-</div>
-</div>
-</li>
-<li>
-<p>Verify if you already have the the samples repository.</p>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>ls rhde-rhem-samples</strong>
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>cd</strong>
+$ <strong>ls rhde-rhem-samples</strong>
 LICENSE  README.md  antora.yml  config  enroll  modules  webapp</code></pre>
 </div>
 </div>
@@ -308,15 +319,13 @@ $ <strong>cd</strong></code></pre>
 </div>
 </li>
 <li>
-<p>If you do not.</p>
+<p>If you do not, clone the course samples repository.</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>ls rhde-rhem-samples</strong>
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>cd</strong>
+$ <strong>ls rhde-rhem-samples</strong>
 ls: cannot access 'rhde-rhem-samples': No such file or directory</code></pre>
 </div>
-</div>
-<div class="paragraph">
-<p>Then clone the course samples repository.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -330,12 +339,30 @@ Cloning into 'rhde-rhem-samples'...
 </div>
 </li>
 <li>
-<p>Install tools for managing containers and VMs on your <em>development machine</em>.</p>
+<p>Install tools for managing containers and VMs.</p>
 <div class="olist loweralpha">
 <ol class="loweralpha" type="a">
 <li>
-<p>Install the <code>container-tools</code> meta-package.
-Altough the <code>workstation</code> VM has Podman preinstalled, you will need the full suite of container tools in this course.</p>
+<p>Verify that the <code>podman</code> and <code>skopeo</code> commands are available.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>which podman</strong>
+/usr/bin/podman
+$ <strong>which skopeo</strong>
+/usr/bin/skopeo</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>If any of them is not, install the corresponding package.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>which podman</strong>
+/usr/bin/which: no podman in (/home/student/.local/bin:/home/student/bin:/home/student/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin)
+$ <strong>which skopeo</strong>
+/usr/bin/which: no podman in (/home/student/.local/bin:/home/student/bin:/home/student/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin)</code></pre>
+</div>
+</div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-console" data-lang="console">$ <strong>sudo dnf install skopeo buildah</strong>
@@ -345,7 +372,22 @@ Complete!</code></pre>
 </div>
 </li>
 <li>
-<p>Install the libvirt tools and enable its QEMU socket service.</p>
+<p>Verify that libvirt tools are available.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>which virsh</strong>
+/usr/bin/virsh</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>If they are not, install the libvirt tools and enable its QEMU socket service.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>which virsh</strong>
+/usr/bin/which: no virsh in (/home/student/.local/bin:/home/student/bin:/home/student/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin)</code></pre>
+</div>
+</div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-console" data-lang="console">$ <strong>sudo dnf install qemu-kvm libvirt virt-install virt-viewer</strong>
@@ -372,14 +414,7 @@ CPU model:           x86_64
 </div>
 </li>
 <li>
-<p>Configure your <em>development machine</em> to access RPM packages and container images from Red Hat, over the internet.</p>
-<div class="olist loweralpha">
-<ol class="loweralpha" type="a">
-<li>
-<p>Register your <em>development machine</em> with the Red Hat subscription manager.</p>
-<div class="paragraph">
-<p>If you are using the upstream Flight Control packages, you can use the login from a free Red Hat Developer subscription for individuals.</p>
-</div>
+<p>Enable access RPM packages and container images from Red Hat, over the internet.</p>
 <div class="admonitionblock note">
 <table>
 <tr>
@@ -392,10 +427,34 @@ The <code>workstation</code> VM is preconfigured with access to a private mirror
 </tr>
 </table>
 </div>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p>Verify that your <em>development machine</em> is registered with Red Hat.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>sudo subscription-manager status</strong>
+...
+The registered system name is: workstation</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>If it is not, register your <em>development machine</em> using a valid Red Hat account, such as a free Red Hat Developer account.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>sudo subscription-manager status</strong>
++-------------------------------------------+
+   System Status Details
++-------------------------------------------+
+Overall Status: Not registered</code></pre>
+</div>
+</div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-console" data-lang="console">$ <strong>sudo subscription-manager register</strong>
 ...
+The system has been registered with ID: aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee
 The registered system name is: workstation</code></pre>
 </div>
 </div>
@@ -424,7 +483,7 @@ sha256:f5e1860fae45c9d01fb612fcfad6c1d3a93e9ea4533bf01ea1c4d47ae2226580</code></
 </div>
 </li>
 <li>
-<p>Download the bootc image builder to the container storage of the root user.</p>
+<p>Download the bootc image builder container image to the container storage of the root user.</p>
 <div class="paragraph">
 <p>You will run bootc image builder as root, so you must log in again on the Red Hat container registry.</p>
 </div>
@@ -458,7 +517,27 @@ servera</code></pre>
 </div>
 </li>
 <li>
-<p>Install the container tools on your <em>server machine</em>.</p>
+<p>Verify that the Red Hat Edge Manager services are installed and active.
+If they are, you can skip to <strong>step 5</strong>.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>sudo rpm -q flightctl-services</strong>
+flightctl-services-1.0.2-1.el9.x86_64
+$ <strong>sudo systemctl is-active flightctl-api</strong>
+active</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>If they are not, install the container tools on your <em>server machine</em>.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>sudo rpm -q flightctl-services</strong>
+package flightctl-services is not installed
+$ <strong>sudo systemctl is-active flightctl-target</strong>
+inactive</code></pre>
+</div>
+</div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-console" data-lang="console">$ <strong>sudo dnf install podman skopeo</strong>
@@ -468,10 +547,10 @@ Complete!</code></pre>
 </div>
 </li>
 <li>
-<p>Enable the Flight Control repository from EPEL.</p>
+<p>If you want to use packages from the upstream Flight Control project, enable its repository from EPEL.</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code>$ <strong>sudo dnf config-manager --add-repo https://rpm.flightctl.io/flightctl-epel.repo</strong>
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>sudo dnf config-manager --add-repo https://rpm.flightctl.io/flightctl-epel.repo</strong>
 Adding repo from: https://rpm.flightctl.io/flightctl-epel.repo</code></pre>
 </div>
 </div>
@@ -482,10 +561,73 @@ Adding repo from: https://rpm.flightctl.io/flightctl-epel.repo</code></pre>
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-There is no need to register <code>servera</code> because the Flight Control services package contains no dependencies other than a container engine (Podman) and the classroom environment contains a mirror of the RHEL 10 packages, which the <code>sererva</code> machine is preconfigured to use.
+In this case, there is no need to register <code>servera</code> because the Flight Control services package contains no dependencies other than a container engine (Podman) and the classroom environment contains a mirror of the RHEL 9 packages, which the <code>servera</code> VM is preconfigured to use.
 </td>
 </tr>
 </table>
+</div>
+</li>
+<li>
+<p>Alternatively, register your <em>server machine</em> with Red Hat subscription manager and log in on the Red Hat container registries as the <code>root</code> user.</p>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+This requires using a Red Hat login entitled to a Red Hat Device Edge product subscription or other product subscription which provides Red Hat Edge Manager packages.
+</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>sudo subscription-manager register</strong>
+...
+The registered system name is: servera
+$ <strong>sudo subscription-manager repos --enable edge-manager-1.0-for-rhel-9-x86_64-rpms</strong>
+Repository 'edge-manager-1.0-for-rhel-9-x86_64-rpms' is enabled for this system.
+$ <strong>sudo podman login registry.redhat.io</strong>
+...
+Login Succeeded!</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>As a third alternative, use the offline mirror of the Red Hat Edge Manager package channel and log in on the Red Hat container registries.</p>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+This still requires a valid Red Hat log in, but it could be from a free Red Hat Developer account.
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+Review this step after the classroom is updated.
+</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>dnf confifg-manager --add-repo http://content.example.com/rhde9.6/x86_64/dvd/edge-manager</strong>
+GRAB OUTPUT
+$ <strong>sudo podman login registry.redhat.io</strong>
+...
+Login Succeeded!</code></pre>
+</div>
 </div>
 </li>
 <li>
@@ -504,7 +646,7 @@ Complete!</code></pre>
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-If you want to try the current latest release from the upstream project, remove the version component <code>-1.0.2</code> from the package <code>flightctl-services</code> in the command above.
+If you want to try the current latest release from either the upstream project or product, remove the version component <code>-1.0.2</code> from the package argument in the previous command.
 </td>
 </tr>
 </table>
@@ -562,15 +704,109 @@ To show all installed unit files use 'systemctl list-unit-files'.</code></pre>
 <li>
 <p>If you experience errors, or it seems that the Edge Manager services are taking too long to start, refer to the <a href="https://redhatquickcourses.github.io/rhde-rhem-devices/rhde-rhem-devices/1/ch2-deploy/s2-install-lab.html" target="_blank" rel="noopener">previous course</a> for troubleshooting hints.</p>
 </li>
+<li>
+<p>Download the Edge Manager CLI package, which you will copy to your <em>development machine</em>.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>dnf download flightctl-cli-1.0.2</strong>
+...
+lightctl-cli-1.0.2-1.el9.x86_64.rpm</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Download the Edge Manager agent package, which you will also copy to your <em>development machine</em>.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>dnf download flightctl-agent-1.0.2 flightctl-selinux-1.0.2</strong>
+...
+(1/2): flightctl-agent-1.0.2-1.el9.x86_64.rpm
+(2/2): flightctl-selinux-1.0.2-1.el9.noarch.rpm</code></pre>
+</div>
+</div>
+</li>
 </ol>
 </div>
 </li>
 <li>
-<p>For simplicity, configure local users for the Edge Manager services, on the PAM issuer container.</p>
+<p>Install the Edge Manager CLI on your <em>development machine</em>.</p>
 <div class="olist loweralpha">
 <ol class="loweralpha" type="a">
 <li>
-<p>Create groups which correspond to the <code>admin</code>, <code>operator</code>, and <code>viewer</code> roles.</p>
+<p>Verify that the <code>flightctl</code> command is availabe.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>which flightctl</strong>
+/usr/bin/flightctl</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>If it is not, copy its package from your <em>server machine</em> and install it.</p>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Even if the CLI package is built for RHEL 9, it works on RHEL 10 also because
+the Edge Manager CLI is a static binary, with no dependencies on shared libraries.
+</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>which flightctl</strong>
+/usr/bin/which: no flightctl in (/home/student/.local/bin:/home/student/bin:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin)</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>scp servera:~/flightctl-cli*rpm ~/Downloads</strong>
+GRAB OUTPUT
+$ <strong>sudo dnf install ~/Downloads/flightctl-cli*rpm</strong>
+...
+Complete!</code></pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>Configure users for the Edge Manager services, on the its PAM issuer container.</p>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p>Verify that you can log in on Edge Manager, from your <em>development machine</em>, as a regular user and also as an administrator.
+If you do, you can skip to <strong>step 7</strong></p>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+If you see the prompt "Use insecure connections?" answer <strong>N</strong> and let the log in attempt fail.
+</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl login -u student -p student https://servera.lab.example.com:3443</strong>
+Auto-selected organization: 00000000-0000-0000-0000-000000000000 Default
+Login successful.
+$ <strong>flightctl login -u admin -p redhat https://servera.lab.example.com:3443</strong>
+Auto-selected organization: 00000000-0000-0000-0000-000000000000 Default
+Login successful.</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>If you cannot log in, switch to your <em>server machine</em> and create groups which correspond to the <code>admin</code>, <code>operator</code>, and <code>viewer</code> roles.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-console" data-lang="console">$ <strong>sudo podman exec -i flightctl-pam-issuer groupadd flightctl-admin</strong>
@@ -610,47 +846,8 @@ admin : admin flightctl-admin</code></pre>
 </div>
 </div>
 </li>
-</ol>
-</div>
-</li>
 <li>
-<p>Install the Edge Manager CLI on your <em>development machine</em></p>
-<div class="olist loweralpha">
-<ol class="loweralpha" type="a">
-<li>
-<p>Make sure your current shell is on the right machine.</p>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>hostname</strong>
-workstation</code></pre>
-</div>
-</div>
-</li>
-<li>
-<p>Enable the flight repository from EPEL and install its CLI package.</p>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>sudo dnf config-manager --add-repo https://rpm.flightctl.io/flightctl-epel.repo</strong>
-Adding repo from: https://rpm.flightctl.io/flightctl-epel.repo
-$ <strong>sudo dnf install flightctl-cli</strong>
-...
-Complete!</code></pre>
-</div>
-</div>
-</li>
-<li>
-<p>Verify that the <code>flightctl</code> command is in your command PATH.</p>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl version</strong>
-Client Version: v1.0.0
-Server Version: Could not read server version
-You must log in to view the server version. Please use the 'login' command to authenticate before proceeding</code></pre>
-</div>
-</div>
-</li>
-<li>
-<p>Copy the self-signed certificate of the Edge Manager server and add it to the system&#8217;s trusted CA set.</p>
+<p>Switch to your <em>development machine</em> and copy the self-signed certificate of the Edge Manager server and add it to the system&#8217;s trusted CA set.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-console" data-lang="console">$ <strong>scp servera:/etc/flightctl/pki/ca-bundle.crt ~</strong>
@@ -661,7 +858,7 @@ $ <strong>sudo update-ca-trust extract</strong></code></pre>
 </div>
 </li>
 <li>
-<p>Log in on the Edge Manager server.</p>
+<p>Verify that you can now log in on the Edge Manager server.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl login -u admin -p redhat https://servera.lab.example.com:3443</strong>
@@ -671,14 +868,12 @@ Login successful.</code></pre>
 </div>
 </li>
 <li>
-<p>Verify that the CLI can now get the server&#8217;s version, and that there are no managed devices yet.</p>
+<p>Verify that the CLI can now get the server&#8217;s version.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl version</strong>
-Client Version: v1.0.0
-Server Version: v1.0.0
-$ <strong>flightctl get device</strong>
-NAME    ALIAS   OWNER   SYSTEM  UPDATED APPLICATIONS</code></pre>
+Client Version: v1.0.2
+Server Version: v1.0.2</code></pre>
 </div>
 </div>
 </li>
@@ -690,8 +885,44 @@ NAME    ALIAS   OWNER   SYSTEM  UPDATED APPLICATIONS</code></pre>
 <div class="olist loweralpha">
 <ol class="loweralpha" type="a">
 <li>
-<p>Copy example files and scripts for creating the enrollment image to a work directory.
+<p>On your <em>development machine</em>, verify that you already have the enrollment ISO and SSH key to provision managed devices.
+Look for files named <code>rhem-enroll.iso</code> and <code>edge-key</code> on the <code>temp-enroll</code> directory.
+If you do, you can skip to <strong>step 9</strong></p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>cd</strong>
+$ <strong>cd temp-enroll</strong>
+$ <strong>ls</strong>
+Containerfile  bib-iso.sh  config.toml  config.yaml  edge-key  edge-key.pub  output  rhem-enroll.iso  virt-install.sh</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>If not, log in on your private registry and verify that the bootc enrollment image is available there.
+If it is, you can skip to <strong>step 8</strong>.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>podman login -u student -p redhat registry.lab.example.com:5000</strong>
+Login Succeeded!
+$ <strong>skopeo inspect --format '{{.Digest}}' docker://registry.lab.example.com:5000/rhem-enroll:v1.0</strong>
+503f839113b376c55ceee225a8cbfdc9bf1496f3342385ce171f2cf2e01f1333</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>If it is not, copy example files and scripts for creating the enrollment image to a work directory.
 Then make the work directory your current directory.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>cd</strong>
+$ <strong>cd temp-enroll</strong>
+bash: cd: temp-enroll: No such file or directory
+$ <strong>podman login -u student -p redhat registry.lab.example.com:5000</strong>
+Login Succeeded!
+$ <strong>skopeo inspect --format '{{.Digest}}' docker://registry.lab.example.com:5000/rhem-enroll:v1.0</strong>
+FATA[0000] Error parsing image name "docker://registry.lab.example.com:5000/rhem-enroll:v1.0": reading manifest v1.0 in registry.lab.example.com:5000/rhem-enroll: manifest unknown</code></pre>
+</div>
+</div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-console" data-lang="console">$ <strong>cp -r rhde-rhem-samples/enroll temp-enroll</strong>
@@ -700,20 +931,19 @@ $ <strong>cd temp-enroll</strong></code></pre>
 </div>
 </li>
 <li>
+<p>Copy the agent package from your <em>server machine</em>, so you can include it on device images.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>mkdir rpms</strong>
+$ <strong>scp servera:~/flightctl-{agent,selinux}*rpm rpms</strong>
+flightctl-agent-1.0.2-1.el9.x86_64.rpm
+flightctl-selinux-1.0.2-1.el9.x86_64.rpm</code></pre>
+</div>
+</div>
+</li>
+<li>
 <p>Review the <code>Containerfile</code> that builds a minimal enrollment image.
 If you need explanations about what is included in this image, please review the <a href="https://redhatquickcourses.github.io/rhde-rhem-devices/rhde-rhem-devices/1/ch3-enroll/s2-enroll-lab.html">previous course</a>.</p>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-If you want to try with the current latest release of the upstream project, edit your Containerfile to remove the version component <code>-1.0.0</code> from the package <code>flightctl-agent</code>.
-</td>
-</tr>
-</table>
-</div>
 </li>
 <li>
 <p>Copy the CA certificate of the private container registry.
@@ -821,6 +1051,14 @@ Results saved in .</code></pre>
 </div>
 </div>
 </li>
+<li>
+<p>Copy the generated ISO image file to a more recognizable name, outside the temporary directory.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>cp output/bootiso/install.iso rhem-enroll.iso</strong></code></pre>
+</div>
+</div>
+</li>
 </ol>
 </div>
 </li>
@@ -841,10 +1079,56 @@ If you need help understand and troubleshooting managed device enrollment, pleas
 <div class="olist loweralpha">
 <ol class="loweralpha" type="a">
 <li>
-<p>Copy the generated ISO image file to a more recognizable name, outside the temporary directory.</p>
+<p>Verify that there are no managed devices in Edge Manager.</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>cp output/bootiso/install.iso rhem-enroll.iso</strong></code></pre>
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl get device</strong>
+NAME    ALIAS   OWNER   SYSTEM  UPDATED APPLICATIONS</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>If there are any devices, decomission and delete each of them by running the following commands.</p>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+This and the next substeps ensure that labs from this course labs are not impacted by left overs from labs of the previous course.
+</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl decomission <em>device-UUID</em></strong>
+GRAB OUTPUT
+$ <strong>flightctl delete device <em>device-UUID</em></strong>
+GRAB OUTPUT</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Verify that there are no local VMs.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>virsh list --all</strong>
+ Id   Name   State
+--------------------</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>If there are any VMs, delete each of them by running the following commands.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>virsh destroy <em>vm</em></strong>
+GRAB OUTPUT
+$ <strong>virsh undefine <em>vm</em></strong>
+GRAB OUTPUT
+$ <strong>rm ~/.local/share/libvirt/images/<em>vm</em>.qcow2</strong></code></pre>
 </div>
 </div>
 </li>
@@ -867,7 +1151,7 @@ Escape character is ^] (Ctrl + ])</code></pre>
 </div>
 </li>
 <li>
-<p>Verify that there is an enrollment request that is pending.</p>
+<p>Verify that there is a pending enrollment request.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl get enrollmentrequest</strong>
@@ -883,7 +1167,7 @@ NAME                                                    APPROVAL        APPROVER
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl approve enrollmentrequest <em>1u63hvsgtua9tjjbmla9bgh5h2s77cb8esepphnf68m3ocf8qfng</em> -l alias=edge-1 -l rhel=9.6 -l type=noapps</strong></code></pre>
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl approve enrollmentrequest -l alias=edge-2 -l rhel=9.6 -l type=noapps <em>1u63hvsgtua9tjjbmla9bgh5h2s77cb8esepphnf68m3ocf8qfng</em></strong></code></pre>
 </div>
 </div>
 </li>
@@ -911,7 +1195,7 @@ NAME                                                    ALIAS   OWNER   SYSTEM  
 </div>
 </li>
 <li>
-<p>Repeat the process to create and enroll a second local test VM.</p>
+<p>Repeat the process to create a second local test VM.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-console" data-lang="console">$ <strong>bash virt-install.sh 2</strong>
@@ -922,10 +1206,7 @@ Restarting guest.
 Running text console command: virsh --connect qemu:///session console edge-2
 Connected to domain 'edge-2'
 Escape character is ^] (Ctrl + ])
-kbd:[Ctrl+\]]
-$ <strong>flightctl get enrollmentrequest</strong>
-NAME                                                    APPROVAL        APPROVER        APPROVED LABELS
-{edge-2-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}    Pending         &lt;none&gt;</code></pre>
+kbd:[Ctrl+\]]</code></pre>
 </div>
 </div>
 </li>
@@ -933,7 +1214,15 @@ NAME                                                    APPROVAL        APPROVER
 <p>Approve the enrollment of your second local test VM.</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl approve enrollmentrequest <em>{edge-2-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}</em> -l alias=edge-2 -l rhel=9.6 -l type=noapps</strong></code></pre>
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl get enrollmentrequest</strong>
+NAME                                                    APPROVAL        APPROVER        APPROVED LABELS
+g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g    Pending         &lt;none&gt;
+1u63hvsgtua9tjjbmla9bgh5h2s77cb8esepphnf68m3ocf8qfng    Approved        admin           alias=edge-1,rhel=9.6,type=noapps</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl approve enrollmentrequest -l alias=edge-2 -l rhel=9.6 -l type=noapps <em>g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g</em></strong></code></pre>
 </div>
 </div>
 </li>
@@ -943,44 +1232,10 @@ NAME                                                    APPROVAL        APPROVER
 <div class="content">
 <pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl get device -o wide</strong>
 NAME                                                    ALIAS   OWNER   SYSTEM  UPDATED         APPLICATIONS    LABELS
-{edge-1-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}    edge-2  &lt;none&gt;  Online  UpToDate        NoApplications  alias=edge-2,rhel=9.6,type=noapp</code></pre>
+1u63hvsgtua9tjjbmla9bgh5h2s77cb8esepphnf68m3ocf8qfng    edge-1  &lt;none&gt;  Online  UpToDate        NoApplications  alias=edge-2,rhel=9.6,type=noapps
+g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g    edge-2  &lt;none&gt;  Online  UpToDate        NoApplications  alias=edge-2,rhel=9.6,type=noapps</code></pre>
 </div>
 </div>
-</li>
-</ol>
-</div>
-</li>
-<li>
-<p>Task or outcome.</p>
-<div class="olist loweralpha">
-<ol class="loweralpha" type="a">
-<li>
-<p>Something to do, using a graphical or web UI.
-Click <b class="menuref">Save As</b> to save your work.</p>
-</li>
-<li>
-<p>More things to do</p>
-</li>
-</ol>
-</div>
-</li>
-<li>
-<p>Task or outcome.</p>
-<div class="olist loweralpha">
-<ol class="loweralpha" type="a">
-<li>
-<p>Something to do, using a shell.</p>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>command --options fixed-arguments <em>variable-arguments</em></strong>
-output of the command
-highlight <strong>something</strong> in the output</code></pre>
-</div>
-</div>
-</li>
-<li>
-<p>More things to do.
-Press <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>C</kbd></span> to interrupt.</p>
 </li>
 </ol>
 </div>
@@ -988,7 +1243,8 @@ Press <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>C</kbd></span> to interrupt.</p>
 </ol>
 </div>
 <div class="paragraph">
-<p>Summary of what you acomplished.</p>
+<p>You now have a minimaly configured Edge Manager service and two local VMs which act as managed devices, that are fully provisioned and enrolled into Edge Manager.
+This environment will be a starting point for the activities in the next chapters.</p>
 </div>
 </div>
 </div>
