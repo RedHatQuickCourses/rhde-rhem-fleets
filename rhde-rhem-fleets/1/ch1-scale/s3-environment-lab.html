@@ -277,7 +277,7 @@ Some of the requirements of Edge Manager can be satisfied by the existing RPM pa
 <p>The classroom environment has an issue which requires setting SELinux to permissive mode. This is something Red Hat do <strong>NOT</strong> advises doing to any production system, including developer machines and CI/CD servers.</p>
 </div>
 <div class="paragraph">
-<p>Perform the following before you attempt any lab of this course.</p>
+<p>On your <em>development machine</em>, perform the following before you attempt any lab of this course.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -285,7 +285,8 @@ Some of the requirements of Edge Manager can be satisfied by the existing RPM pa
 </div>
 </div>
 <div class="paragraph">
-<p>Note tat SELinux is still in enforcing mode on the <em>server machine</em> and all test VMs which stand in for managed devices.</p>
+<p>Note tat SELinux is still in enforcing mode on your <em>server machine</em> and also on all test VMs which stand in for managed devices.
+Only your <em>development machine</em> needs SELinux set to permissive mode.</p>
 </div>
 </td>
 </tr>

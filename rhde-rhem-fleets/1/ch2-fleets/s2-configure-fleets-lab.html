@@ -175,7 +175,7 @@
 <i class="fa icon-warning" title="Warning"></i>
 </td>
 <td class="content">
-Not started  yet.
+Work In Progress
 </td>
 </tr>
 </table>
@@ -196,8 +196,320 @@ Not started  yet.
 <div class="paragraph">
 <p>High-level summary of what you will perform in this lab, but more detailed than the objective.</p>
 </div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>The classroom environment has an issue which requires setting SELinux to permissive mode. This is something Red Hat do <strong>NOT</strong> advises doing to any production system, including developer machines and CI/CD servers.</p>
+</div>
+<div class="paragraph">
+<p>On your <em>development machine</em>, perform the following before you attempt any lab of this course.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>sudo setenforce Permissive</strong></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Note tat SELinux is still in enforcing mode on your <em>server machine</em> and also on all test VMs which stand in for managed devices.
+Only your <em>development machine</em> needs SELinux set to permissive mode.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
 <div class="olist arabic">
 <ol class="arabic">
+<li>
+<p>Verify that you have the prerequisites from the <a href="../ch1-scale/s3-environment-lab.html" class="xref page">previous lab</a>.
+If any of the prerequisites are missing, please return to the previous lab and ensure that you did not skip any step.</p>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p>Verify that you have a clone of the course samples repository.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>cd</strong>
+$ <strong>ls rhde-rhem-samples</strong>
+antora.yml  config  enroll ...</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Verify that you have two local VMs.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>virsh list --all</strong>
+ Id   Name     State
+------------------------
+ 1    edge-1   running
+ 2    edge-2   running</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>If your VMs are not running, start them, but ensuring they are booting as a device that has been powered on, without reusing any saved state.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>virsh list --all</strong>
+ Id   Name     State
+-------------------------
+ -    edge-1   shut off
+ -    edge-2   shut off</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>virsh start edge-1 --force-boot</strong>
+Domain 'edge-1' started
+$ <strong>virsh start edge-2 --force-boot</strong>
+Domain 'edge-2' started</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Give your local VMs a few moments to finish boot.
+Then, log in on Edge Manager as a non-administrator and verify that there are two managed devices, which are on-line and up-to-date.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl login -u student -p student https://servera.lab.example.com:3443</strong>
+Auto-selected organization: 00000000-0000-0000-0000-000000000000 Default
+Login successful.
+$ <strong>flightctl get device</strong>
+NAME                                                    ALIAS   OWNER   SYSTEM  UPDATED         APPLICATIONS
+g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g    edge-2  &lt;none&gt;  Online  OutOfDate       NoApplications
+1u63hvsgtua9tjjbmla9bgh5h2s77cb8esepphnf68m3ocf8qfng    edge-1  &lt;none&gt;  Online  OutOfDate       NoApplications</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>If you devices keep displaying as off-line for too long, it might be related to clock skew.
+In that case, stop each of your local VMs and return to the beginning of this lab.</p>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Clock skew prevents a device from synchronizing with Edge Manager, and is known to happen if your ROLE classroom is stopped without first shutting down local VMs on your <em>develoment machine</em> and later your VMs are restarted from saved state.
+</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>virsh destroy edge-1</strong>
+Domain 'edge-1' destroyed
+$ <strong>virsh destroy edge-2</strong>
+Domain 'edge-2' destroyed</code></pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>Create a device fleet, using the web UI.
+The process is very similar to editting a device configuration, if you remember the activity from the first course.</p>
+<div class="paragraph">
+<p>You will configure your fleet with a device template that sets two configuration files, using the inline configuration provider: A pre-login banner, and a lifecycle hook to enable login using the serial console.</p>
+</div>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p>On your <em>development machine</em>, start a web browser and open <code>https://servera.lab.example.com</code>.
+Log in on Edge Manager as <code>student</code> using the <code>student</code> password.
+On the left pane, click <b class="menuref">Fleets</b>.
+It should display a page which states "No fleets yet".</p>
+</li>
+<li>
+<p>Click <b class="menuref">Create fleet</b>.
+Name your new fleet as <code>store</code> and, under <strong>Device selector</strong>, click on <b class="menuref">Add label</b>.
+Type <code>location=store</code> as the device selector, and press <kbd>Tab</kbd> to leave the text box.
+Ignore the warning that "There are no devices matching these labels" and click <b class="menuref">Next</b>.</p>
+</li>
+<li>
+<p>Under <strong>Host configuration (files)</strong>, click <b class="menuref">Add configuration</b> and type <code>store</code> on the <strong>Source name</strong> field.
+Select <code>Inline configuration</code> as the <strong>Source type</strong> field.</p>
+</li>
+<li>
+<p>Under <strong>File 1</strong>, type <code>/etc/issue.d/warning.issue</code> as the <strong>File path</strong> field, and type the following on the <strong>Content</strong> field:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">This is managed device {{ .metadata.labels.alias }}
+Access by non-authorized personnel is strictly forbidden.</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Also ensure that there is a blank line at the end of the multi-line text box.</p>
+</div>
+</li>
+<li>
+<p>Scroll down and click <b class="menuref">Add file</b> to create <strong>File 2</strong>.
+Type <code>/etc/flightctl/hooks.d/afterupdating/enable-serial-console.yaml</code> as the <strong>File path</strong> field, and type the following on the <strong>Content</strong> field:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">- run: /usr/bin/systemctl enable serial-getty@ttyS0.service --now</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Click <b class="menuref">Next</b> until you reach the end of the <strong>Create fleet</strong> assistant and click <b class="menuref">Create fleet</b>.
+You should get a details page for a fleet in the <code>Valid</code> state and with no devices.</p>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>Alter the labels on the first managed device so it joins the fleet and verify it got the fleet configuration.</p>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p>Switch to a terminal and attempt to open the serial console of your local VM.
+It does not display a log in prompt, no matter which keys you press.
+Your only alternative is dettaching from the VM console using <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>]</kbd></span>.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>virsh console edge-1</strong>
+Connected to domain 'edge-1'
+Escape character is ^] (Ctrl + ])</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Back to your web browser, click <b class="menuref">Devices</b> on the left pane.
+Then click on the menu icon (three vertical dots) for the <code>edge-1</code> managed device and select <b class="menuref">Edit device configurations</b>.</p>
+</li>
+<li>
+<p>Click on <b class="menuref">Add label</b> and type <code>location=store</code> on the text box.
+Press <kbd>Tab</kbd> to close the text box and notice that the page displays a green check mark under <strong>Fleet name</strong>, acknowledging that the new label makes the device a member of the <code>store</code> fleet.</p>
+</li>
+<li>
+<p>Click <b class="menuref">Next</b> until you reach the last page of the assistant, and click <b class="menuref">save</b>.</p>
+</li>
+<li>
+<p>Scroll down and notice that the <strong>Update status</strong> is <code>Out-of-date</code>.
+Wait until it changes to <code>Up-to-date</code>.</p>
+</li>
+<li>
+<p>Switch to a terminal and attempt again to open a terminal.
+You may have to press <kbd>Enter</kbd> a few times to get a log in prompt.
+After you get the prompt, press <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>D</kbd></span> to reset the log in process and view the banner messages.</p>
+<div class="paragraph">
+<p>You should see the standard banner from Edge Manager, which displays a QR code used to enroll or manage the device, and the warning that the fleet configuration added.</p>
+</div>
+<div class="paragraph">
+<p>You do not need to log in.
+You can press <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>]</kbd></span> to dettach from the virtual console, after confirming the warning banner is displayed by the device.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>virsh console edge-1</strong>
+enroll login:
+enroll login:
+Red Hat Enterprise Linux 9.6 (Plow)
+Kernel 5.14.0-570.76.1.el9_6.x86_64 on an x86_64 (ttyS0)
+
+enp1s0: 172.25.250.9 fe80::5054:ff:fec1:c7f
+
+█████████████████████████████████████████████████████████
+█████████████████████████████████████████████████████████
+████ ▄▄▄▄▄ █▀ ▀██▀▄▀▀▄█▀▄  ▀▄  ▄▀ ▄ ██  █▄▀▀ █ ▄▄▄▄▄ ████
+████ █   █ █▀▀▀ ▀▄▄▀▀█▀▀▄█▄▄ ▄ ▄▄██  ▄▄ ▀▄█ ▄█ █   █ ████
+████ █▄▄▄█ █▄▄█▄█▀▀█ ▄ ▀▄▀ ▄▄▄ ██▀▄██ ██ ▄▀███ █▄▄▄█ ████
+████▄▄▄▄▄▄▄█ █ ▀ ▀▄▀ █ █ █ █▄█ █▄▀ ▀ █▄█ █ ▀▄█▄▄▄▄▄▄▄████
+████▀▄▀  ▄▄█▄▀█▀▄ ▀  ▀▀ ▀ ▄▄▄▄▄█▄▀▀█��▀ ▄█ ▀▀▀▄ █  █ █████
+█████▀▄▄▀ ▄▀▄▀  ▀█▀  ▀▀▀ ▄ ▄█▀  ▀▄▀ ▀▄ ███▀▀██▀█   ▀▄████
+████▄▀▀ ▀ ▄██▄██▄  ▄██▀▄ █▄▄▀ ▀▀▄▄▀▀ ▄▄█ �� ▄█▀ ▀▄█▀█▄████
+████▀█▀█▀█▄  ▄▀▄ █ ▀ █▀▀ ▀▄███  ▄▄▀ ██▀ ▄▄ ▄█▀▀▀▄ ▀ ▄████
+████▀██ █▄▄▀▄▀ ▄▄   ▄▄▄  ▀▀█ ▄█▀▄▀ █▄█▀▀ ▄▄ █   ▄▄▄▀█████
+████ ▄▄▀▀▄▄ █▀▄▀█ ▀▀  ▀▀█ ▀▄█▀ █ █ ▀▄█▄ ▄█▄ ▀█▀█▄ ▄▀ ████
+█████▄▀ ▀▄▄▀▄▄█ ▄ ▀█ ▄▀ ▄█ ▀█ ██▄▄ ██ ▀▄ █ █▀▀ █▀█▀█▄████
+████   �� ▄▄▄ ▄▄█ ▄███▀ ▀██ ▄▄▄ ▄ ▄▀  █  ▄██▀ ▄▄▄ ▄ █▄████
+████▄ ▀  █▄█ ▄█ ██▄▀██▄ ██ █▄█ █▀▄ ▄ ▀█  ▄ █ █▄█  ▀██████
+████ █▄▄▄▄▄▄▄▀▀▀▀��▀▀ █▄ ▀▀▄▄ ▄ ▀█▄▀▀▄▄▀▄▄ ▄ ▄ ▄  ▀ ▄ ████
+█████ ▄ ▄█▄▀▄▄███▀▀▀██ ▄▄ ▄  ▀█▄▀█▀ ▄█ █▄ █▄▄ ▀▀█   ▄████
+████  ▀ ▀▄▄█▄▀▀▄ ▄▀█▄ ▀█▀ ██��   ▄▄██ ▀▀  ▄▀  █▄▀▄▀▄▀▄████
+██████▄ ▄█▄█▄▀█ ██ ▄▀ ▄█  █ ▀██  █  ▀ ▀▀ █▀ █▀ ▀ ▀▀█▄████
+████▀ ▀▄██▄██▀  ▄▄ ▄▀▄ █  ▀█▀▀  ██▀▀   ▄▄ █ █▀���██▄▀█ ████
+████  █▄▀ ▄ ██▀▀  █    █▀█▀█▄   ▄▀ █▄▀█ ▄▀▀▄█ ▀▀▀█▀█▄████
+█████ ▀▀█▄▄█▀▀▀▄▀▀███▀█▄▄  ▀▀██ █▀█▄█▀█ ▄▀▄ ▀▀▄▄▀ ▀▀▄████
+████▄▄▄███▄▄▀█ ▀█ ▄▄▀▄ █▀▄ ▄▄▄ █▀▄█▄▄ ▄▀ ▀▀  ▄▄▄    ▄████
+████ ▄▄▄▄▄ █▀▄ ▄ █▄  ▀██ ▄ █▄█ ▀  ▄██ ▄▀▄▄▄█ █▄█  ▄█ ██��█
+████ █   █ █ █ ▄▄▀█ ▄█   █ ▄ ▄ ▄▄▀▀▀▀ ▀  ▀ ▄   ▄▄▀█ ▀████
+████ █▄▄▄█ █▀▀ ▄  ▀▄▀▀█▄▀▄▀ █▄  ▄▄▀█▀ ▄▀█ ▀▄▀   ▄  ▀ ████
+████▄▄▄▄▄▄▄██████▄▄▄▄▄███▄██▄▄█▄▄▄▄█▄███▄▄▄▄▄██▄▄▄██▄████
+█████████████████████████████████████████████████████████
+▀▀▀▀▀▀▀▀���▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+
+Your device is enrolled to flightctl,
+you can manage your device scanning the above QR. or following this URL:
+https://servera.lab.example.com:443/manage/mpr39vjcj5fup095de4pqnld6h4snt2ud79g74p7spv5i00jjid0
+
+This is managed device edge-1
+Access by non-authorized personnel is strictly forbidden.
+enroll login:</code></pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>Configure the second managed device, so we can see the impact on that previous configuration, when the device joins the fleet.</p>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p>TBD</p>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>Provision a third managed device, and set its labels so it joins the fleet at enrollment.</p>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p>TBD</p>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>Create a second fleet, and move a device to it, so we can see how it affects configs originally from the previous fleet.</p>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p>Create a new working directory and copy the example files.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>mkdir temp-fleet</strong>
+$ <strong>cd temp-fleet</strong>
+$ <strong>cp -r ../rhde-rhem-samples/fleet/* .</strong></code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>TBD</p>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>Create a third fleet, which overlaps with the first or second fleet.</p>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p>TBD</p>
+</li>
+</ol>
+</div>
+</li>
 <li>
 <p>Task or outcome.</p>
 <div class="olist loweralpha">
