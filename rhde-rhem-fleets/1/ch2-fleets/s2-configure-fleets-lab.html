@@ -132,6 +132,14 @@
         </li>
       </ul>
     </li>
+    <li class="component">
+      <a class="title" href="../../../samples/1/index.html">samples</a>
+      <ul class="versions">
+        <li class="version is-latest">
+          <a href="../../../samples/1/index.html">1</a>
+        </li>
+      </ul>
+    </li>
   </ul>
 </div>
     </div>
@@ -484,7 +492,20 @@ It configures a post-login banner (a "message of the day").</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-console" data-lang="console">$ <strong>cat edge-2-motd.yaml</strong>
-include::rhde-rhem-samples:TBD</code></pre>
+apiVersion: flightctl.io/v1beta1
+kind: Device
+metadata:
+  labels:
+    alias: edge-2
+    rhel: "9.6"
+    type: noapps
+  name: REPLACE_WITH_UUID
+spec:
+  config:
+  - inline:
+    - content: Under new management!
+      path: /etc/motd
+    name: motd</code></pre>
 </div>
 </div>
 </li>
@@ -736,7 +757,7 @@ enroll login:</code></pre>
 </div>
 </li>
 <li>
-<p>Create a second fleet, and move a device to it, so we can see how it affects configs originally from the previous fleet.</p>
+<p>Create a second fleet, using the CLI, and move a device to it, so we can see how it affects configs originally from the previous fleet.</p>
 <div class="olist loweralpha">
 <ol class="loweralpha" type="a">
 <li>
@@ -751,7 +772,118 @@ Login successful.</code></pre>
 </div>
 </li>
 <li>
-<p>TBD</p>
+<p>Review the fleet manifest.
+It configures a custom prompt for shells in managed devices.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>cat warehouse.yaml</strong>
+apiVersion: flightctl.io/v1beta1
+kind: Fleet
+metadata:
+  name: warehouse
+spec:
+  selector:
+    matchLabels:
+      location: warehouse
+  template:
+    spec:
+      applications: []
+      config:
+      - inline:
+        - content: |-
+            export PS1="managed device: {{ .metadata.labels.alias }}\$ "
+
+          path: /etc/profile.d/managed-device.sh
+        name: ps1</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Create your second fleet using the manifest.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl apply -f warehouse.yaml</strong>
+warehouse.yaml: applying fleet/warehouse: 201 Created</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Edit the manifest for the <code>edge-2</code> device and change its <code>location</code> label to match the selector from the <code>warehouse</code> fleet.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>UUID=$( flightctl get device -l alias=edge-2 -o name)</strong>
+$ <strong>flightctl edit device $UUID</strong>
+apiVersion: flightctl.io/v1beta1
+kind: Device
+metadata:
+  ...
+  labels:
+    alias: edge-2
+    <strong>location: warehouse</strong>
+    rhel: "9.6"
+    type: noapps
+  name: g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g
+...
+device/g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g edited</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Wait until the device status changes to <code>Up-To-Date</code>.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl get device $UUID</strong>
+NAME                                                    ALIAS   OWNER           SYSTEM  UPDATED         APPLICATIONS
+g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g    edge-2  Fleet/warehouse Online  UpToDate        NoApplications</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Open a SSH connection to the device and verify that its prompt has changed.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>ssh -i ../temp-enroll/edge-key -p 8222 core@127.0.0.1</strong>
+Last login: Wed Mar 11 20:16:11 2026 from 172.25.250.254
+managed device: edge-2$ <strong>exit</strong>
+logout
+Connection to 127.0.0.1 closed.</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Attach to the virtual console of the device and verify that it does show a log in prompt, but does not show the pre-login banner from <code>store</code> fleet anymore.
+Remember to press <kbd>Enter</kbd> to get the login prompt, and to press <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>D</kbd></span> to display the banners.
+Then press kdb:[Ctrl+\]] to detach from the console.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>virsh console edge-2</strong>
+Connected to domain 'edge-2'
+Escape character is ^] (Ctrl + ])
+
+enroll login:
+Red Hat Enterprise Linux 9.6 (Plow)
+Kernel 5.14.0-570.76.1.el9_6.x86_64 on an x86_64
+...
+Your device is enrolled to flightctl,
+you can manage your device scanning the above QR. or following this URL:
+https://servera.lab.example.com:443/manage/g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g
+
+enroll login:</code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+The agetty service is still up, enabling console logins, because the Systemd unit was enabled and started, by the <code>store</code> fleet configuration, as an imperative configuration from a hook.
+The hook file itself was deleted by switching fleets, but the Systemd unit is still enabled and running.
+</td>
+</tr>
+</table>
+</div>
 </li>
 </ol>
 </div>
