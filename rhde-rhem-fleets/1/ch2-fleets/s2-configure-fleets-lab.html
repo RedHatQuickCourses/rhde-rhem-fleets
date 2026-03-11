@@ -278,8 +278,12 @@ Then, log in on Edge Manager as a non-administrator and verify that there are tw
 <div class="content">
 <pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl login -u student -p student https://servera.lab.example.com:3443</strong>
 Auto-selected organization: 00000000-0000-0000-0000-000000000000 Default
-Login successful.
-$ <strong>flightctl get device</strong>
+Login successful.</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl get device</strong>
 NAME                                                    ALIAS   OWNER   SYSTEM  UPDATED         APPLICATIONS
 g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g    edge-2  &lt;none&gt;  Online  OutOfDate       NoApplications
 1u63hvsgtua9tjjbmla9bgh5h2s77cb8esepphnf68m3ocf8qfng    edge-1  &lt;none&gt;  Online  OutOfDate       NoApplications</code></pre>
@@ -317,7 +321,7 @@ Domain 'edge-2' destroyed</code></pre>
 <p>Create a device fleet, using the web UI.
 The process is very similar to editting a device configuration, if you remember the activity from the first course.</p>
 <div class="paragraph">
-<p>You will configure your fleet with a device template that sets two configuration files, using the inline configuration provider: A pre-login banner, and a lifecycle hook to enable login using the serial console.</p>
+<p>You will create a fleet with a device template that sets two configuration files, using the inline configuration provider: A pre-login banner (an "issue" message), and a lifecycle hook that enables login using the serial console.</p>
 </div>
 <div class="olist loweralpha">
 <ol class="loweralpha" type="a">
@@ -449,7 +453,7 @@ enp1s0: 172.25.250.9 fe80::5054:ff:fec1:c7f
 
 Your device is enrolled to flightctl,
 you can manage your device scanning the above QR. or following this URL:
-https://servera.lab.example.com:443/manage/mpr39vjcj5fup095de4pqnld6h4snt2ud79g74p7spv5i00jjid0
+https://servera.lab.example.com:443/manage/1u63hvsgtua9tjjbmla9bgh5h2s77cb8esepphnf68m3ocf8qfng
 
 This is managed device edge-1
 Access by non-authorized personnel is strictly forbidden.
@@ -461,11 +465,161 @@ enroll login:</code></pre>
 </div>
 </li>
 <li>
-<p>Configure the second managed device, so we can see the impact on that previous configuration, when the device joins the fleet.</p>
+<p>Configure the second managed device, using the CLI, so you can later see the impact on its previous configuration, when that device joins a fleet.</p>
 <div class="olist loweralpha">
 <ol class="loweralpha" type="a">
 <li>
-<p>TBD</p>
+<p>Create a temporary working directory, and copy example files to it.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>mkdir temp-fleet</strong>
+$ <strong>cd temp-fleet</strong>
+$ <strong>cp -r ../rhde-rhem-samples/fleet/* .</strong></code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Review the device manifest.
+It configures a post-login banner (a "message of the day").</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>cat edge-2-motd.yaml</strong>
+include::rhde-rhem-samples:TBD</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Replace the device UUID on the device manifest with the actual UUID of your managed device.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>UUID=$( flightctl get device -l alias=edge-2 -o name )</strong>
+$ <strong>echo $UUID</strong>
+g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g
+$ <strong>sed -i "s|REPLACE_WITH_UUID|$UUID|" edge-2-motd.yaml</strong></code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Apply the device manifest to update the device configuration.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl apply -f edge-2-motd.yaml</strong>
+edge-2-motd.yaml: applying device/g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g: 200 OK</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Wait until the device status changes to <code>Up-to-Date</code>.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl get device $UUID</strong> -o wide
+NAME                                                    ALIAS   OWNER   SYSTEM  UPDATED         APPLICATIONS    LABELS
+g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g    edge-2  &lt;none&gt;  Online  UpToDate        NoApplications  type=noapps,alias=edge-2,rhel=9.6</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Open an SSH connection to the device, verify that it displays the post-login banner, and terminate the SSH connection.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>ssh -i ../temp-enroll/edge-key -p 8222 core@127.0.0.1</strong>
+Under new management!
+Last login: Wed Mar 11 19:50:57 2026 from 172.25.250.254
+[core@enroll ~]$ <strong>exit</strong>
+logout
+Connection to 127.0.0.1 closed.</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Attempt to access the virtual console of the device, and verify that you cannt get a log in prompt.
+Press <kbd>Enter</kbd> a few times and dettach from the VM using <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>]</kbd></span>.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>virsh console edge-2</strong>
+Connected to domain 'edge-2'
+Escape character is ^] (Ctrl + ])</code></pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>Join the device to the fleet, using the CLI, and verify its configuration changes.</p>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p>Edit the device manifest to add the label <code>location=store</code> to its metadata.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl edit device $UUID</strong>
+apiVersion: flightctl.io/v1beta1
+kind: Device
+metadata:
+  ...
+  labels:
+    alias: edge-2
+    rhel: "9.6"
+    type: noapps
+    <strong>location: store</strong>
+  name: g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g
+  ...
+spec:
+  config:
+  - inline:
+    - content: Under new management!
+...
+device/g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g edited</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Wait until the device status changes to <code>Up-to-Date</code>.
+Notice that the device now displays as belonging to a fleet: see column <code>OWNER</code>.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl get device $UUID -o wide</strong>
+NAME                                                    ALIAS   OWNER           SYSTEM  UPDATED         APPLICATIONS    LABELS
+g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g    edge-2  Fleet/store     Online  UpToDate        NoApplications  location=store,rhel=9.6,type=noapps,alias=edge-2</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Open an SSH connection to the device, verify that its post-login banner is gone, and terminate the SSH connection.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>ssh -i ../temp-enroll/edge-key -p 8222 core@127.0.0.1</strong>
+Last login: Wed Mar 11 20:06:24 2026
+[core@enroll ~]$ exit
+logout
+Connection to 127.0.0.1 closed.</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Access the virtual console of the device, and verify that the pre-login banner displays after the QR code.
+Press <kbd>Enter</kbd> a few times to get a log in prompt and press <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>D</kbd></span> to initialize a new log in process and see the banners.
+You do not need to log in, just dettach from the VM using <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>]</kbd></span>.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>virsh console edge-2</strong>
+Connected to domain 'edge-2'
+Escape character is ^] (Ctrl + ])
+enroll login:
+enroll login:
+Red Hat Enterprise Linux 9.6 (Plow)
+...
+
+Your device is enrolled to flightctl,
+you can manage your device scanning the above QR. or following this URL:
+https://servera.lab.example.com:443/manage/g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g
+
+This is managed device edge-2
+Access by non-authorized personnel is strictly forbidden.
+enroll login:</code></pre>
+</div>
+</div>
 </li>
 </ol>
 </div>
@@ -475,7 +629,108 @@ enroll login:</code></pre>
 <div class="olist loweralpha">
 <ol class="loweralpha" type="a">
 <li>
-<p>TBD</p>
+<p>By now, you have one fleet with two devices.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl get fleet</strong>
+NAME    OWNER   SELECTOR        VALID
+store   &lt;none&gt;  location=store  True
+$ <strong>flightctl get device -o wide</strong>
+NAME                                                    ALIAS   OWNER           SYSTEM  UPDATED         APPLICATIONS    LABELS
+g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g    edge-2  Fleet/store     Online  UpToDate        NoApplications  type=noapps,alias=edge-2,location=store,rhel=9.6
+1u63hvsgtua9tjjbmla9bgh5h2s77cb8esepphnf68m3ocf8qfng    edge-1  Fleet/store     Online  UpToDate        NoApplications  alias=edge-1,location=store,rhel=9.6,type=noapps</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>To list only devices from a given fleet, use a field selector.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl get device --field-selector metadata.owner=Fleet/store</strong>
+NAME                                                    ALIAS   OWNER           SYSTEM  UPDATED         APPLICATIONS
+g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g    edge-2  Fleet/store     Online  UpToDate        NoApplications
+1u63hvsgtua9tjjbmla9bgh5h2s77cb8esepphnf68m3ocf8qfng    edge-1  Fleet/store     Online  UpToDate        NoApplications</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Use the script in the <code>temp-enroll</code> directory, from the first lab, to provision a third test VM.
+Dettach from its console when VM creation is complete by pressing <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>]</kbd></span>.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>cd ../temp-enroll</strong>
+$ <strong>bash virt-install.sh 3</strong>
+Creating VM edge-3, use port 8322 for SSH.
+...
+Domain creation completed.
+Restarting guest.
+Running text console command: virsh --connect qemu:///session console edge-3
+Connected to domain 'edge-3'
+Escape character is ^] (Ctrl + ])</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Log in on Edge Manager as an administrator and approve the enrollment request, but setting the <code>location</code> label to match the fleet.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl get enrollmentrequest</strong>
+NAME                                                    APPROVAL        APPROVER        APPROVED LABELS
+g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g    Approved        admin           alias=edge-1,rhel=9.6,type=noapps
+mpr39vjcj5fup095de4pqnld6h4snt2ud79g74p7spv5i00jjid0    Pending         &lt;none
+1u63hvsgtua9tjjbmla9bgh5h2s77cb8esepphnf68m3ocf8qfng    Approved        admin           alias=edge-1,rhel=9.6,type=noapps</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl login -u admin -p redhat https://servera.lab.example.com:3443</strong>
+Auto-selected organization: 00000000-0000-0000-0000-000000000000 Default
+Login successful.
+$ <strong>flightctl approve enrollmentrequest -l alias=edge-3 -l location=store <em>mpr39vjcj5fup095de4pqnld6h4snt2ud79g74p7spv5i00jjid0</em></strong></code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Verify that the new device joined the fleet.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl get device --field-selector metadata.owner=Fleet/store</strong>
+NAME                                                    ALIAS   OWNER           SYSTEM  UPDATED         APPLICATIONS
+g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g    edge-2  Fleet/store     Online  UpToDate        NoApplications
+mpr39vjcj5fup095de4pqnld6h4snt2ud79g74p7spv5i00jjid0    edge-3  Fleet/store     Unknown OutOfDate       Unknown
+1u63hvsgtua9tjjbmla9bgh5h2s77cb8esepphnf68m3ocf8qfng    edge-1  Fleet/store     Online  UpToDate        NoApplications</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Wait until your third managed device is <code>UpToDate</code>.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>UUID=$( flightctl get device -l alias=edge-3 -o name )</strong>
+$ <strong>flightctl get device $UUID</strong>
+NAME                                                    ALIAS   OWNER           SYSTEM  UPDATED         APPLICATIONS
+mpr39vjcj5fup095de4pqnld6h4snt2ud79g74p7spv5i00jjid0    edge-3  Fleet/store     Online  UpToDate        NoApplications</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Verify that the new device displays a pre-login banner, proving it alredy contains the fleet&#8217;s configurations.
+Press <kbd>Enter</kbd> to get a log in prompt and press <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>D</kbd></span> to initialize a new log in process and see the banners.
+Then dettach from the VM using <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>]</kbd></span>.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>virsh console edge-3</strong>
+Connected to domain 'edge-3'
+Escape character is ^] (Ctrl + ])
+enroll login:
+enroll login:
+Red Hat Enterprise Linux 9.6 (Plow)
+...
+This is managed device edge-3
+Access by non-authorized personnel is strictly forbidden.
+enroll login:</code></pre>
+</div>
+</div>
 </li>
 </ol>
 </div>
@@ -485,12 +740,13 @@ enroll login:</code></pre>
 <div class="olist loweralpha">
 <ol class="loweralpha" type="a">
 <li>
-<p>Create a new working directory and copy the example files.</p>
+<p>Return to the working directory of this lab, and log in on Edge Manager as a non-administrator, to maintain a good security posture.</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>mkdir temp-fleet</strong>
-$ <strong>cd temp-fleet</strong>
-$ <strong>cp -r ../rhde-rhem-samples/fleet/* .</strong></code></pre>
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>cd ../temp-fleet</strong>
+$ <strong>flightctl login -u student -p student https://servera.lab.example.com:3443</strong>
+Auto-selected organization: 00000000-0000-0000-0000-000000000000 Default
+Login successful.</code></pre>
 </div>
 </div>
 </li>
@@ -502,6 +758,16 @@ $ <strong>cp -r ../rhde-rhem-samples/fleet/* .</strong></code></pre>
 </li>
 <li>
 <p>Create a third fleet, which overlaps with the first or second fleet.</p>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p>TBD</p>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>Remove a device from its fleet, so you can see the impact on the configurations it got from its fleet.</p>
 <div class="olist loweralpha">
 <ol class="loweralpha" type="a">
 <li>
