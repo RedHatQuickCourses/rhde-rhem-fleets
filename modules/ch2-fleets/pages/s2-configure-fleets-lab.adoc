@@ -232,7 +232,7 @@ It configures a post-login banner (a "message of the day").
 [source,console,subs="verbatim,quotes"]
 --
 $ *cat edge-2-motd.yaml*
-include::rhde-rhem-samples:TBD
+include::1@samples:fleet:example$edge-2-motd.yaml[]
 --
 
 .. Replace the device UUID on the device manifest with the actual UUID of your managed device.
@@ -453,7 +453,7 @@ Access by non-authorized personnel is strictly forbidden.
 enroll login:
 --
 
-7. Create a second fleet, and move a device to it, so we can see how it affects configs originally from the previous fleet.
+7. Create a second fleet, using the CLI, and move a device to it, so we can see how it affects configs originally from the previous fleet.
 
 .. Return to the working directory of this lab, and log in on Edge Manager as a non-administrator, to maintain a good security posture.
 +
@@ -465,7 +465,86 @@ Auto-selected organization: 00000000-0000-0000-0000-000000000000 Default
 Login successful.
 --
 
-.. TBD
+.. Review the fleet manifest.
+It configures a custom prompt for shells in managed devices.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *cat warehouse.yaml*
+include::1@samples:fleet:example$warehouse.yaml[]
+--
+
+.. Create your second fleet using the manifest.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *flightctl apply -f warehouse.yaml*
+warehouse.yaml: applying fleet/warehouse: 201 Created
+--
+
+.. Edit the manifest for the `edge-2` device and change its `location` label to match the selector from the `warehouse` fleet.
++
+[source,console,subs="verbatim,quotes,attributes"]
+--
+$ *UUID=$( flightctl get device -l alias=edge-2 -o name)*
+$ *flightctl edit device $UUID*
+apiVersion: flightctl.io/v1beta1
+kind: Device
+metadata:
+  ...
+  labels:
+    alias: edge-2
+    *location: warehouse*
+    rhel: "9.6"
+    type: noapps
+  name: {edge-2-uuid-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}
+...
+device/{edge-2-uuid-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb} edited
+--
+
+.. Wait until the device status changes to `Up-To-Date`.
++
+[source,console,subs="verbatim,quotes,attributes"]
+--
+$ *flightctl get device $UUID*
+NAME                                                    ALIAS   OWNER           SYSTEM  UPDATED         APPLICATIONS
+{edge-2-uuid-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}    edge-2  Fleet/warehouse Online  UpToDate        NoApplications
+--
+
+.. Open a SSH connection to the device and verify that its prompt has changed.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *ssh -i ../temp-enroll/edge-key -p 8222 core@127.0.0.1*
+Last login: Wed Mar 11 20:16:11 2026 from 172.25.250.254
+managed device: edge-2$ *exit*
+logout
+Connection to 127.0.0.1 closed.
+--
+
+.. Attach to the virtual console of the device and verify that it does show a log in prompt, but does not show the pre-login banner from `store` fleet anymore.
+Remember to press kbd:[Enter] to get the login prompt, and to press kbd:[Ctrl+D] to display the banners.
+Then press kdb:[Ctrl+\]] to detach from the console.
++
+[source,console,subs="verbatim,quotes,attributes"]
+--
+$ *virsh console edge-2*
+Connected to domain 'edge-2'
+Escape character is ^] (Ctrl + ])
+
+enroll login: 
+Red Hat Enterprise Linux 9.6 (Plow)
+Kernel 5.14.0-570.76.1.el9_6.x86_64 on an x86_64
+...
+Your device is enrolled to flightctl,
+you can manage your device scanning the above QR. or following this URL:
+https://servera.lab.example.com:443/manage/{edge-2-uuid-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}
+
+enroll login:
+--
++
+NOTE: The agetty service is still up, enabling console logins, because the Systemd unit was enabled and started, by the `store` fleet configuration, as an imperative configuration from a hook.
+The hook file itself was deleted by switching fleets, but the Systemd unit is still enabled and running.
 
 8. Create a third fleet, which overlaps with the first or second fleet.
 

@@ -5,7 +5,8 @@ site:
 content:
   sources:
   - url: ./
-
+  - url: https://github.com/RedHatQuickCourses/rhde-rhem-samples.git
+  
 asciidoc:
   attributes:
     page-pagination: true
