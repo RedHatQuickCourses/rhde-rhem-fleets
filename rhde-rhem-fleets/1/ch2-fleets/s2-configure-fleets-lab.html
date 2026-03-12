@@ -172,7 +172,7 @@
 <dl>
 <dt class="hdlist1">Objective</dt>
 <dd>
-<p>Configure multiple device fleets and assign devices to them using fleet-level configurations.</p>
+<p>Configure multiple device fleets and assign devices to them using labels and selectors.</p>
 </dd>
 </dl>
 </div>
@@ -194,7 +194,19 @@ Work In Progress
 <h2 id="_before_you_begin"><a class="anchor" href="#_before_you_begin"></a>Before you begin</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Describe requirements, such as customer portal accounts, Red Hat Developer free sub, already configured machines, access to container registries, etc.</p>
+<p>You need a <em>development machine</em> running RHEL, with enough capacity to run a few local VMs and a custom installer ISO used to provision new local VMs.</p>
+</div>
+<div class="paragraph">
+<p>You also need a <em>server machine</em> running RHEL, which is already configured as an Edge Manager server.</p>
+</div>
+<div class="paragraph">
+<p>Both your <em>development machine</em> and <em>server machine</em> were configured by performing the <a href="../ch1-scale/s3-environment-lab.html" class="xref page">first lab</a>.</p>
+</div>
+<div class="paragraph">
+<p>If you are using the course classroom, your <em>development machine</em> is the <code>workstation</code> VM.
+Log in as the user <code>student</code> with password <code>student</code>.
+From that machine, you may start SSH sessions to the <code>servera</code> VM, which is your <em>server</em> machine, using the same user.
+Alternatively, you can open a shell or a console directly on the <code>servera</code> VM.</p>
 </div>
 </div>
 </div>
@@ -202,7 +214,9 @@ Work In Progress
 <h2 id="_instructions"><a class="anchor" href="#_instructions"></a>Instructions</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>High-level summary of what you will perform in this lab, but more detailed than the objective.</p>
+<p>You will create fleets, using both the Edge Manager web UI and its CLI, and put devices on those fleets.
+You will also switch devices between different fleets, and observe how those changes affect managed device configurations.
+For simplicity, you will use only inline configurations.</p>
 </div>
 <div class="admonitionblock important">
 <table>
@@ -233,8 +247,8 @@ Only your <em>development machine</em> needs SELinux set to permissive mode.</p>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
-<p>Verify that you have the prerequisites from the <a href="../ch1-scale/s3-environment-lab.html" class="xref page">previous lab</a>.
-If any of the prerequisites are missing, please return to the previous lab and ensure that you did not skip any step.</p>
+<p>Verify that you have the prerequisites from the <a href="../ch1-scale/s3-environment-lab.html" class="xref page">first lab</a>.
+If any of the prerequisites are missing, please return to the first lab and ensure that you did not skip any step.</p>
 <div class="olist loweralpha">
 <ol class="loweralpha" type="a">
 <li>
@@ -464,7 +478,7 @@ enp1s0: 172.25.250.9 fe80::5054:ff:fec1:c7f
 
 Your device is enrolled to flightctl,
 you can manage your device scanning the above QR. or following this URL:
-<a href="https://servera.lab.example.com:443/manage/1u63hvsgtua9tjjbmla9bgh5h2s77cb8esepphnf68m3ocf8qfng" class="bare">https://servera.lab.example.com:443/manage/1u63hvsgtua9tjjbmla9bgh5h2s77cb8esepphnf68m3ocf8qfng</a>
+https://servera.lab.example.com:443/manage/1u63hvsgtua9tjjbmla9bgh5h2s77cb8esepphnf68m3ocf8qfng
 
 This is managed device edge-1
 Access by non-authorized personnel is strictly forbidden.
@@ -507,7 +521,9 @@ metadata:
 spec:
   config:
   - inline:
-    - content: Under new management!
+    - content: |-
+        Under new management!
+
       path: /etc/motd
     name: motd</code></pre>
 </div>
@@ -641,7 +657,7 @@ Red Hat Enterprise Linux 9.6 (Plow)
 
 Your device is enrolled to flightctl,
 you can manage your device scanning the above QR. or following this URL:
-<a href="https://servera.lab.example.com:443/manage/g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g" class="bare">https://servera.lab.example.com:443/manage/g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g</a>
+https://servera.lab.example.com:443/manage/g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g
 
 This is managed device edge-2
 Access by non-authorized personnel is strictly forbidden.
@@ -877,7 +893,7 @@ Kernel 5.14.0-570.76.1.el9_6.x86_64 on an x86_64
 ...
 Your device is enrolled to flightctl,
 you can manage your device scanning the above QR. or following this URL:
-<a href="https://servera.lab.example.com:443/manage/g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g" class="bare">https://servera.lab.example.com:443/manage/g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g</a>
+https://servera.lab.example.com:443/manage/g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g
 
 enroll login:
 <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>]</kbd></span></code></pre>
@@ -890,8 +906,13 @@ enroll login:
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-The agetty service is still up, enabling console logins, because the Systemd unit was enabled and started, by the <code>store</code> fleet configuration, as an imperative configuration from a hook.
-The hook file itself was deleted by switching fleets, but the Systemd unit is still enabled and running.
+<div class="paragraph">
+<p>The <code>serial-getty</code> service is still up, enabling console logins, because its Systemd unit was enabled and started, by the <code>store</code> fleet configuration, from a hook.
+The hook file itself was deleted by switching fleets, but the Systemd unit is still enabled and running and will keep that way after reboot.</p>
+</div>
+<div class="paragraph">
+<p>This example illustrates how using imperative configurations may require extra care when updating configurations using Edge Manager.</p>
+</div>
 </td>
 </tr>
 </table>
@@ -905,7 +926,178 @@ The hook file itself was deleted by switching fleets, but the Systemd unit is st
 <div class="olist loweralpha">
 <ol class="loweralpha" type="a">
 <li>
-<p>TBD</p>
+<p>Review the fleet manifest.
+Notice that its selector is the same as the <code>store</code> fleet.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>cat kiosk.yaml</strong>
+apiVersion: flightctl.io/v1beta1
+kind: Fleet
+metadata:
+  name: kiosk
+spec:
+  selector:
+    matchLabels:
+      location: store
+  template:
+    spec:
+      applications: []
+      config:
+      - inline:
+        - content: |-
+            kiosk terminal {{ .metadata.labels.alias }}
+
+          path: /etc/motd
+        name: motd</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Create the fleet.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl apply -f kiosk.yaml</strong>
+kiosk.yaml: applying fleet/kiosk: 201 Created</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>The status of the fleets provide <strong>no hint</strong> that there is a conflict, despite the duplicate selectors.
+The status of the devices provide no hint either.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl get fleet</strong>
+NAME            OWNER   SELECTOR                VALID
+kiosk           &lt;none&gt;  location=store          True
+store           &lt;none&gt;  location=store          True
+warehouse       &lt;none&gt;  location=warehouse      True
+$ <strong>flightctl get device</strong>
+NAME                                                    ALIAS   OWNER           SYSTEM  UPDATED         APPLICATIONS
+g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g    edge-2  Fleet/warehouse Online  UpToDate        NoApplications
+mpr39vjcj5fup095de4pqnld6h4snt2ud79g74p7spv5i00jjid0    edge-3  Fleet/store     Online  UpToDate        NoApplications
+1u63hvsgtua9tjjbmla9bgh5h2s77cb8esepphnf68m3ocf8qfng    edge-1  Fleet/store     Online  UpToDate        NoApplications</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>The conflict is only noted in the conditions of the affected devices.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>UUID=$( flightctl get device -l alias=edge-1 )</strong>
+$ <strong>flightctl get device $UUID -o yaml</strong>
+apiVersion: flightctl.io/v1beta1
+kind: Device
+...
+  labels:
+    alias: edge-1
+    location: store
+    rhel: "9.6"
+    type: noapps
+  name: 1u63hvsgtua9tjjbmla9bgh5h2s77cb8esepphnf68m3ocf8qfng
+  owner: Fleet/store
+...
+  - lastTransitionTime: "2026-03-12T16:20:25.862755686Z"
+    message: kiosk,store
+    reason: MultipleOwners
+    status: "True"
+    type: MultipleOwners
+...</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>The following script uses the <code>jq</code> command to filter only devices with the <code>MultipleOwners</code> condition, if any.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>cat get-devices-multipleowners.sh</strong>
+#!/bin/bash
+
+flightctl get devices -o json | jq -r '.items[]
+  | select(.status.conditions[]? | .type == "MultipleOwners" and .status == "True")
+  | "Device: \(.metadata.name)\nLabels: \(.metadata.labels // "None")\n---"'
+$ <strong>bash get-devices-multipleowners.sh</strong>
+Device: kml2gjca0l19lq7v1hqj9od3emin53u58skj76me4ue1772n0s40
+Labels: {"alias":"edge-3","location":"store"}
+---
+Device: mpr39vjcj5fup095de4pqnld6h4snt2ud79g74p7spv5i00jjid0
+Labels: {"alias":"edge-1","location":"store","rhel":"9.6","type":"noapps"}
+---</code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+The web UI displays a warning icon on all devices having this and other conditions, making it easier to spot issues with devices.
+Unfortunately, the web UI does not display a warning on the fleets themselves.
+</td>
+</tr>
+</table>
+</div>
+</li>
+<li>
+<p>There is also a script that just count the number of devices with the condition.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>cat count-devices-multipleowners.sh</strong>
+#!/bin/bash
+
+flightctl get devices -o json | jq '[.items[]
+  | .status.conditions[]?
+  | select(.type == "MultipleOwners" and .status == "True")]
+  | length'
+$ <strong>bash count-devices-multipleowners.sh</strong>
+2</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Fix the fleet manifest by chaging its selector.
+Open the <code>kiosk.yaml</code> file with a text editor and make the following changes:</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>apiVersion: flightctl.io/v1beta1
+kind: Fleet
+metadata:
+  name: kiosk
+spec:
+  selector:
+    matchLabels:
+      <strong>location: parking lot</strong>
+  template:
+...</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Update the fleet.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl apply -f kiosk.yaml</strong>
+kiosk.yaml: applying fleet/kiosk: 200 OK</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Verify that now all your fleets have different selectors, and that no device has the <code>Multiple Owners</code> condition.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl get fleet</strong>
+NAME            OWNER   SELECTOR                VALID
+kiosk           &lt;none&gt;  location=parking lot    True
+store           &lt;none&gt;  location=store          True
+warehouse       &lt;none&gt;  location=warehouse      True</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>bash count-devices-multipleowners.sh</strong>
+0</code></pre>
+</div>
+</div>
 </li>
 </ol>
 </div>
@@ -915,42 +1107,75 @@ The hook file itself was deleted by switching fleets, but the Systemd unit is st
 <div class="olist loweralpha">
 <ol class="loweralpha" type="a">
 <li>
-<p>TBD</p>
-</li>
-</ol>
-</div>
-</li>
-<li>
-<p>Task or outcome.</p>
-<div class="olist loweralpha">
-<ol class="loweralpha" type="a">
-<li>
-<p>Something to do, using a graphical or web UI.
-Click <b class="menuref">Save As</b> to save your work.</p>
-</li>
-<li>
-<p>More things to do</p>
-</li>
-</ol>
-</div>
-</li>
-<li>
-<p>Task or outcome.</p>
-<div class="olist loweralpha">
-<ol class="loweralpha" type="a">
-<li>
-<p>Something to do, using a shell.</p>
+<p>Edit the manifest for device <code>edge-1</code> to remove its <code>location</code> label.</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>command --options fixed-arguments <em>variable-arguments</em></strong>
-output of the command
-highlight <strong>something</strong> in the output</code></pre>
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>UUID=$( flightctl get device -l alias=edge-1 -o name )</strong>
+$ <strong>flightctl edit device $UUID</strong>
+apiVersion: flightctl.io/v1beta1
+kind: Device
+metadata:
+  ...
+  labels:
+    alias: edge-1
+    rhel: "9.6"
+    type: noapps
+  name: 1u63hvsgtua9tjjbmla9bgh5h2s77cb8esepphnf68m3ocf8qfng
+  owner: Fleet/store
+...
+device/1u63hvsgtua9tjjbmla9bgh5h2s77cb8esepphnf68m3ocf8qfng edited</code></pre>
 </div>
 </div>
 </li>
 <li>
-<p>More things to do.
-Press <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>C</kbd></span> to interrupt.</p>
+<p>Verify that the device does belong to any fleet, and wait until it is <code>Up-to-Date</code>.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl get device $UUID -o wide</strong>
+NAME                                                    ALIAS   OWNER   SYSTEM  UPDATED         APPLICATIONS    LABELS
+1u63hvsgtua9tjjbmla9bgh5h2s77cb8esepphnf68m3ocf8qfng    edge-1  &lt;none&gt;  Online  UpToDate        NoApplications  type=noapps,alias=edge-1,rhel=9.6</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Verify that the device still contains the pre-login banner set by its old fleet.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>ssh -i ../temp-enroll/edge-key -p 8122 core@127.0.0.1 -- cat /etc/issue.d/warning.issue</strong>
+This is managed device edge-1
+Access by non-authorized personnel is strictly forbidden.</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Verify that the device manifest contains a copy of its old fleet configuration.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl get device $UUID -o yaml</strong>
+apiVersion: flightctl.io/v1beta1
+kind: Device
+...
+  labels:
+    alias: edge-1
+    rhel: "9.6"
+    type: noapps
+  name: 1u63hvsgtua9tjjbmla9bgh5h2s77cb8esepphnf68m3ocf8qfng
+  resourceVersion: "212"
+spec:
+  applications: []
+  config:
+  - inline:
+    - content: |
+        This is managed device edge-1
+        Access by non-authorized personnel is strictly forbidden.
+      path: /etc/issue.d/warning.issue
+    - content: '- run: systemctl enable serial-getty@ttyS0.service --now'
+      path: /etc/flightctl/hooks.d/afterupdating/enable-serial-console.yaml
+    name: store
+status:
+...</code></pre>
+</div>
+</div>
 </li>
 </ol>
 </div>
@@ -958,7 +1183,9 @@ Press <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>C</kbd></span> to interrupt.</p>
 </ol>
 </div>
 <div class="paragraph">
-<p>Summary of what you acomplished.</p>
+<p>You demonstrated that Edge keeps track of the configurations it puts on managed devices, as they join and switch fleets.
+You also demonstrated that, when a device switches to no fleet, it keeps its last configuration.
+Devices also keep their last applied configuation in case there&#8217;s a conflict and they end up belonging to multiple fleets.</p>
 </div>
 </div>
 </div>
