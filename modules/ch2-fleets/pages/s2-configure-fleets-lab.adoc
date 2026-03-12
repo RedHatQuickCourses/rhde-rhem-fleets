@@ -139,11 +139,13 @@ You should get a details page for a fleet in the `Valid` state and with no devic
 It does not display a log in prompt, no matter which keys you press.
 Your only alternative is dettaching from the VM console using kbd:[Ctrl+\]].
 +
-[source,console,subs="verbatim,quotes"]
+[source,console,subs="verbatim,quotes,macros"]
 --
 $ *virsh console edge-1*
 Connected to domain 'edge-1'
 Escape character is ^] (Ctrl + ])
+kbd:[Enter]
+kbd:[Ctrl+\]]
 --
 
 .. Back to your web browser, click menu:Devices[] on the left pane.
@@ -166,11 +168,12 @@ You should see the standard banner from Edge Manager, which displays a QR code u
 You do not need to log in.
 You can press kbd:[Ctrl+\]] to dettach from the virtual console, after confirming the warning banner is displayed by the device.
 +
-[source,console,subs="verbatim,quotes,attributes"]
+[source,console,subs="verbatim,quotes,attributes,macros"]
 --
 $ *virsh console edge-1*
+kbd:[Enter]
 enroll login: 
-enroll login: 
+kbd:[Ctrl+D]kbd:[Enter]
 Red Hat Enterprise Linux 9.6 (Plow)
 Kernel 5.14.0-570.76.1.el9_6.x86_64 on an x86_64 (ttyS0)
 
@@ -213,6 +216,7 @@ https://servera.lab.example.com:443/manage/{edge-1-uuid-aaaaaaaaaaaaaaaaaaaaaaaa
 This is managed device edge-1
 Access by non-authorized personnel is strictly forbidden.
 enroll login:
+kbd:[Ctrl+\]]
 --
 
 4. Configure the second managed device, using the CLI, so you can later see the impact on its previous configuration, when that device joins a fleet.
@@ -277,11 +281,13 @@ Connection to 127.0.0.1 closed.
 .. Attempt to access the virtual console of the device, and verify that you cannt get a log in prompt.
 Press kbd:[Enter] a few times and dettach from the VM using kbd:[Ctrl+\]].
 +
-[source,console,subs="verbatim,quotes"]
+[source,console,subs="verbatim,quotes,macros"]
 --
 $ *virsh console edge-2*
 Connected to domain 'edge-2'
 Escape character is ^] (Ctrl + ])
+kbd:[Enter]
+kbd:[Ctrl+\]]
 --
 
 5. Join the device to the fleet, using the CLI, and verify its configuration changes.
@@ -335,13 +341,14 @@ Connection to 127.0.0.1 closed.
 Press kbd:[Enter] a few times to get a log in prompt and press kbd:[Ctrl+D] to initialize a new log in process and see the banners.
 You do not need to log in, just dettach from the VM using kbd:[Ctrl+\]].
 +
-[source,console,subs="verbatim,quotes,attributes"]
+[source,console,subs="verbatim,quotes,attributes,macros"]
 --
 $ *virsh console edge-2*
 Connected to domain 'edge-2'
 Escape character is ^] (Ctrl + ])
+kbd:[Enter]
 enroll login: 
-enroll login: 
+kbd:[Ctrl+D]kbd:[Enter]
 Red Hat Enterprise Linux 9.6 (Plow)
 ...
 
@@ -352,6 +359,7 @@ https://servera.lab.example.com:443/manage/{edge-2-uuid-bbbbbbbbbbbbbbbbbbbbbbbb
 This is managed device edge-2
 Access by non-authorized personnel is strictly forbidden.
 enroll login:
+kbd:[Ctrl+\]]
 --
 
 6. Provision a third managed device, and set its labels so it joins the fleet at enrollment.
@@ -439,18 +447,20 @@ NAME                                                    ALIAS   OWNER           
 Press kbd:[Enter] to get a log in prompt and press kbd:[Ctrl+D] to initialize a new log in process and see the banners.
 Then dettach from the VM using kbd:[Ctrl+\]].
 +
-[source,console,subs="verbatim,quotes"]
+[source,console,subs="verbatim,quotes,macros"]
 --
 $ *virsh console edge-3*
 Connected to domain 'edge-3'
 Escape character is ^] (Ctrl + ])
+kbd:[Enter]
 enroll login: 
-enroll login: 
+kbd:[Ctrl+D]kbd:[Enter]
 Red Hat Enterprise Linux 9.6 (Plow)
 ...
 This is managed device edge-3
 Access by non-authorized personnel is strictly forbidden.
 enroll login:
+kbd:[Ctrl+\]]
 --
 
 7. Create a second fleet, using the CLI, and move a device to it, so we can see how it affects configs originally from the previous fleet.
@@ -524,15 +534,16 @@ Connection to 127.0.0.1 closed.
 
 .. Attach to the virtual console of the device and verify that it does show a log in prompt, but does not show the pre-login banner from `store` fleet anymore.
 Remember to press kbd:[Enter] to get the login prompt, and to press kbd:[Ctrl+D] to display the banners.
-Then press kdb:[Ctrl+\]] to detach from the console.
+Then press kbd:[Ctrl+\]] to detach from the console.
 +
-[source,console,subs="verbatim,quotes,attributes"]
+[source,console,subs="verbatim,quotes,attributes,macros"]
 --
 $ *virsh console edge-2*
 Connected to domain 'edge-2'
 Escape character is ^] (Ctrl + ])
-
+kbd:[Enter]
 enroll login: 
+kbd:[Ctrl+D]kbd:[Enter]
 Red Hat Enterprise Linux 9.6 (Plow)
 Kernel 5.14.0-570.76.1.el9_6.x86_64 on an x86_64
 ...
@@ -541,6 +552,7 @@ you can manage your device scanning the above QR. or following this URL:
 https://servera.lab.example.com:443/manage/{edge-2-uuid-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}
 
 enroll login:
+kbd:[Ctrl+\]]
 --
 +
 NOTE: The agetty service is still up, enabling console logins, because the Systemd unit was enabled and started, by the `store` fleet configuration, as an imperative configuration from a hook.
