@@ -8,7 +8,7 @@ Objective::
 
 Configure multiple devies, which belong to fleets, from files stored in a git repository.
 
-WARNING: Work In Progress
+WARNING: Pending Review
 
 == Before you begin
 
@@ -26,11 +26,11 @@ Alternatively, you can open a shell or a console directly on the `servera` VM.
 NOTE: This lab does not require the outcomes of the xref:ch2-fleets:s2-configure-fleets-lab.adoc[previous lab].
 You could perform just the first lab and skip to here.
 The example outputs of commands assume that you are performing all labs sequentially, in the same environment.
-If you skipped a lab, your output may display different sets of VMs, devices, and fleets, but it shouldn't affect the intended outcomes of this lab.
+If you skipped the previous lab, your outputs may display different sets of VMs, devices, and fleets, but it shouldn't affect the expected outcomes of this lab.
 
 == Instructions
 
-High-level summary of what you will perform in this lab, but more detailed than the objective.
+You will create a fleet using the Git configuation provider, and then you will update files in a git repository and pull those updates to the fleet configuration.
 
 include::ch1-scale:partial$set-permissive.adoc[]
 
@@ -46,7 +46,7 @@ $ *ls rhde-rhem-samples*
 antora.yml  config  enroll ...
 --
 
-.. Verify that you have two local VMs.
+.. Verify that you have at least two local VMs.
 +
 [source,console,subs="verbatim,quotes"]
 --
@@ -58,7 +58,7 @@ $ *virsh list --all*
  3    edge-3   running
 --
 
-.. If your VMs are not running, start them, but ensuring they are booting as a device that has been powered on, without reusing any saved state.
+.. If your VMs are not running, start them, but ensuring they are booting from power on instead of resumed from saved state.
 +
 [source,console,subs="verbatim,quotes"]
 --
@@ -179,40 +179,68 @@ Wait until the status change to `Up-to-Date`.
 --
 $ *cat /etc/motd*
 This is a point-of-sale terminal.
-Its configurations ate set by Red Hat Edge Manager.
+Its configurations are set by Red Hat Edge Manager.
 --
 
+6. Fork the samples repository, so you can experiment with configuration updates.
 
+.. Open a new browser tab and visit http://github.com. 
+Log in with your GitHub account.
+If you do not have one, create one.
++
+NOTE: Keep two brower tabs open, one on the Edge Manager web UI, another on GitHub.
 
-1. Task or outcome.
+.. Once logged in on GitHub, visit https://github.com/RedHatQuickCourses/rhde-rhem-samples.git and click menu:Fork[] on the top bar to create a fork opf the samples repository on your personal GitHub account.
 
-.. Something to do, using a graphical or web UI.
-Click menu:Save As[] to save your work.
+.. On your personal fork of the samples repository, click menu:Code[] and then click on the copy icon, to copy the URL of your fork to the clipboard.
 
-.. More things to do
+.. Switch to the Edge Manager web UI and click menu:Repositories[].
+Click on the actions menu icon (three vertical dots) for the `pos` repository and then click menu:Edit repository[].
 
-2. Task or outcome.
+.. Paste the URL of your personal fork as the *Repository URL* and click menu:Save[].
 
-.. Something to do, using a shell.
+.. Switch to GitHub, and navigate to the `/pos/etc/motd` file.
+Click the pen icon to edit the file.
+
+.. Change the first line of text to `This is the *enhanced* point-of-sale terminal.` and click menu:Commit changes[].
+Accept the default commit message and other defaults, and click again on menu:Commit changes[].
++
+// Should commit to a branch?
+
+.. Click on the short commit ID, which displays near the *History* icon, to the right of the commit message, above the file contents.
+GitHub shows a diff view of the changes from your commit.
+Click on the copy icon, to the top right, next to the commit ID, to copy the full commit ID to the clipboard.
+
+7. Update the fleet definition to refer to your commit.
+
+.. Switch to the Edge Manager web UI, and click menu:Fleet[] to enter the fleets page, and click the actions menu of the `pos` fleet.
+Select menu:Edit fleet configurations[] and click menu:Next[] to enter the *Device template* page.
+
+.. Scroll down to *Branch/tag/commit* and paste the full commit ID.
+Click menu:Next[] until you reach the *Review and save* page and click menu:Save[].
+
+.. Click on menu:Devices[] to enter the devices page and wait until the `edge-1` managed device is `Up-to-Date`.
+Then click `edge-1` to enter its device details page.
+
+.. Click the menu:Terminal[] tab and verify that the `/etc/motd` file has been changed.
 +
 [source,console,subs="verbatim,quotes"]
 --
-$ *command --options fixed-arguments _variable-arguments_*
-output of the command
-highlight *something* in the output
+$ *cat /etc/motd*
+This the *enhanced* point-of-sale terminal.
+Its configurations are set by Red Hat Edge Manager.
 --
 
+You demonstrated that Edge Manager can fetch configuration files from a git repository, but it requires that you update the fleet definition, by changing the commit ID, to fetch updates from the repository. 
 
-.. More things to do.
-Press kbd:[Ctrl+C] to interrupt.
-
-
-Summary of what you acomplished.
+// Suppose resource syncs would auto-update from a branch or tag, but couldn't find info on them.
 
 == What's next
 
-Now that you have organized your devices into fleets, the next chapter explores how to monitor device and fleet status, troubleshoot issues, and extract meaningful data from Red Hat Edge Manager.
+Now that you have organized your devices into fleets which pull configuration files from a git repository, the next chapter explores how to monitor device and fleet status, troubleshoot issues, and extract meaningful data from Red Hat Edge Manager.
 
 ////
+UPDATE: tasks related to git split from the previous lab.
+
 Configure fleets and assign devices to fleets. Need at least two fleets and a number of devices on each fleet. Have preseeded fleet configurations in a git repository, so learners can just refer to them. Show that, once a device belongs to a fleet, no configuration cannot be set at the device level. All configurations must come from the fleet. The changes, at an individual device level, from joining a fleet are essentially the same as if a device were updated or repurposed.
 ////
