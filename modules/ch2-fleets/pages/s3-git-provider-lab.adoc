@@ -1,0 +1,218 @@
+:time_estimate: 5
+
+= Lab: Configure Devices Using Git Repositories
+
+_Estimated reading time: *{time_estimate} minutes*._
+
+Objective::
+
+Configure multiple devies, which belong to fleets, from files stored in a git repository.
+
+WARNING: Work In Progress
+
+== Before you begin
+
+You need a _development machine_ running RHEL, with enough capacity to run a few local VMs and a custom installer ISO used to provision new local VMs.
+
+You also need a _server machine_ running RHEL, which is already configured as an Edge Manager server.
+
+Both your _development machine_ and _server machine_ were configured by performing the xref:ch1-scale:s3-environment-lab.adoc[first lab].
+
+If you are using the course classroom, your _development machine_ is the `workstation` VM.
+Log in as the user `student` with password `student`.
+From that machine, you may start SSH sessions to the `servera` VM, which is your _server_ machine, using the same user.
+Alternatively, you can open a shell or a console directly on the `servera` VM.
+
+NOTE: This lab does not require the outcomes of the xref:ch2-fleets:s2-configure-fleets-lab.adoc[previous lab].
+You could perform just the first lab and skip to here.
+The example outputs of commands assume that you are performing all labs sequentially, in the same environment.
+If you skipped a lab, your output may display different sets of VMs, devices, and fleets, but it shouldn't affect the intended outcomes of this lab.
+
+== Instructions
+
+High-level summary of what you will perform in this lab, but more detailed than the objective.
+
+include::ch1-scale:partial$set-permissive.adoc[]
+
+1. Verify that you have the prerequisites from the xref:ch1-scale:s3-environment-lab.adoc[first lab].
+If any of the prerequisites are missing, please return to the first lab and ensure that you did not skip any step.
+
+.. Verify that you have a clone of the course samples repository.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *cd*
+$ *ls rhde-rhem-samples*
+antora.yml  config  enroll ...
+--
+
+.. Verify that you have two local VMs.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *virsh list --all*
+ Id   Name     State
+------------------------
+ 1    edge-1   running
+ 2    edge-2   running
+ 3    edge-3   running
+--
+
+.. If your VMs are not running, start them, but ensuring they are booting as a device that has been powered on, without reusing any saved state.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *virsh list --all*
+ Id   Name     State
+-------------------------
+ -    edge-1   shut off
+ -    edge-2   shut off
+ -    edge-3   shut off
+--
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *virsh start edge-1 --force-boot*
+Domain 'edge-1' started
+# repeat for the remaining VMs
+--
+
+.. Give your local VMs a few moments to finish boot.
+Then, log in on Edge Manager as a non-administrator and verify that there are two managed devices, which are on-line and up-to-date.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *flightctl login -u student -p student https://servera.lab.example.com:3443*
+Auto-selected organization: 00000000-0000-0000-0000-000000000000 Default
+Login successful.
+--
++
+[source,console,subs="verbatim,quotes,attributes"]
+--
+$ *flightctl get device*
+NAME                                                    ALIAS   OWNER            SYSTEM  UPDATED         APPLICATIONS
+{edge-3-uuid-cccccccccccccccccccccccccccccccccccccc}    edge-3  Fleet/warehouse  Online  UpToDate        NoApplications
+{edge-2-uuid-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}    edge-2  Fleet/store      Online  UpToDate        NoApplications
+{edge-1-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}    edge-1  <none>           Online  UpToDate        NoApplications
+--
+
+.. If you devices keep displaying as off-line for too long, it might be related to clock skew.
+In that case, stop each of your local VMs and return to the beginning of this lab.
++
+NOTE: Clock skew prevents a device from synchronizing with Edge Manager, and is known to happen if your ROLE classroom is stopped without first shutting down local VMs on your _develoment machine_ and later your VMs are restarted from saved state.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *virsh destroy edge-1*
+Domain 'edge-1' destroyed
+# repeat for the remaining VMs
+--
+
+2. Configure a repository source, using the web UI.
+
+.. On your _development machine_, start a web browser and open `\https://servera.lab.example.com`.
+Log in on Edge Manager as `student` using the `student` password.
+On the left pane, click menu:Repositories[].
+It should display a page which states "No repositories yet".
+
+.. Click menu:Create repository[].
+Name your repository as `samples` and, for the *Repository URL*, type `\https://github.com/RedHatQuickCourses/rhde-rhem-samples.git` which is the URL of the samples repository of this course.
+
+.. Unckeck menu:Use resource syncs[] and click menu:Create repository[].
++
+////
+checked and type `pos` as the name of the resource sync.
+Type `main` as the *Target revision* and `/pos` as the *Path*.
+Scroll down 
+////
+
+.. The repository details page shows the repository with a status of `Sync pending`.
+After a few monents the status of the repository should change to `Accessible`.
++
+If you experience any errors, click the status icons for a descriptive message of the error and make any required fix.
++
+////
+and its only resource sync 
+and the status of the resource sync should change to `Synced`
+////
+
+3. Explore the contents of the samples repository.
+
+.. Still on the repository details page, click on the value of the *Url*, that is, click on `\https://github.com/RedHatQuickCourses/rhde-rhem-samples.git`. 
+It opens a new browser tab on GitHub.
+
+.. Click `pos/etc` and see it contains a single file named `motd`.
+Open the file and view its contents.
+Then return to the browser tab with the Edge Manager web UI.
+
+4. Create a fleet which refers to the repository source.
+
+.. On the left pane, click menu:Fleets[] and then click menu:Create fleet[].
+Name your new fleet as `pos` and, under *Device selector*, click on menu:Add label[].
+Type `role=pos` as the device selector, and press kbd:[Tab] to leave the text box. 
+Ignore the warning that "There are no devices matching these labels" and click menu:Next[].
+
+.. Under *Host configuration (files)*, click menu:Add configuration[] and type `store` on the *Source name* field. 
+Select `Git configuration` as the *Source type* field and select `samples` as the *Repository*.
+
+.. Type `main` as the *Branch/tag/commit* field, and `/pos` as the *Path*.
++
+// Why typing the same data which was already provided for the resource sync?
++
+// Maybe use with a fork, so students can make their own commits and pushes?
+
+.. Click menu:Next[] until you reach the end of the *Create fleet* assistant and click menu:Create fleet[].
+You should get a details page for a fleet in the `Valid` state and with no devices.
+
+5. Add a device to your new fleet.
+
+.. On the left pane, click menu:Devices[] and click on `edge-1`, which should be a member of no fleet.
+
+.. On the device details page, click menu:Add label[] and type `role=pos`, then press kbd:[Tab].
+
+.. Verify that the details page now display the *Fleet name* as `pos` and scroll down to see the *Update status* heading.
+Wait until the status change to `Up-to-Date`.
+
+.. Click the menu:Terminal[] tab and verify that the `/etc/motd` file has been changed.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *cat /etc/motd*
+This is a point-of-sale terminal.
+Its configurations ate set by Red Hat Edge Manager.
+--
+
+
+
+1. Task or outcome.
+
+.. Something to do, using a graphical or web UI.
+Click menu:Save As[] to save your work.
+
+.. More things to do
+
+2. Task or outcome.
+
+.. Something to do, using a shell.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *command --options fixed-arguments _variable-arguments_*
+output of the command
+highlight *something* in the output
+--
+
+
+.. More things to do.
+Press kbd:[Ctrl+C] to interrupt.
+
+
+Summary of what you acomplished.
+
+== What's next
+
+Now that you have organized your devices into fleets, the next chapter explores how to monitor device and fleet status, troubleshoot issues, and extract meaningful data from Red Hat Edge Manager.
+
+////
+Configure fleets and assign devices to fleets. Need at least two fleets and a number of devices on each fleet. Have preseeded fleet configurations in a git repository, so learners can just refer to them. Show that, once a device belongs to a fleet, no configuration cannot be set at the device level. All configurations must come from the fleet. The changes, at an individual device level, from joining a fleet are essentially the same as if a device were updated or repurposed.
+////

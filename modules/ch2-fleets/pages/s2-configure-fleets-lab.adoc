@@ -8,7 +8,7 @@ Objective::
 
 Configure multiple device fleets and assign devices to them using labels and selectors.
 
-WARNING: Work In Progress
+WARNING: Pending Review
 
 == Before you begin
 
@@ -87,8 +87,8 @@ Login successful.
 --
 $ *flightctl get device*
 NAME                                                    ALIAS   OWNER   SYSTEM  UPDATED         APPLICATIONS
-{edge-2-uuid-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}    edge-2  <none>  Online  OutOfDate       NoApplications
-{edge-1-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}    edge-1  <none>  Online  OutOfDate       NoApplications
+{edge-2-uuid-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}    edge-2  <none>  Online  UpToDate       NoApplications
+{edge-1-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}    edge-1  <none>  Online  UpToDate       NoApplications
 --
 
 .. If you devices keep displaying as off-line for too long, it might be related to clock skew.
