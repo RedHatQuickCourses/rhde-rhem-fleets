@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Lab: Configure Devices Using Git Repositories :: Managing Edge Device Fleets and Applications with Red Hat Edge Manager</title>
+    <link rel="prev" href="s2-configure-fleets-lab.html">
+    <link rel="next" href="../ch3-monitor/index.html">
+    <meta name="generator" content="Antora 3.1.3">
+    <link rel="stylesheet" href="../../../_/css/site.css">
+    <script>var uiRootPath = '../../../_'</script>
+  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://www.redhat.com" target="_blank"><img src="../../../_/img/redhat-logo.png" height="40px" alt="Red Hat"></a>
+      <a class="navbar-item" style="font-size: 24px; color: white" href="../../..">Managing Edge Device Fleets and Applications with Red Hat Edge Manager</a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <a class="navbar-item" href="https://github.com/RedHatQuickCourses/rhde-rhem-fleets/issues" target="_blank">Report Issues</a>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="rhde-rhem-fleets" data-version="1">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="../index.html">Managing Edge Device Fleets and Applications with Red Hat Edge Manager</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../index.html">Home</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../LABENV/index.html">Lab Environment</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../ch1-scale/index.html">Managing Edge Devices at Scale</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../ch1-scale/s1-cattle-pets.html">Cattle vs Pets: Managing Edge Devices at Scale</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../ch1-scale/s3-environment-lab.html">Lab: Prepare the Classroom Environment</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="index.html">Creating and Managing Device Fleets</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="s1-fleet-concept.html">Understanding the Fleet Concept in RHEM</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="s2-configure-fleets-lab.html">Lab: Configure and Manage Device Fleets</a>
+  </li>
+  <li class="nav-item is-current-page" data-depth="2">
+    <a class="nav-link" href="s3-git-provider-lab.html">Lab: Configure Devices Using Git Repositories</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../ch3-monitor/index.html">Monitoring and Troubleshooting Devices and Fleets</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../ch3-monitor/s1-monitoring.html">Monitoring Device and Fleet Status</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../ch3-monitor/s2-troubleshoot-lab.html">Lab: Troubleshoot Device and Fleet Issues</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../ch4-quadlets/index.html">Configuring and Managing Quadlet Applications</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../ch4-quadlets/s1-quadlets.html">Understanding Quadlet Applications in RHEM</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../ch4-quadlets/s2-deploy-lab.html">Lab: Deploy Applications to a Fleet</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="nav-panel-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">Managing Edge Device Fleets and Applications with Red Hat Edge Manager</span>
+    <span class="version">1</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <a class="title" href="../index.html">Managing Edge Device Fleets and Applications with Red Hat Edge Manager</a>
+      <ul class="versions">
+        <li class="version is-current is-latest">
+          <a href="../index.html">1</a>
+        </li>
+      </ul>
+    </li>
+    <li class="component">
+      <a class="title" href="../../../samples/1/index.html">samples</a>
+      <ul class="versions">
+        <li class="version is-latest">
+          <a href="../../../samples/1/index.html">1</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="../index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="../index.html">Managing Edge Device Fleets and Applications with Red Hat Edge Manager</a></li>
+    <li><a href="index.html">Creating and Managing Device Fleets</a></li>
+    <li><a href="s3-git-provider-lab.html">Lab: Configure Devices Using Git Repositories</a></li>
+  </ul>
+</nav>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<h1 class="page">Lab: Configure Devices Using Git Repositories</h1>
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p><em>Estimated reading time: <strong>5 minutes</strong>.</em></p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">Objective</dt>
+<dd>
+<p>Configure multiple devies, which belong to fleets, from files stored in a git repository.</p>
+</dd>
+</dl>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+Work In Progress
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_before_you_begin"><a class="anchor" href="#_before_you_begin"></a>Before you begin</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>You need a <em>development machine</em> running RHEL, with enough capacity to run a few local VMs and a custom installer ISO used to provision new local VMs.</p>
+</div>
+<div class="paragraph">
+<p>You also need a <em>server machine</em> running RHEL, which is already configured as an Edge Manager server.</p>
+</div>
+<div class="paragraph">
+<p>Both your <em>development machine</em> and <em>server machine</em> were configured by performing the <a href="../ch1-scale/s3-environment-lab.html" class="xref page">first lab</a>.</p>
+</div>
+<div class="paragraph">
+<p>If you are using the course classroom, your <em>development machine</em> is the <code>workstation</code> VM.
+Log in as the user <code>student</code> with password <code>student</code>.
+From that machine, you may start SSH sessions to the <code>servera</code> VM, which is your <em>server</em> machine, using the same user.
+Alternatively, you can open a shell or a console directly on the <code>servera</code> VM.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+This lab does not require the outcomes of the <a href="s2-configure-fleets-lab.html" class="xref page">previous lab</a>.
+You could perform just the first lab and skip to here.
+The example outputs of commands assume that you are performing all labs sequentially, in the same environment.
+If you skipped a lab, your output may display different sets of VMs, devices, and fleets, but it shouldn&#8217;t affect the intended outcomes of this lab.
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_instructions"><a class="anchor" href="#_instructions"></a>Instructions</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>High-level summary of what you will perform in this lab, but more detailed than the objective.</p>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>The classroom environment has an issue which requires setting SELinux to permissive mode. This is something Red Hat do <strong>NOT</strong> advises doing to any production system, including developer machines and CI/CD servers.</p>
+</div>
+<div class="paragraph">
+<p>On your <em>development machine</em>, perform the following before you attempt any lab of this course.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>sudo setenforce Permissive</strong></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Note tat SELinux is still in enforcing mode on your <em>server machine</em> and also on all test VMs which stand in for managed devices.
+Only your <em>development machine</em> needs SELinux set to permissive mode.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Verify that you have the prerequisites from the <a href="../ch1-scale/s3-environment-lab.html" class="xref page">first lab</a>.
+If any of the prerequisites are missing, please return to the first lab and ensure that you did not skip any step.</p>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p>Verify that you have a clone of the course samples repository.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>cd</strong>
+$ <strong>ls rhde-rhem-samples</strong>
+antora.yml  config  enroll ...</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Verify that you have two local VMs.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>virsh list --all</strong>
+ Id   Name     State
+------------------------
+ 1    edge-1   running
+ 2    edge-2   running
+ 3    edge-3   running</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>If your VMs are not running, start them, but ensuring they are booting as a device that has been powered on, without reusing any saved state.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>virsh list --all</strong>
+ Id   Name     State
+-------------------------
+ -    edge-1   shut off
+ -    edge-2   shut off
+ -    edge-3   shut off</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>virsh start edge-1 --force-boot</strong>
+Domain 'edge-1' started
+# repeat for the remaining VMs</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Give your local VMs a few moments to finish boot.
+Then, log in on Edge Manager as a non-administrator and verify that there are two managed devices, which are on-line and up-to-date.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl login -u student -p student https://servera.lab.example.com:3443</strong>
+Auto-selected organization: 00000000-0000-0000-0000-000000000000 Default
+Login successful.</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl get device</strong>
+NAME                                                    ALIAS   OWNER            SYSTEM  UPDATED         APPLICATIONS
+mpr39vjcj5fup095de4pqnld6h4snt2ud79g74p7spv5i00jjid0    edge-3  Fleet/warehouse  Online  UpToDate        NoApplications
+g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g    edge-2  Fleet/store      Online  UpToDate        NoApplications
+1u63hvsgtua9tjjbmla9bgh5h2s77cb8esepphnf68m3ocf8qfng    edge-1  &lt;none&gt;           Online  UpToDate        NoApplications</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>If you devices keep displaying as off-line for too long, it might be related to clock skew.
+In that case, stop each of your local VMs and return to the beginning of this lab.</p>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Clock skew prevents a device from synchronizing with Edge Manager, and is known to happen if your ROLE classroom is stopped without first shutting down local VMs on your <em>develoment machine</em> and later your VMs are restarted from saved state.
+</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>virsh destroy edge-1</strong>
+Domain 'edge-1' destroyed
+# repeat for the remaining VMs</code></pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>Configure a repository source, using the web UI.</p>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p>On your <em>development machine</em>, start a web browser and open <code>https://servera.lab.example.com</code>.
+Log in on Edge Manager as <code>student</code> using the <code>student</code> password.
+On the left pane, click <b class="menuref">Repositories</b>.
+It should display a page which states "No repositories yet".</p>
+</li>
+<li>
+<p>Click <b class="menuref">Create repository</b>.
+Name your repository as <code>samples</code> and, for the <strong>Repository URL</strong>, type <code>https://github.com/RedHatQuickCourses/rhde-rhem-samples.git</code> which is the URL of the samples repository of this course.</p>
+</li>
+<li>
+<p>Unckeck <b class="menuref">Use resource syncs</b> and click <b class="menuref">Create repository</b>.</p>
+</li>
+<li>
+<p>The repository details page shows the repository with a status of <code>Sync pending</code>.
+After a few monents the status of the repository should change to <code>Accessible</code>.</p>
+<div class="paragraph">
+<p>If you experience any errors, click the status icons for a descriptive message of the error and make any required fix.</p>
+</div>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>Explore the contents of the samples repository.</p>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p>Still on the repository details page, click on the value of the <strong>Url</strong>, that is, click on <code>https://github.com/RedHatQuickCourses/rhde-rhem-samples.git</code>.
+It opens a new browser tab on GitHub.</p>
+</li>
+<li>
+<p>Click <code>pos/etc</code> and see it contains a single file named <code>motd</code>.
+Open the file and view its contents.
+Then return to the browser tab with the Edge Manager web UI.</p>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>Create a fleet which refers to the repository source.</p>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p>On the left pane, click <b class="menuref">Fleets</b> and then click <b class="menuref">Create fleet</b>.
+Name your new fleet as <code>pos</code> and, under <strong>Device selector</strong>, click on <b class="menuref">Add label</b>.
+Type <code>role=pos</code> as the device selector, and press <kbd>Tab</kbd> to leave the text box.
+Ignore the warning that "There are no devices matching these labels" and click <b class="menuref">Next</b>.</p>
+</li>
+<li>
+<p>Under <strong>Host configuration (files)</strong>, click <b class="menuref">Add configuration</b> and type <code>store</code> on the <strong>Source name</strong> field.
+Select <code>Git configuration</code> as the <strong>Source type</strong> field and select <code>samples</code> as the <strong>Repository</strong>.</p>
+</li>
+<li>
+<p>Type <code>main</code> as the <strong>Branch/tag/commit</strong> field, and <code>/pos</code> as the <strong>Path</strong>.</p>
+</li>
+<li>
+<p>Click <b class="menuref">Next</b> until you reach the end of the <strong>Create fleet</strong> assistant and click <b class="menuref">Create fleet</b>.
+You should get a details page for a fleet in the <code>Valid</code> state and with no devices.</p>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>Add a device to your new fleet.</p>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p>On the left pane, click <b class="menuref">Devices</b> and click on <code>edge-1</code>, which should be a member of no fleet.</p>
+</li>
+<li>
+<p>On the device details page, click <b class="menuref">Add label</b> and type <code>role=pos</code>, then press <kbd>Tab</kbd>.</p>
+</li>
+<li>
+<p>Verify that the details page now display the <strong>Fleet name</strong> as <code>pos</code> and scroll down to see the <strong>Update status</strong> heading.
+Wait until the status change to <code>Up-to-Date</code>.</p>
+</li>
+<li>
+<p>Click the <b class="menuref">Terminal</b> tab and verify that the <code>/etc/motd</code> file has been changed.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>cat /etc/motd</strong>
+This is a point-of-sale terminal.
+Its configurations ate set by Red Hat Edge Manager.</code></pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>Task or outcome.</p>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p>Something to do, using a graphical or web UI.
+Click <b class="menuref">Save As</b> to save your work.</p>
+</li>
+<li>
+<p>More things to do</p>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>Task or outcome.</p>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p>Something to do, using a shell.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>command --options fixed-arguments <em>variable-arguments</em></strong>
+output of the command
+highlight <strong>something</strong> in the output</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>More things to do.
+Press <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>C</kbd></span> to interrupt.</p>
+</li>
+</ol>
+</div>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>Summary of what you acomplished.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_whats_next"><a class="anchor" href="#_whats_next"></a>What&#8217;s next</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Now that you have organized your devices into fleets, the next chapter explores how to monitor device and fleet status, troubleshoot issues, and extract meaningful data from Red Hat Edge Manager.</p>
+</div>
+</div>
+</div>
+<nav class="pagination">
+  <span class="prev"><a href="s2-configure-fleets-lab.html">Lab: Configure and Manage Device Fleets</a></span>
+  <span class="next"><a href="../ch3-monitor/index.html">Monitoring and Troubleshooting Devices and Fleets</a></span>
+</nav>
+</article>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <img src="../../../_/img/rhl-logo-red.png" height="40px" alt="Red Hat"  href="https://redhat.com" >
+</footer><script id="site-script" src="../../../_/js/site.js" data-ui-root-path="../../../_"></script>
+<script async src="../../../_/js/vendor/highlight.js"></script>
+  </body>
+</html>
