@@ -389,7 +389,9 @@ Your only alternative is dettaching from the VM console using <span class="keyse
 <div class="content">
 <pre class="highlight"><code class="language-console" data-lang="console">$ <strong>virsh console edge-1</strong>
 Connected to domain 'edge-1'
-Escape character is ^] (Ctrl + ])</code></pre>
+Escape character is ^] (Ctrl + ])
+<kbd>Enter</kbd>
+<span class="keyseq"><kbd>Ctrl</kbd>+<kbd>]</kbd></span></code></pre>
 </div>
 </div>
 </li>
@@ -422,8 +424,9 @@ You can press <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>]</kbd></span> to dettac
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-console" data-lang="console">$ <strong>virsh console edge-1</strong>
+<kbd>Enter</kbd>
 enroll login:
-enroll login:
+<span class="keyseq"><kbd>Ctrl</kbd>+<kbd>D</kbd></span><kbd>Enter</kbd>
 Red Hat Enterprise Linux 9.6 (Plow)
 Kernel 5.14.0-570.76.1.el9_6.x86_64 on an x86_64 (ttyS0)
 
@@ -461,11 +464,12 @@ enp1s0: 172.25.250.9 fe80::5054:ff:fec1:c7f
 
 Your device is enrolled to flightctl,
 you can manage your device scanning the above QR. or following this URL:
-https://servera.lab.example.com:443/manage/1u63hvsgtua9tjjbmla9bgh5h2s77cb8esepphnf68m3ocf8qfng
+<a href="https://servera.lab.example.com:443/manage/1u63hvsgtua9tjjbmla9bgh5h2s77cb8esepphnf68m3ocf8qfng" class="bare">https://servera.lab.example.com:443/manage/1u63hvsgtua9tjjbmla9bgh5h2s77cb8esepphnf68m3ocf8qfng</a>
 
 This is managed device edge-1
 Access by non-authorized personnel is strictly forbidden.
-enroll login:</code></pre>
+enroll login:
+<span class="keyseq"><kbd>Ctrl</kbd>+<kbd>]</kbd></span></code></pre>
 </div>
 </div>
 </li>
@@ -559,7 +563,9 @@ Press <kbd>Enter</kbd> a few times and dettach from the VM using <span class="ke
 <div class="content">
 <pre class="highlight"><code class="language-console" data-lang="console">$ <strong>virsh console edge-2</strong>
 Connected to domain 'edge-2'
-Escape character is ^] (Ctrl + ])</code></pre>
+Escape character is ^] (Ctrl + ])
+<kbd>Enter</kbd>
+<span class="keyseq"><kbd>Ctrl</kbd>+<kbd>]</kbd></span></code></pre>
 </div>
 </div>
 </li>
@@ -627,18 +633,20 @@ You do not need to log in, just dettach from the VM using <span class="keyseq"><
 <pre class="highlight"><code class="language-console" data-lang="console">$ <strong>virsh console edge-2</strong>
 Connected to domain 'edge-2'
 Escape character is ^] (Ctrl + ])
+<kbd>Enter</kbd>
 enroll login:
-enroll login:
+<span class="keyseq"><kbd>Ctrl</kbd>+<kbd>D</kbd></span><kbd>Enter</kbd>
 Red Hat Enterprise Linux 9.6 (Plow)
 ...
 
 Your device is enrolled to flightctl,
 you can manage your device scanning the above QR. or following this URL:
-https://servera.lab.example.com:443/manage/g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g
+<a href="https://servera.lab.example.com:443/manage/g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g" class="bare">https://servera.lab.example.com:443/manage/g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g</a>
 
 This is managed device edge-2
 Access by non-authorized personnel is strictly forbidden.
-enroll login:</code></pre>
+enroll login:
+<span class="keyseq"><kbd>Ctrl</kbd>+<kbd>]</kbd></span></code></pre>
 </div>
 </div>
 </li>
@@ -743,13 +751,15 @@ Then dettach from the VM using <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>]</kbd>
 <pre class="highlight"><code class="language-console" data-lang="console">$ <strong>virsh console edge-3</strong>
 Connected to domain 'edge-3'
 Escape character is ^] (Ctrl + ])
+<kbd>Enter</kbd>
 enroll login:
-enroll login:
+<span class="keyseq"><kbd>Ctrl</kbd>+<kbd>D</kbd></span><kbd>Enter</kbd>
 Red Hat Enterprise Linux 9.6 (Plow)
 ...
 This is managed device edge-3
 Access by non-authorized personnel is strictly forbidden.
-enroll login:</code></pre>
+enroll login:
+<span class="keyseq"><kbd>Ctrl</kbd>+<kbd>]</kbd></span></code></pre>
 </div>
 </div>
 </li>
@@ -853,22 +863,24 @@ Connection to 127.0.0.1 closed.</code></pre>
 <li>
 <p>Attach to the virtual console of the device and verify that it does show a log in prompt, but does not show the pre-login banner from <code>store</code> fleet anymore.
 Remember to press <kbd>Enter</kbd> to get the login prompt, and to press <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>D</kbd></span> to display the banners.
-Then press kdb:[Ctrl+\]] to detach from the console.</p>
+Then press <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>]</kbd></span> to detach from the console.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-console" data-lang="console">$ <strong>virsh console edge-2</strong>
 Connected to domain 'edge-2'
 Escape character is ^] (Ctrl + ])
-
+<kbd>Enter</kbd>
 enroll login:
+<span class="keyseq"><kbd>Ctrl</kbd>+<kbd>D</kbd></span><kbd>Enter</kbd>
 Red Hat Enterprise Linux 9.6 (Plow)
 Kernel 5.14.0-570.76.1.el9_6.x86_64 on an x86_64
 ...
 Your device is enrolled to flightctl,
 you can manage your device scanning the above QR. or following this URL:
-https://servera.lab.example.com:443/manage/g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g
+<a href="https://servera.lab.example.com:443/manage/g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g" class="bare">https://servera.lab.example.com:443/manage/g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g</a>
 
-enroll login:</code></pre>
+enroll login:
+<span class="keyseq"><kbd>Ctrl</kbd>+<kbd>]</kbd></span></code></pre>
 </div>
 </div>
 <div class="admonitionblock note">
