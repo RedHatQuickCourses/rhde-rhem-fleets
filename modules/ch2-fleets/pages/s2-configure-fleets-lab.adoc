@@ -6,23 +6,33 @@ _Estimated reading time: *{time_estimate} minutes*._
 
 Objective::
 
-Configure multiple device fleets and assign devices to them using fleet-level configurations.
+Configure multiple device fleets and assign devices to them using labels and selectors.
 
 WARNING: Work In Progress
 
 == Before you begin
 
-Describe requirements, such as customer portal accounts, Red Hat Developer free sub, already configured machines, access to container registries, etc.
+You need a _development machine_ running RHEL, with enough capacity to run a few local VMs and a custom installer ISO used to provision new local VMs.
+
+You also need a _server machine_ running RHEL, which is already configured as an Edge Manager server.
+
+Both your _development machine_ and _server machine_ were configured by performing the xref:ch1-scale:s3-environment-lab.adoc[first lab].
+
+If you are using the course classroom, your _development machine_ is the `workstation` VM.
+Log in as the user `student` with password `student`.
+From that machine, you may start SSH sessions to the `servera` VM, which is your _server_ machine, using the same user.
+Alternatively, you can open a shell or a console directly on the `servera` VM.
 
 == Instructions
 
-High-level summary of what you will perform in this lab, but more detailed than the objective.
-
+You will create fleets, using both the Edge Manager web UI and its CLI, and put devices on those fleets.
+You will also switch devices between different fleets, and observe how those changes affect managed device configurations.
+For simplicity, you will use only inline configurations.
 
 include::ch1-scale:partial$set-permissive.adoc[]
 
-1. Verify that you have the prerequisites from the xref:ch1-scale:s3-environment-lab.adoc[previous lab].
-If any of the prerequisites are missing, please return to the previous lab and ensure that you did not skip any step.
+1. Verify that you have the prerequisites from the xref:ch1-scale:s3-environment-lab.adoc[first lab].
+If any of the prerequisites are missing, please return to the first lab and ensure that you did not skip any step.
 
 .. Verify that you have a clone of the course samples repository.
 +
@@ -211,7 +221,7 @@ enp1s0: 172.25.250.9 fe80::5054:ff:fec1:c7f
 
 Your device is enrolled to flightctl,
 you can manage your device scanning the above QR. or following this URL:
-https://servera.lab.example.com:443/manage/{edge-1-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}
+\https://servera.lab.example.com:443/manage/{edge-1-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}
 
 This is managed device edge-1
 Access by non-authorized personnel is strictly forbidden.
@@ -354,7 +364,7 @@ Red Hat Enterprise Linux 9.6 (Plow)
 
 Your device is enrolled to flightctl,
 you can manage your device scanning the above QR. or following this URL:
-https://servera.lab.example.com:443/manage/{edge-2-uuid-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}
+\https://servera.lab.example.com:443/manage/{edge-2-uuid-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}
 
 This is managed device edge-2
 Access by non-authorized personnel is strictly forbidden.
@@ -549,47 +559,225 @@ Kernel 5.14.0-570.76.1.el9_6.x86_64 on an x86_64
 ...
 Your device is enrolled to flightctl,
 you can manage your device scanning the above QR. or following this URL:
-https://servera.lab.example.com:443/manage/{edge-2-uuid-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}
+\https://servera.lab.example.com:443/manage/{edge-2-uuid-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}
 
 enroll login:
 kbd:[Ctrl+\]]
 --
 +
-NOTE: The agetty service is still up, enabling console logins, because the Systemd unit was enabled and started, by the `store` fleet configuration, as an imperative configuration from a hook.
-The hook file itself was deleted by switching fleets, but the Systemd unit is still enabled and running.
+[NOTE]
+====
+The `serial-getty` service is still up, enabling console logins, because its Systemd unit was enabled and started, by the `store` fleet configuration, from a hook.
+The hook file itself was deleted by switching fleets, but the Systemd unit is still enabled and running and will keep that way after reboot.
+
+This example illustrates how using imperative configurations may require extra care when updating configurations using Edge Manager. 
+====
 
 8. Create a third fleet, which overlaps with the first or second fleet.
 
-.. TBD
-
-9. Remove a device from its fleet, so you can see the impact on the configurations it got from its fleet.
-
-.. TBD
-
-
-1. Task or outcome.
-
-.. Something to do, using a graphical or web UI.
-Click menu:Save As[] to save your work.
-
-.. More things to do
-
-2. Task or outcome.
-
-.. Something to do, using a shell.
+.. Review the fleet manifest.
+Notice that its selector is the same as the `store` fleet.
 +
 [source,console,subs="verbatim,quotes"]
 --
-$ *command --options fixed-arguments _variable-arguments_*
-output of the command
-highlight *something* in the output
+$ *cat kiosk.yaml*
+include::1@samples:fleet:example$kiosk.yaml[]
 --
 
+.. Create the fleet.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *flightctl apply -f kiosk.yaml*
+kiosk.yaml: applying fleet/kiosk: 201 Created
+--
 
-.. More things to do.
-Press kbd:[Ctrl+C] to interrupt.
+.. The status of the fleets provide *no hint* that there is a conflict, despite the duplicate selectors.
+The status of the devices provide no hint either.
++
+[source,console,subs="verbatim,quotes,attributes"]
+--
+$ *flightctl get fleet*
+NAME            OWNER   SELECTOR                VALID
+kiosk           <none>  location=store          True
+store           <none>  location=store          True
+warehouse       <none>  location=warehouse      True
+$ *flightctl get device*
+NAME                                                    ALIAS   OWNER           SYSTEM  UPDATED         APPLICATIONS
+{edge-2-uuid-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}    edge-2  Fleet/warehouse Online  UpToDate        NoApplications
+{edge-3-uuid-cccccccccccccccccccccccccccccccccccccc}    edge-3  Fleet/store     Online  UpToDate        NoApplications
+{edge-1-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}    edge-1  Fleet/store     Online  UpToDate        NoApplications
+--
 
-Summary of what you acomplished.
+.. The conflict is only noted in the conditions of the affected devices.
++
+[source,console,subs="verbatim,quotes,attributes"]
+--
+$ *UUID=$( flightctl get device -l alias=edge-1 )*
+$ *flightctl get device $UUID -o yaml*
+apiVersion: flightctl.io/v1beta1
+kind: Device
+...
+  labels:
+    alias: edge-1
+    location: store
+    rhel: "9.6"
+    type: noapps
+  name: {edge-1-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}
+  owner: Fleet/store
+...
+  - lastTransitionTime: "2026-03-12T16:20:25.862755686Z"
+    message: kiosk,store
+    reason: MultipleOwners
+    status: "True"
+    type: MultipleOwners
+...
+--
+
+.. The following script uses the `jq` command to filter only devices with the `MultipleOwners` condition, if any.
++
+[source,console,subs="verbatim,quotes,attributes"]
+--
+$ *cat get-devices-multipleowners.sh*
+include::1@samples:fleet:example$get-devices-multipleowners.sh[]
+$ *bash get-devices-multipleowners.sh*
+Device: kml2gjca0l19lq7v1hqj9od3emin53u58skj76me4ue1772n0s40
+Labels: {"alias":"edge-3","location":"store"}
+---
+Device: mpr39vjcj5fup095de4pqnld6h4snt2ud79g74p7spv5i00jjid0
+Labels: {"alias":"edge-1","location":"store","rhel":"9.6","type":"noapps"}
+---
+--
++
+NOTE: The web UI displays a warning icon on all devices having this and other conditions, making it easier to spot issues with devices.
+Unfortunately, the web UI does not display a warning on the fleets themselves.
+
+.. There is also a script that just count the number of devices with the condition.
++
+[source,console,subs="verbatim,quotes,attributes"]
+--
+$ *cat count-devices-multipleowners.sh*
+include::1@samples:fleet:example$count-devices-multipleowners.sh[]
+$ *bash count-devices-multipleowners.sh*
+2
+--
++
+// coundn't get those filters to work as a long command and display them properly for cut-and-paste from Antora.
+
+.. Fix the fleet manifest by chaging its selector.
+Open the `kiosk.yaml` file with a text editor and make the following changes:
++
+[source,subs="verbatim,quotes"]
+--
+apiVersion: flightctl.io/v1beta1
+kind: Fleet
+metadata:
+  name: kiosk
+spec:
+  selector:
+    matchLabels:
+      *location: parking lot*
+  template:
+...
+--
+
+.. Update the fleet.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *flightctl apply -f kiosk.yaml*
+kiosk.yaml: applying fleet/kiosk: 200 OK
+--
+
+.. Verify that now all your fleets have different selectors, and that no device has the `Multiple Owners` condition.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *flightctl get fleet*
+NAME            OWNER   SELECTOR                VALID
+kiosk           <none>  location=parking lot    True
+store           <none>  location=store          True
+warehouse       <none>  location=warehouse      True
+--
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *bash count-devices-multipleowners.sh*
+0
+--
+
+10. Remove a device from its fleet, so you can see the impact on the configurations it got from its fleet.
+
+.. Edit the manifest for device `edge-1` to remove its `location` label.
++
+[source,console,subs="verbatim,quotes,attributes"]
+--
+$ *UUID=$( flightctl get device -l alias=edge-1 -o name )*
+$ *flightctl edit device $UUID*
+apiVersion: flightctl.io/v1beta1
+kind: Device
+metadata:
+  ...
+  labels:
+    alias: edge-1
+    rhel: "9.6"
+    type: noapps
+  name: {edge-1-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}
+  owner: Fleet/store
+...
+device/{edge-1-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa} edited
+--
+
+.. Verify that the device does belong to any fleet, and wait until it is `Up-to-Date`.
++
+[source,console,subs="verbatim,quotes,attributes"]
+--
+$ *flightctl get device $UUID -o wide*
+NAME                                                    ALIAS   OWNER   SYSTEM  UPDATED         APPLICATIONS    LABELS
+{edge-1-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}    edge-1  <none>  Online  UpToDate        NoApplications  type=noapps,alias=edge-1,rhel=9.6
+--
+
+.. Verify that the device still contains the pre-login banner set by its old fleet.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *ssh -i ../temp-enroll/edge-key -p 8122 core@127.0.0.1 -- cat /etc/issue.d/warning.issue*
+This is managed device edge-1
+Access by non-authorized personnel is strictly forbidden.
+--
+
+.. Verify that the device manifest contains a copy of its old fleet configuration.
++
+[source,console,subs="verbatim,quotes,attributes"]
+--
+$ *flightctl get device $UUID -o yaml*
+apiVersion: flightctl.io/v1beta1
+kind: Device
+...
+  labels:
+    alias: edge-1
+    rhel: "9.6"
+    type: noapps
+  name: {edge-1-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}
+  resourceVersion: "212"
+spec:
+  applications: []
+  config:
+  - inline:
+    - content: |
+        This is managed device edge-1
+        Access by non-authorized personnel is strictly forbidden.
+      path: /etc/issue.d/warning.issue
+    - content: '- run: systemctl enable serial-getty@ttyS0.service --now'
+      path: /etc/flightctl/hooks.d/afterupdating/enable-serial-console.yaml
+    name: store
+status:
+...
+--
+
+You demonstrated that Edge keeps track of the configurations it puts on managed devices, as they join and switch fleets.
+You also demonstrated that, when a device switches to no fleet, it keeps its last configuration.
+Devices also keep their last applied configuation in case there's a conflict and they end up belonging to multiple fleets.
 
 == What's next
 
