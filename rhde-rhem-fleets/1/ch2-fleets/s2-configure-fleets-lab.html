@@ -175,7 +175,7 @@
 <dl>
 <dt class="hdlist1">Objective</dt>
 <dd>
-<p>Configure multiple device fleets and assign devices to them using labels and selectors.</p>
+<p>Configure multiple device fleets and assign devices to fleets using labels and selectors.</p>
 </dd>
 </dl>
 </div>
@@ -277,7 +277,7 @@ antora.yml  config  enroll ...</code></pre>
 </div>
 </li>
 <li>
-<p>If your VMs are not running, start them, but ensuring they are booting as a device that has been powered on, without reusing any saved state.</p>
+<p>If your VMs are not running, start them, but ensuring they are booting from power on instead of resumed from saved state.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-console" data-lang="console">$ <strong>virsh list --all</strong>
@@ -1196,7 +1196,7 @@ Devices also keep their last applied configuation in case there&#8217;s a confli
 <h2 id="_whats_next"><a class="anchor" href="#_whats_next"></a>What&#8217;s next</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Now that you have organized your devices into fleets, the next chapter explores how to monitor device and fleet status, troubleshoot issues, and extract meaningful data from Red Hat Edge Manager.</p>
+<p>Now that you have organized your devices into fleets, the next chapter explores how to fetch operating system configurations from a git repository, instead of having them inline inside a device or fleet manifest.</p>
 </div>
 </div>
 </div>

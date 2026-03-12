@@ -186,7 +186,7 @@
 <i class="fa icon-warning" title="Warning"></i>
 </td>
 <td class="content">
-Work In Progress
+Pending Review
 </td>
 </tr>
 </table>
@@ -221,7 +221,7 @@ Alternatively, you can open a shell or a console directly on the <code>servera</
 This lab does not require the outcomes of the <a href="s2-configure-fleets-lab.html" class="xref page">previous lab</a>.
 You could perform just the first lab and skip to here.
 The example outputs of commands assume that you are performing all labs sequentially, in the same environment.
-If you skipped a lab, your output may display different sets of VMs, devices, and fleets, but it shouldn&#8217;t affect the intended outcomes of this lab.
+If you skipped the previous lab, your outputs may display different sets of VMs, devices, and fleets, but it shouldn&#8217;t affect the expected outcomes of this lab.
 </td>
 </tr>
 </table>
@@ -232,7 +232,7 @@ If you skipped a lab, your output may display different sets of VMs, devices, an
 <h2 id="_instructions"><a class="anchor" href="#_instructions"></a>Instructions</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>High-level summary of what you will perform in this lab, but more detailed than the objective.</p>
+<p>You will create a fleet using the Git configuation provider, and then you will update files in a git repository and pull those updates to the fleet configuration.</p>
 </div>
 <div class="admonitionblock important">
 <table>
@@ -278,7 +278,7 @@ antora.yml  config  enroll ...</code></pre>
 </div>
 </li>
 <li>
-<p>Verify that you have two local VMs.</p>
+<p>Verify that you have at least two local VMs.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-console" data-lang="console">$ <strong>virsh list --all</strong>
@@ -291,7 +291,7 @@ antora.yml  config  enroll ...</code></pre>
 </div>
 </li>
 <li>
-<p>If your VMs are not running, start them, but ensuring they are booting as a device that has been powered on, without reusing any saved state.</p>
+<p>If your VMs are not running, start them, but ensuring they are booting from power on instead of resumed from saved state.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-console" data-lang="console">$ <strong>virsh list --all</strong>
@@ -443,7 +443,7 @@ Wait until the status change to <code>Up-to-Date</code>.</p>
 <div class="content">
 <pre class="highlight"><code class="language-console" data-lang="console">$ <strong>cat /etc/motd</strong>
 This is a point-of-sale terminal.
-Its configurations ate set by Red Hat Edge Manager.</code></pre>
+Its configurations are set by Red Hat Edge Manager.</code></pre>
 </div>
 </div>
 </li>
@@ -451,36 +451,80 @@ Its configurations ate set by Red Hat Edge Manager.</code></pre>
 </div>
 </li>
 <li>
-<p>Task or outcome.</p>
+<p>Fork the samples repository, so you can experiment with configuration updates.</p>
 <div class="olist loweralpha">
 <ol class="loweralpha" type="a">
 <li>
-<p>Something to do, using a graphical or web UI.
-Click <b class="menuref">Save As</b> to save your work.</p>
+<p>Open a new browser tab and visit <a href="http://github.com" class="bare">http://github.com</a>.
+Log in with your GitHub account.
+If you do not have one, create one.</p>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Keep two brower tabs open, one on the Edge Manager web UI, another on GitHub.
+</td>
+</tr>
+</table>
+</div>
 </li>
 <li>
-<p>More things to do</p>
+<p>Once logged in on GitHub, visit <a href="https://github.com/RedHatQuickCourses/rhde-rhem-samples.git" class="bare">https://github.com/RedHatQuickCourses/rhde-rhem-samples.git</a> and click <b class="menuref">Fork</b> on the top bar to create a fork opf the samples repository on your personal GitHub account.</p>
+</li>
+<li>
+<p>On your personal fork of the samples repository, click <b class="menuref">Code</b> and then click on the copy icon, to copy the URL of your fork to the clipboard.</p>
+</li>
+<li>
+<p>Switch to the Edge Manager web UI and click <b class="menuref">Repositories</b>.
+Click on the actions menu icon (three vertical dots) for the <code>pos</code> repository and then click <b class="menuref">Edit repository</b>.</p>
+</li>
+<li>
+<p>Paste the URL of your personal fork as the <strong>Repository URL</strong> and click <b class="menuref">Save</b>.</p>
+</li>
+<li>
+<p>Switch to GitHub, and navigate to the <code>/pos/etc/motd</code> file.
+Click the pen icon to edit the file.</p>
+</li>
+<li>
+<p>Change the first line of text to <code>This is the <strong>enhanced</strong> point-of-sale terminal.</code> and click <b class="menuref">Commit changes</b>.
+Accept the default commit message and other defaults, and click again on <b class="menuref">Commit changes</b>.</p>
+</li>
+<li>
+<p>Click on the short commit ID, which displays near the <strong>History</strong> icon, to the right of the commit message, above the file contents.
+GitHub shows a diff view of the changes from your commit.
+Click on the copy icon, to the top right, next to the commit ID, to copy the full commit ID to the clipboard.</p>
 </li>
 </ol>
 </div>
 </li>
 <li>
-<p>Task or outcome.</p>
+<p>Update the fleet definition to refer to your commit.</p>
 <div class="olist loweralpha">
 <ol class="loweralpha" type="a">
 <li>
-<p>Something to do, using a shell.</p>
+<p>Switch to the Edge Manager web UI, and click <b class="menuref">Fleet</b> to enter the fleets page, and click the actions menu of the <code>pos</code> fleet.
+Select <b class="menuref">Edit fleet configurations</b> and click <b class="menuref">Next</b> to enter the <strong>Device template</strong> page.</p>
+</li>
+<li>
+<p>Scroll down to <strong>Branch/tag/commit</strong> and paste the full commit ID.
+Click <b class="menuref">Next</b> until you reach the <strong>Review and save</strong> page and click <b class="menuref">Save</b>.</p>
+</li>
+<li>
+<p>Click on <b class="menuref">Devices</b> to enter the devices page and wait until the <code>edge-1</code> managed device is <code>Up-to-Date</code>.
+Then click <code>edge-1</code> to enter its device details page.</p>
+</li>
+<li>
+<p>Click the <b class="menuref">Terminal</b> tab and verify that the <code>/etc/motd</code> file has been changed.</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>command --options fixed-arguments <em>variable-arguments</em></strong>
-output of the command
-highlight <strong>something</strong> in the output</code></pre>
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>cat /etc/motd</strong>
+This the <strong>enhanced</strong> point-of-sale terminal.
+Its configurations are set by Red Hat Edge Manager.</code></pre>
 </div>
 </div>
-</li>
-<li>
-<p>More things to do.
-Press <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>C</kbd></span> to interrupt.</p>
 </li>
 </ol>
 </div>
@@ -488,7 +532,7 @@ Press <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>C</kbd></span> to interrupt.</p>
 </ol>
 </div>
 <div class="paragraph">
-<p>Summary of what you acomplished.</p>
+<p>You demonstrated that Edge Manager can fetch configuration files from a git repository, but it requires that you update the fleet definition, by changing the commit ID, to fetch updates from the repository.</p>
 </div>
 </div>
 </div>
@@ -496,7 +540,7 @@ Press <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>C</kbd></span> to interrupt.</p>
 <h2 id="_whats_next"><a class="anchor" href="#_whats_next"></a>What&#8217;s next</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Now that you have organized your devices into fleets, the next chapter explores how to monitor device and fleet status, troubleshoot issues, and extract meaningful data from Red Hat Edge Manager.</p>
+<p>Now that you have organized your devices into fleets which pull configuration files from a git repository, the next chapter explores how to monitor device and fleet status, troubleshoot issues, and extract meaningful data from Red Hat Edge Manager.</p>
 </div>
 </div>
 </div>
