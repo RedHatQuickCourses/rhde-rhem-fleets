@@ -18,6 +18,264 @@ Describe requirements, such as customer portal accounts, Red Hat Developer free 
 
 High-level summary of what you will perform in this lab, but more detailed than the objective.
 
+////
+There's no suitable app image on current HOL019 private registry.
+Copy to it a web server and a database?
+
+registry.redhat.io/ubi9/httpd-24
+registry.redhat.io/rhel9/mysql-84
+
+single-container app works with the UBI httpd image. :-)
+Now trying to create a container with static HTML to use as a volume
+It's more work than just creating my own derived image for the static web app, but I'm learning something new.
+////
+
+include::ch1-scale:partial$set-permissive.adoc[]
+
+1. Verify that you have the prerequisites from the xref:ch1-scale:s3-environment-lab.adoc[first lab].
+If any of the prerequisites are missing, please return to the first lab and ensure that you did not skip any step.
+
+.. Verify that you have a clone of the course samples repository.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *cd*
+$ *ls rhde-rhem-samples*
+antora.yml  config  enroll ...
+--
+
+.. Verify that you have at least two local VMs.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *virsh list --all*
+ Id   Name     State
+------------------------
+ 1    edge-1   running
+ 2    edge-2   running
+ 3    edge-3   running
+--
+
+.. If your VMs are not running, start them, but ensuring they are booting from power on instead of resumed from saved state.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *virsh list --all*
+ Id   Name     State
+-------------------------
+ -    edge-1   shut off
+ -    edge-2   shut off
+ -    edge-3   shut off
+--
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *virsh start edge-1 --force-boot*
+Domain 'edge-1' started
+# repeat for the remaining VMs
+--
+
+.. Give your local VMs a few moments to finish boot.
+Then, log in on Edge Manager as a non-administrator and verify that there are two managed devices, which are on-line and up-to-date.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *flightctl login -u student -p student https://servera.lab.example.com:3443*
+Auto-selected organization: 00000000-0000-0000-0000-000000000000 Default
+Login successful.
+--
++
+[source,console,subs="verbatim,quotes,attributes"]
+--
+$ *flightctl get device*
+NAME                                                    ALIAS   OWNER            SYSTEM  UPDATED         APPLICATIONS
+{edge-3-uuid-cccccccccccccccccccccccccccccccccccccc}    edge-3  Fleet/warehouse  Online  UpToDate        NoApplications
+{edge-2-uuid-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}    edge-2  Fleet/store      Online  UpToDate        NoApplications
+{edge-1-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}    edge-1  <none>           Online  UpToDate        NoApplications
+--
+
+.. If you devices keep displaying as off-line for too long, it might be related to clock skew.
+In that case, stop each of your local VMs and return to the beginning of this lab.
++
+NOTE: Clock skew prevents a device from synchronizing with Edge Manager, and is known to happen if your ROLE classroom is stopped without first shutting down local VMs on your _develoment machine_ and later your VMs are restarted from saved state.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *virsh destroy edge-1*
+Domain 'edge-1' destroyed
+# repeat for the remaining VMs
+--
+
+2. Build and publish a bootc container image which includes a container runtime.
++
+Remember that the enrollment image, which you used at the beggining of this course, provided only a mininum RHEL system with the Edge Manager agent.
+
+.. Create a temporary working directory, and copy example files to it.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *mkdir temp-managedapp*
+$ *cd temp-managedapp*
+$ **cp -r ../rhde-rhem-samples/managedapp/* .**
+--
+
+.. Review the containerfile.
+It adds the container-tools meta-package, which includes Podman, and also the qemu-guest-agent, which should solve clock skew issues of local VMs.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *cat Containerfile*
+include::1@samples:managedapp:example$Containerfile[]
+--
+
+.. Copy from the working directory of the enrollment image some auxiliary files which you neeed to include in your bootc container image, such as the private registry CAs and SSH keys.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *cp ../temp-enroll/domain.crt .*
+$ *cp ../temp-enroll/edge-key.pub .*
+$ *cp -r ../temp-enroll/rpms .*
+--
+
+.. Log in on the Red Hat container registry, so you can pull the RHEL 9 base bootc container, and build your new bootc container image.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *podman login registry.redhat.io*
+...
+Login Succeeded!
+--
++
+[source,console,subs="verbatim,quotes,attributes"]
+--
+$ *podman build -t rhem-containers .*
+STEP 1/2: FROM registry.redhat.io/rhel9/rhel-bootc:9.6
+...
+Successfully tagged localhost/rhem-containers:latest
+{rhem-containers-v1-shaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}
+--
+
+.. Log in on your private container registry and publish your new bootc container image there.
++
+[source,console,subs="verbatim,quotes,attributes"]
+--
+$ *podman login -u student -p redhat registry.lab.example.com:5000*
+Login Succeeded!
+$ *skopeo copy containers-storage:localhost/rhem-containers:latest docker://registry.lab.example.com:5000/rhem-containers:v1.0*
+...
+Writing manifest to image destination
+--
+
+3. Publish, on your private container registry, a static web site that mocks as a client-side web application.
++
+// Not sure this approach is sound. AFAIK that container would serve only first-time initialization, not be useful for updating a static web site or web app.
+
+.. Copy an HTTP server image to your private registry.
++
+NOTE: You can ignore the error about writing signatures, because the private registry in the classroom environment does not support storing image signatues and other OCI artifacts.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *skopeo copy docker://registry.redhat.io/ubi9/httpd-24 docker://registry.lab.example.com:5000/ubi9/httpd-24*
+...
+Writing manifest to image destination
+Storing signatures
+FATA[0003] copying system image from manifest list: writing signatures: writing sigstore attachments is disabled by configuration
+--
+
+.. Review the contents of the `data` directory.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *tree data*
+data
+└── html
+    └── index.html
+
+2 directories, 1 file
+$ *cat data/html/index.html*
+Mock of the web application
+--
+
+.. Build and publish a scratch container container with the contents of the `data` directory to use as a volume for the HTTP server container.
++
+[source,console,subs="verbatim,quotes,attributes"]
+--
+$ *podman build -t webappvol -f Containerfile-html .*
+STEP 1/2: FROM scratch
+...
+Successfully tagged localhost/webappvol:latest
+{rhem-webappvol-v1-shaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}
+$ *skopeo copy containers-storage:localhost/webappvol:latest docker://registry.lab.example.com:5000/webappvol:v1.0*
+...
+Writing manifest to image destination
+--
+
+4. Create a fleet which uses the new bootc container and also defines a single-container application.
+
+.. Review the fleet manifest, which uses all three configuration providers taught in this course series, just to show you can mix and match them at your convenience.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *cat frontend.yaml*
+include::1@samples:managedapp:example$frontend.yaml[]
+--
+
+.. Create an authentication file for the private registry, and add it to the fleet configuration.
+Notice it must be added in two places, because the container runtime and the bootc subsystems do NOT share the registry authentication files.
+course series, just to show you can mix and match them at your convenience.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *podman login --authfile auth.json -u student -p redhat registry.lab.example.com:5000*
+Login Succeeded!
+$ *AUTH_JSON=$( jq -c . auth.json )*
+$ *sed -i "s|REPLACE_WITH_OSTREE_AUTH_JSON|$AUTH_JSON|" frontend.yaml*
+$ *sed -i "s|REPLACE_WITH_ROOT_AUTH_JSON|$AUTH_JSON|" frontend.yaml*
+--
+
+.. Review your fleet manifest and ensure it does not contains any `REPLACE` markers anymore.
+
+.. Review the repository manifest, which defines the `webapp` git repository referenced by the `frontend` fleet.
+We provide this here just as an example of using configuration files from Git from the Edge Manager CLI.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *cat webapp.yaml*
+include::1@samples:managedapp:example$webapp.yaml[]
+--
+
+.. Apply the manifests to your Edge Manager server.
++
+NOTE: The status of the fleet may be `Unknown` for a while, while Edge Manager fetches the configation files from the Git repository.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *flightctl apply -f webapp.yaml*
+webapp.yaml: applying repository/webapp: 201 Created
+$ *flightctl apply -f frontend.yaml*
+frontend.yaml: applying fleet/frontend: 201 Created
+$ *flightctl get fleet frontend*
+NAME            OWNER   SELECTOR        VALID
+frontend        <none>  role=frontend   True
+--
+
+5. Join a managed device to the new fleet.
+
+.. Also show the app status on RHEM
+
+.. Show the motd from the git config
+
+.. TBD
+
+6. Verify the application is accessible.
+
+.. TBD
+
+7. Simulate downtime in the application and show that RHEM perceives it.
+
+.. TBD
+
 1. Task or outcome.
 
 .. Something to do, using a graphical or web UI.

@@ -295,7 +295,7 @@ IMPORTANT: Review this step after the classroom is updated.
 +
 [source,console,subs="verbatim,quotes"]
 --
-$ *dnf confifg-manager --add-repo http://content.example.com/rhde9.6/x86_64/dvd/edge-manager*
+$ *dnf config-manager --add-repo http://content.example.com/rhde9.6/x86_64/dvd/edge-manager*
 GRAB OUTPUT
 $ *sudo podman login registry.redhat.io*
 ...

@@ -239,6 +239,11 @@ You demonstrated that Edge Manager can fetch configuration files from a git repo
 
 Now that you have organized your devices into fleets which pull configuration files from a git repository, the next chapter explores how to monitor device and fleet status, troubleshoot issues, and extract meaningful data from Red Hat Edge Manager.
 
+The next chapter also provides an example of creating and managing fleets configurations using Git repositoryes by using the CLI.
+Unlike the previous lab, which demonstrated both web UI and CLI management of fleets, using inline configurations, this lab uses only the web UI to make it shorter.
+
+NOTE: Review previous statements in case we scope down or remove the monitoring chapter.
+
 ////
 UPDATE: tasks related to git split from the previous lab.
 

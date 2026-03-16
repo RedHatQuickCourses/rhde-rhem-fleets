@@ -8,6 +8,8 @@ asciidoc:
     edge-2-uuid-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb: g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g
     edge-3-uuid-cccccccccccccccccccccccccccccccccccccc: mpr39vjcj5fup095de4pqnld6h4snt2ud79g74p7spv5i00jjid0
     rhem-enroll-v1-shaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa: 503f839113b376c55ceee225a8cbfdc9bf1496f3342385ce171f2cf2e01f1333
+    rhem-containers-v1-shaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa: b78ad6382056022b5430359c9a3ad488464c2c8466219113784611b355d28f17
+    rhem-webappvol-v1-shaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa: 8d7d6217f71a22f4f890b34708922569c479367dcd46f73eb6f910ea9963a4e2
 nav:
 - modules/ROOT/nav.adoc
 - modules/LABENV/nav.adoc
