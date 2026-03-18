@@ -12,15 +12,362 @@ WARNING: Not started  yet.
 
 == Before you begin
 
-Describe requirements, such as customer portal accounts, Red Hat Developer free sub, already configured machines, access to container registries, etc.
+include::ch2-fleets:partial$before-you-begin.adoc[]
 
 == Instructions
 
 High-level summary of what you will perform in this lab, but more detailed than the objective.
 
-1. Something
+include::ch1-scale:partial$set-permissive.adoc[]
+
+1. On your _developer machine_, verify that you have the prerequisites from the xref:ch1-scale:s3-environment-lab.adoc[first lab].
+If any of the prerequisites are missing, please return to the first lab and ensure that you did not skip any step.
+
+.. Verify that you have a clone of the course samples repository.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *cd*
+$ *ls rhde-rhem-samples*
+antora.yml  config  enroll ...
+--
+
+.. Verify that you have at least two local VMs.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *virsh list --all*
+ Id   Name     State
+------------------------
+ 1    edge-1   running
+ 2    edge-2   running
+ 3    edge-3   running
+--
+
+.. If your VMs are not running, start them, but ensuring they are booting from power on instead of resumed from saved state.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *virsh list --all*
+ Id   Name     State
+-------------------------
+ -    edge-1   shut off
+ -    edge-2   shut off
+ -    edge-3   shut off
+--
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *virsh start edge-1 --force-boot*
+Domain 'edge-1' started
+# repeat for the remaining VMs
+--
+
+.. Give your local VMs a few moments to finish boot.
+Then, log in on Edge Manager as a non-administrator and verify that there are two managed devices, which are on-line and up-to-date.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *flightctl login -u student -p student https://servera.lab.example.com:3443*
+Auto-selected organization: 00000000-0000-0000-0000-000000000000 Default
+Login successful.
+--
++
+[source,console,subs="verbatim,quotes,attributes"]
+--
+$ *flightctl get device*
+NAME                                                    ALIAS   OWNER            SYSTEM  UPDATED         APPLICATIONS
+{edge-3-uuid-cccccccccccccccccccccccccccccccccccccc}    edge-3  Fleet/warehouse  Online  UpToDate        NoApplications
+{edge-2-uuid-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}    edge-2  Fleet/store      Online  UpToDate        NoApplications
+{edge-1-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}    edge-1  <none>           Online  UpToDate        NoApplications
+--
+
+.. If you devices keep displaying as off-line for too long, it might be related to clock skew.
+In that case, stop each of your local VMs and return to the beginning of this lab.
++
+NOTE: Clock skew prevents a device from synchronizing with Edge Manager, and is known to happen if your ROLE classroom is stopped without first shutting down local VMs on your _develoment machine_ and later your VMs are restarted from saved state.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *virsh destroy edge-1*
+Domain 'edge-1' destroyed
+# repeat for the remaining VMs
+--
+
+2. Ensure there is a `warehouse` fleet with two devices.
+
+.. Verify that a fleet named `warehouse` already exists.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *flightctl get fleet warehouse*
+NAME            OWNER   SELECTOR                VALID
+warehouse       <none>  location=warehouse      True
+--
+
+.. If it does not exist, create the fleet using the provided manifest file.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *flightctl get fleet warehouse*
+Error: response status: 404, message: Fleet of name "warehouse" not found
+--
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *flightctl apply -f rhde-rhem-samples/fleet/warehouse.yaml*
+warehouse.yaml: applying fleet/warehouse: 201 Created
+--
+
+.. Verify that managed devices `edge-1` and `edge-2` are members of the `warehouse` fleet.
++
+[source,console,subs="verbatim,quotes,attributes"]
+--
+$ *flightctl get device --field-selector metadata.owner=Fleet/warehouse*
+NAME                                                    ALIAS   OWNER            SYSTEM  UPDATED         APPLICATIONS
+{edge-1-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}    edge-1  Fleet/warehouse  Online  UpToDate        NoApplications
+{edge-2-uuid-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}    edge-2  Fleet/warehouse  Online  UpToDate        NoApplications
+--
+
+.. If the fleet contains no devices, or only one device, join the device which is not in any fleet (or which is on a different fleet) to the warehouse fleet.
++
+Edit the device to include a `location` label which matches the selector of the `warehouse` fleet.
+Make such edits to `edge-1` and `edge-2` by following the example.
++
+[source,console,subs="verbatim,quotes,attributes"]
+--
+$ *UUID=$( flightctl get device -l alias=edge-1 -o name )*
+$ *flightctl edit device $UUID*
+apiVersion: flightctl.io/v1beta1
+kind: Device
+metadata:
+  ...
+  labels:
+    alias: edge-1
+    rhel: "9.6"
+    type: noapps
+    *location: warehouse*
+  name: {edge-1-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}
+  ...
+spec:
+...
+device/{edge-1-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa} edited
+--
+
+.. If you made any edits, wait until both `edge-1` and `edge-2` managed devices are up-to-date.
++
+[source,console,subs="verbatim,quotes,attributes"]
+--
+$ *flightctl get device --field-selector metadata.owner=Fleet/warehouse*
+NAME                                                    ALIAS   OWNER            SYSTEM  UPDATED         APPLICATIONS
+{edge-1-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}    edge-1  Fleet/warehouse  Online  UpToDate        NoApplications
+{edge-2-uuid-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}    edge-2  Fleet/warehouse  Online  UpToDate        NoApplications
+--
+
+3. Add a device monitor to the fleet, using the provided manifest.
++
+// It seems I cannot do it from the web UI on 1.0.2
+
+.. Create a temporary working directory, and copy example files to it.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *mkdir temp-monitor*
+$ *cd temp-monitor*
+$ **cp -r ../rhde-rhem-samples/monitor/* .**
+--
+
+.. Review the new manifest for the `warehouse` fleet.
+It adds a disk space monitor, which trigger alerts when the disk is 50% and 80% full.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *cat disk-monitor.yaml*
+include::1@samples:monitor:example$disk-monitor.yaml[]
+--
+
+.. Apply the modifications to the fleet.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *flightctl apply -f disk-monitor.yaml*
+disk-monitor.yaml: applying fleet/warehouse: 200 OK
+--
+
+.. Wait until both devices in the fleet are up-to-date.
++
+[source,console,subs="verbatim,quotes,attributes"]
+--
+$ *flightctl get device --field-selector metadata.owner=Fleet/warehouse*
+NAME                                                    ALIAS   OWNER            SYSTEM  UPDATED         APPLICATIONS
+{edge-1-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}    edge-1  Fleet/warehouse  Online  OutDated        NoApplications
+{edge-2-uuid-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}    edge-2  Fleet/warehouse  Online  OutDated        NoApplications
+--
++
+[source,console,subs="verbatim,quotes,attributes"]
+--
+NAME                                                    ALIAS   OWNER            SYSTEM  UPDATED         APPLICATIONS
+$ *flightctl get --field-selector metadata.owner=Fleet/warehouse*
+{edge-1-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}    edge-1  Fleet/warehouse  Online  UpToDate        NoApplications
+{edge-2-uuid-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}    edge-2  Fleet/warehouse  Online  UpToDate        NoApplications
+--
++
+////
+Got SYSTEM error?!? LoL their disks are already full :-P
+
+student@workstation:~/temp-monitor$ flightctl get device --field-selector metadata.owner=Fleet/warehouse
+NAME                                                    ALIAS   OWNER           SYSTEM  UPDATED         APPLICATIONS
+0ka6b5nv4vk1pj08mmsmogg8qn57s5ngvtnhfeuofm6dadpg9p20    edge-2  Fleet/warehouse Error   UpToDate        NoApplications
+mpr39vjcj5fup095de4pqnld6h4snt2ud79g74p7spv5i00jjid0    edge-1  Fleet/warehouse Error   UpToDate        NoApplications
+
+Not quite... I guess it's the definition of the monitor that needs tweaking.
+See, the composefs at / is full, but the real fs at /sysroot is at 27%
+
+student@workstation:~/temp-managedapp$ ssh -i ../temp-enroll/edge-key -p 8122 core@127.0.0.1
+Last login: Wed Mar 18 16:29:08 2026 from 172.25.250.254
+managed device: edge-1$ 
+managed device: edge-1$ df -h
+Filesystem      Size  Used Avail Use% Mounted on
+devtmpfs        4.0M     0  4.0M   0% /dev
+tmpfs           2.0G   84K  2.0G   1% /dev/shm
+tmpfs           783M  576K  782M   1% /run
+/dev/vda2        19G  5.1G   14G  27% /sysroot
+composefs       6.6M  6.6M     0 100% /
+tmpfs           2.0G     0  2.0G   0% /tmp
+/dev/vda1       960M  152M  809M  16% /boot
+tmpfs           392M     0  392M   0% /run/user/1000
+
+Attempting to use /sysroot on the monitor. It worked. :-)
+
+The status field shows only:
+  resources:
+    cpu: Healthy
+    disk: Healthy
+    memory: Healthy
+
+No actual values. Only good or not good?
+////
+
+.. Is there a way of showing the monitors? Maybe querying device status?
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *flightctl get dev $UUID -o json | jq '.status.resources'*
+{
+  "cpu": "Healthy",
+  "disk": "Healthy",
+  "memory": "Healthy"
+}
+--
 
 .. TBD
+
+4. Fill in the disk of one of the devices to alert to trigger in one of the devices.
+
+.. SSH into device
+
+.. fill disk to about 50%. web UI shows a warning sign and a "degraded" message.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ df -h /sysroot
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/vda2        19G  5.3G   14G  28% /sysroot
+$ dd if=/dev/zero of=largefile1 bs=1k count=5000000
+5000000+0 records in
+5000000+0 records out
+5120000000 bytes (5.1 GB, 4.8 GiB) copied, 12.741 s, 402 MB/s
+$ ls -lh largefile1 
+-rw-r--r--. 1 core wheel 4.8G Mar 18 23:32 largefile1
+$ df -h /sysroot
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/vda2        19G   11G  8.9G  54% /sysroot
+--
+
+.. Check degraded/warning status
++
+[source,console,subs="verbatim,quotes,attributes"]
+--
+$ *flightctl get device --field-selector metadata.owner=Fleet/warehouse*
+NAME                                                    ALIAS   OWNER           SYSTEM          UPDATED         APPLICATIONS
+{edge-2-uuid-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}    edge-2  Fleet/warehouse Degraded        UpToDate        NoApplications
+{edge-1-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}    edge-1  Fleet/warehouse Online          UpToDate        NoApplications
+$ *flightctl get dev $UUID -o json | jq '.status.resources'*
+{
+  "cpu": "Healthy",
+  "disk": "Warning",
+  "memory": "Healthy"
+}
+--
+
+.. Fill in more disk on the device
++
+[source,console,subs="verbatim,quotes"]
+--
+$ df -h /sysroot
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/vda2        19G   11G  8.9G  54% /sysroot
+$ dd if=/dev/zero of=largefile2 bs=1k count=8000000
+8000000+0 records in
+8000000+0 records out
+8192000000 bytes (8.2 GB, 7.6 GiB) copied, 15.8843 s, 516 MB/s
+$ ls -lh largefile* 
+-rw-r--r--. 1 core wheel 4.8G Mar 18 23:32 largefile1
+-rw-r--r--. 1 core wheel 7.7G Mar 18 23:40 largefile2
+$ df -h /sysroot
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/vda2        19G   18G  1.3G  94% /sysroot
+--
+
+.. Check error/critical status. Maybe 5min is too long a wait
++
+[source,console,subs="verbatim,quotes,attributes"]
+--
+$ *flightctl get device --field-selector metadata.owner=Fleet/warehouse*
+NAME                                                    ALIAS   OWNER           SYSTEM          UPDATED         APPLICATIONS
+{edge-2-uuid-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}    edge-2  Fleet/warehouse Error        UpToDate        NoApplications
+{edge-1-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}    edge-1  Fleet/warehouse Online          UpToDate        NoApplications
+$ *flightctl get dev $UUID -o json | jq '.status.resources'*
+{
+  "cpu": "Healthy",
+  "disk": "Critical",
+  "memory": "Healthy"
+}
+--
+
+.. Also check the Events tab on the device details page.
+
+.. Also check the "donut" graphics on the fleet details page and the overview page.
+
+.. TBD
+
+5. Clean the disk of the device to clear the alert.
+
+.. TBD
++
+[source,console,subs="verbatim,quotes"]
+--
+$ rm largefile*
+$ df -h  /sysroot
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/vda2        19G  5.3G   14G  28% /sysroot
+--
+
+.. TBD
++
+[source,console,subs="verbatim,quotes,attributes"]
+--
+$ *flightctl get device --field-selector metadata.owner=Fleet/warehouse*
+NAME                                                    ALIAS   OWNER           SYSTEM          UPDATED         APPLICATIONS
+{edge-2-uuid-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}    edge-2  Fleet/warehouse Online        UpToDate        NoApplications
+{edge-1-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}    edge-1  Fleet/warehouse Online          UpToDate        NoApplications
+$ *flightctl get dev $UUID -o json | jq '.status.resources'*
+{
+  "cpu": "Healthy",
+  "disk": "Healthy",
+  "memory": "Healthy"
+}
+--
 
 
 1. Task or outcome.

@@ -8,7 +8,7 @@ Objective::
 
 Deploy a containerized application to a device fleet and observe its rollout and operation.
 
-WARNING: Not started  yet.
+WARNING: Pending Review
 
 == Before you begin
 
@@ -29,7 +29,7 @@ The git configuration is not really necessary for this simplistic scenario, it j
 
 include::ch1-scale:partial$set-permissive.adoc[]
 
-1. Verify that you have the prerequisites from the xref:ch1-scale:s3-environment-lab.adoc[first lab].
+1. On your _developer machine_, verify that you have the prerequisites from the xref:ch1-scale:s3-environment-lab.adoc[first lab].
 If any of the prerequisites are missing, please return to the first lab and ensure that you did not skip any step.
 
 .. Verify that you have a clone of the course samples repository.
@@ -215,10 +215,7 @@ $ *sed -i "s|REPLACE_WITH_ROOT_AUTH_JSON|$AUTH_JSON|" frontend.yaml*
 .. Review your fleet manifest and ensure it does not contains any `REPLACE` markers anymore.
 
 .. Review the repository manifest, which defines the `webapp` git repository referenced by the `frontend` fleet.
-+
-NOTE: The `webapps` repository points to the course samples repository.
-We could have used the `pos` repository from a xref:ch2-fleets:s3-git-provider-lab.adoc[previous lab].
-This lab creates a new repository in Edge Manager just as an example of doing it from CLI.
+It points to the course samples repository.
 +
 [source,console,subs="verbatim,quotes"]
 --
