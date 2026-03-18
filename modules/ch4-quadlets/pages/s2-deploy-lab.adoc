@@ -1,4 +1,4 @@
-:time_estimate: 5
+:time_estimate: 10
 
 = Lab: Deploy Applications to a Fleet
 
@@ -12,23 +12,20 @@ WARNING: Not started  yet.
 
 == Before you begin
 
-Describe requirements, such as customer portal accounts, Red Hat Developer free sub, already configured machines, access to container registries, etc.
+include::ch2-fleets:partial$before-you-begin.adoc[]
 
 == Instructions
 
-High-level summary of what you will perform in this lab, but more detailed than the objective.
+You will create a fleet which contains both inline and git configuration files, and, more importantly, also contains a single-container application.
+Then you will join a device to the new fleet, verify that the application is running, and simulate unexpected application downtime.
 
-////
-There's no suitable app image on current HOL019 private registry.
-Copy to it a web server and a database?
+The inline configurations provide credentials to access a private registry.
+The private registry, in turn, provides:
 
-registry.redhat.io/ubi9/httpd-24
-registry.redhat.io/rhel9/mysql-84
+* a bootc container image, which is ready to run containerized application using Podman;
+* an application container, which runs a simple PHP application.
 
-single-container app works with the UBI httpd image. :-)
-Now trying to create a container with static HTML to use as a volume
-It's more work than just creating my own derived image for the static web app, but I'm learning something new.
-////
+The git configuration is not really necessary for this simplistic scenario, it just shows that you could include multiple configuration providers on the same fleet.
 
 include::ch1-scale:partial$set-permissive.adoc[]
 
@@ -109,6 +106,7 @@ Domain 'edge-1' destroyed
 2. Build and publish a bootc container image which includes a container runtime.
 +
 Remember that the enrollment image, which you used at the beggining of this course, provided only a mininum RHEL system with the Edge Manager agent.
+That image did not include Podman or any other container runtime, so any attempt to run managed applications will fail unless you first update your devices to a suitable system image.
 
 .. Create a temporary working directory, and copy example files to it.
 +
@@ -120,7 +118,8 @@ $ **cp -r ../rhde-rhem-samples/managedapp/* .**
 --
 
 .. Review the containerfile.
-It adds the container-tools meta-package, which includes Podman, and also the qemu-guest-agent, which should solve clock skew issues of local VMs.
+It adds the container-tools meta-package, which includes Podman.
+It also includes the qemu-guest-agent, which should resolve clock skew issues of local VMs.
 +
 [source,console,subs="verbatim,quotes"]
 --
@@ -166,47 +165,27 @@ $ *skopeo copy containers-storage:localhost/rhem-containers:latest docker://regi
 Writing manifest to image destination
 --
 
-3. Publish, on your private container registry, a static web site that mocks as a client-side web application.
-+
-// Not sure this approach is sound. AFAIK that container would serve only first-time initialization, not be useful for updating a static web site or web app.
+3. Build and publish a container image which contains a PHP web application.
 
-.. Copy an HTTP server image to your private registry.
-+
-NOTE: You can ignore the error about writing signatures, because the private registry in the classroom environment does not support storing image signatues and other OCI artifacts.
+.. Review the contents of the PHP application.
+It just displays the version of its PHP runtime.
 +
 [source,console,subs="verbatim,quotes"]
 --
-$ *skopeo copy docker://registry.redhat.io/ubi9/httpd-24 docker://registry.lab.example.com:5000/ubi9/httpd-24*
-...
-Writing manifest to image destination
-Storing signatures
-FATA[0003] copying system image from manifest list: writing signatures: writing sigstore attachments is disabled by configuration
+$ *cat index.php*
+include::1@samples:managedapp:example$index.php[]
 --
 
-.. Review the contents of the `data` directory.
-+
-[source,console,subs="verbatim,quotes"]
---
-$ *tree data*
-data
-└── html
-    └── index.html
-
-2 directories, 1 file
-$ *cat data/html/index.html*
-Mock of the web application
---
-
-.. Build and publish a scratch container container with the contents of the `data` directory to use as a volume for the HTTP server container.
+.. Build and publish your application container.
 +
 [source,console,subs="verbatim,quotes,attributes"]
 --
-$ *podman build -t webappvol -f Containerfile-html .*
-STEP 1/2: FROM scratch
+$ *podman build -t webapp -f Containerfile-webapp .*
+STEP 1/8: FROM registry.redhat.io/ubi9/ubi
 ...
-Successfully tagged localhost/webappvol:latest
-{rhem-webappvol-v1-shaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}
-$ *skopeo copy containers-storage:localhost/webappvol:latest docker://registry.lab.example.com:5000/webappvol:v1.0*
+Successfully tagged localhost/webapp:latest
+{rhem-webapp-v1-shaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}
+$ *skopeo copy containers-storage:localhost/webapp:latest docker://registry.lab.example.com:5000/webapp:v1.0*
 ...
 Writing manifest to image destination
 --
@@ -223,7 +202,6 @@ include::1@samples:managedapp:example$frontend.yaml[]
 
 .. Create an authentication file for the private registry, and add it to the fleet configuration.
 Notice it must be added in two places, because the container runtime and the bootc subsystems do NOT share the registry authentication files.
-course series, just to show you can mix and match them at your convenience.
 +
 [source,console,subs="verbatim,quotes"]
 --
@@ -237,7 +215,10 @@ $ *sed -i "s|REPLACE_WITH_ROOT_AUTH_JSON|$AUTH_JSON|" frontend.yaml*
 .. Review your fleet manifest and ensure it does not contains any `REPLACE` markers anymore.
 
 .. Review the repository manifest, which defines the `webapp` git repository referenced by the `frontend` fleet.
-We provide this here just as an example of using configuration files from Git from the Edge Manager CLI.
++
+NOTE: The `webapps` repository points to the course samples repository.
+We could have used the `pos` repository from a xref:ch2-fleets:s3-git-provider-lab.adoc[previous lab].
+This lab creates a new repository in Edge Manager just as an example of doing it from CLI.
 +
 [source,console,subs="verbatim,quotes"]
 --
@@ -262,43 +243,128 @@ frontend        <none>  role=frontend   True
 
 5. Join a managed device to the new fleet.
 
-.. Also show the app status on RHEM
+.. Edit the `edge-1` device manifest so its labels match the new fleet selector.
++
+Edit any existing with key `role`, or add it it doesn't exist.
+Also ensure you remove any label with key `location`, to prevent the device matching multiple other fleets, from previous labs.
++
+[source,console,subs="verbatim,quotes,attributes"]
+--
+$ *UUID=$( flightctl get device -l alias=edge-1 -o name )*
+$ *flightctl edit device $UUID*
+apiVersion: flightctl.io/v1beta1
+kind: Device
+metadata:
+  ...
+  labels:
+    alias: edge-1
+    rhel: "9.6"
+    type: noapps
+    *role: frontend*
+  name: {edge-1-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}
+  ...
+spec:
+...
+device/{edge-1-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa} edited
+--
 
-.. Show the motd from the git config
+.. Wait until the device status changes to `UptoDate`.
+Notice that the device now displays a `Helthty` status on the `APPLICATIONS` column, instead of `NoApplications`.
++
+[source,console,subs="verbatim,quotes,attributes"]
+--
+$ *flightctl get device $UUID*
+NAME                                                    ALIAS   OWNER           SYSTEM  UPDATED         APPLICATIONS
+{edge-1-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}    edge-1  Fleet/frontend  Online  UpToDate        *Healthy*
+--
 
-.. TBD
+.. Alternatively, you could verify the status of all devices in the fleet.
++
+[source,console,subs="verbatim,quotes,attributes"]
+--
+$ *flightctl get --field-selector metadata.owner=Fleet/frontend*
+{edge-1-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}    edge-1  Fleet/frontend  Online  UpToDate        *Healthy*
+--
 
-6. Verify the application is accessible.
-
-.. TBD
-
-7. Simulate downtime in the application and show that RHEM perceives it.
-
-.. TBD
-
-1. Task or outcome.
-
-.. Something to do, using a graphical or web UI.
-Click menu:Save As[] to save your work.
-
-.. More things to do
-
-2. Task or outcome.
-
-.. Something to do, using a shell.
+.. Show the "message of day" to prove that the device got the settings from the git configuration provider.
 +
 [source,console,subs="verbatim,quotes"]
 --
-$ *command --options fixed-arguments _variable-arguments_*
-output of the command
-highlight *something* in the output
+$ *ssh -i ../temp-enroll/edge-key -p 8122 core@127.0.0.1*
+Managed device running a containerized web app
+
+Last login: Wed Mar 11 19:30:01 2026 from 172.25.250.254
+[core@enroll ~]$ *exit*
+logout
+Connection to 127.0.0.1 closed.
 --
 
+6. Verify the application is accessible, then simulate downtime in the application to show how Edge Manager reacts.
 
-.. More things to do.
-Press kbd:[Ctrl+C] to interrupt.
+.. Access the mock of your web application.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *curl 127.0.0.1:8108*
+Mock web app running PHP 8.0.30
+--
 
-Summary of what you acomplished.
+.. Find the container id of the application container and stop it.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *flightctl console device $UUID -- podman ps*
+CONTAINER ID  IMAGE                                      COMMAND               CREATED         STATUS         PORTS                 NAMES
+*ac31d8eae297*  registry.lab.example.com:5000/webapp:v1.0  /bin/sh -c php-fp...  12 minutes ago  Up 12 minutes  0.0.0.0:80->8080/tcp  systemd-httpd-317337-app
+--
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *flightctl console device $UUID -- podman kill _ac31d8eae297_*
+ac31d8eae297
+--
+
+.. Alternatively, you can open a SSH session to your local VM and run podman from a root prompt.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *ssh -i ../temp-enroll/edge-key -p 8122 core@127.0.0.1*
+...
+[core@enroll ~]$ *sudo -i*
+[root@enroll ~]#
+--
+
+.. Verify that Edge Manager reports a change in application status.
+It may take a few moments until you can see the change.
++
+[source,console,subs="verbatim,quotes,attributes"]
+--
+$ *flightctl get device $UUID*
+NAME                                                    ALIAS   OWNER           SYSTEM  UPDATED         APPLICATIONS
+{edge-1-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}    edge-1  Fleet/frontend  Online  UpToDate        *Error*
+--
+
+.. Verify that your web application is indeed off-line.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *curl 127.0.0.1:8108*
+curl: (56) Recv failure: Connection reset by peer
+--
+
+.. After a few moments, Edge Manager restarts the container and the application status is back to healthy.
++
+[source,console,subs="verbatim,quotes,attributes"]
+--
+$ *flightctl get device $UUID*
+NAME                                                    ALIAS   OWNER           SYSTEM  UPDATED         APPLICATIONS
+{edge-1-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}    edge-1  Fleet/frontend  Online  UpToDate        *Healthy*
+--
+
+.. If you wish, you can verify that the application is again accessible and a new container is running on the managed device.
+
+You demonstrated that Edge Manager can deploy, monitor, and keep containerized application running on managed devices.
+This give organizations the flexibility of managing application life cycles independently of operating systems updates, if they wish.
 
 == What's next
 

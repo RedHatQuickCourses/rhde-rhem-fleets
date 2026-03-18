@@ -18,6 +18,11 @@ Describe requirements, such as customer portal accounts, Red Hat Developer free 
 
 High-level summary of what you will perform in this lab, but more detailed than the objective.
 
+1. Something
+
+.. TBD
+
+
 1. Task or outcome.
 
 .. Something to do, using a graphical or web UI.

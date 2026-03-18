@@ -12,7 +12,8 @@ WARNING: Pending Review
 
 == Before you begin
 
-You need a _development machine_ running RHEL, with enough capacity to run a few local VMs and a custom installer ISO used to provision new local VMs.
+You need a _development machine_ running RHEL, and hosting a few local VMs which stand in for managed devices.
+These local VMs are already provisioned and enrolled in Edge Manager.
 
 You also need a _server machine_ running RHEL, which is already configured as an Edge Manager server.
 

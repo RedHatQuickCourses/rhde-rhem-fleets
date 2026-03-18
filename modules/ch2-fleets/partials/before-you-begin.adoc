@@ -1,0 +1,15 @@
+You need a _development machine_ running RHEL, and hosting a few local VMs which stand in for managed devices.
+These local VMs are already provisioned and enrolled in Edge Manager.
+
+You also need a _server machine_ running RHEL, which is already configured as an Edge Manager server.
+
+Both your _development machine_ and _server machine_ were configured by performing the xref:ch1-scale:s3-environment-lab.adoc[first lab].
+
+If you are using the course classroom, your _development machine_ is the `workstation` VM.
+Log in as the user `student` with password `student`.
+From that machine, you may start SSH sessions to the `servera` VM, which is your _server_ machine, using the same user.
+Alternatively, you can open a shell or a console directly on the `servera` VM.
+
+NOTE: This lab does not require the outcomes of any of the previous labs, you could perform just the first lab and skip to here.
+The example outputs of commands assume that you are performing all labs sequentially, in the same environment.
+If you skipped any of previous labs, your outputs may display different sets of VMs, devices, and fleets, but that should not affect the expected outcomes of this lab.
