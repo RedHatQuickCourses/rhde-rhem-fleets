@@ -168,7 +168,7 @@
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p><em>Estimated reading time: <strong>5 minutes</strong>.</em></p>
+<p><em>Estimated reading time: <strong>10 minutes</strong>.</em></p>
 </div>
 <div class="dlist">
 <dl>
@@ -196,7 +196,34 @@ Not started  yet.
 <h2 id="_before_you_begin"><a class="anchor" href="#_before_you_begin"></a>Before you begin</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Describe requirements, such as customer portal accounts, Red Hat Developer free sub, already configured machines, access to container registries, etc.</p>
+<p>You need a <em>development machine</em> running RHEL, and hosting a few local VMs which stand in for managed devices.
+These local VMs are already provisioned and enrolled in Edge Manager.</p>
+</div>
+<div class="paragraph">
+<p>You also need a <em>server machine</em> running RHEL, which is already configured as an Edge Manager server.</p>
+</div>
+<div class="paragraph">
+<p>Both your <em>development machine</em> and <em>server machine</em> were configured by performing the <a href="../ch1-scale/s3-environment-lab.html" class="xref page">first lab</a>.</p>
+</div>
+<div class="paragraph">
+<p>If you are using the course classroom, your <em>development machine</em> is the <code>workstation</code> VM.
+Log in as the user <code>student</code> with password <code>student</code>.
+From that machine, you may start SSH sessions to the <code>servera</code> VM, which is your <em>server</em> machine, using the same user.
+Alternatively, you can open a shell or a console directly on the <code>servera</code> VM.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+This lab does not require the outcomes of any of the previous labs, you could perform just the first lab and skip to here.
+The example outputs of commands assume that you are performing all labs sequentially, in the same environment.
+If you skipped any of previous labs, your outputs may display different sets of VMs, devices, and fleets, but that should not affect the expected outcomes of this lab.
+</td>
+</tr>
+</table>
 </div>
 </div>
 </div>
@@ -204,7 +231,25 @@ Not started  yet.
 <h2 id="_instructions"><a class="anchor" href="#_instructions"></a>Instructions</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>High-level summary of what you will perform in this lab, but more detailed than the objective.</p>
+<p>You will create a fleet which contains both inline and git configuration files, and, more importantly, also contains a single-container application.
+Then you will join a device to the new fleet, verify that the application is running, and simulate unexpected application downtime.</p>
+</div>
+<div class="paragraph">
+<p>The inline configurations provide credentials to access a private registry.
+The private registry, in turn, provides:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>a bootc container image, which is ready to run containerized application using Podman;</p>
+</li>
+<li>
+<p>an application container, which runs a simple PHP application.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The git configuration is not really necessary for this simplistic scenario, it just shows that you could include multiple configuration providers on the same fleet.</p>
 </div>
 <div class="admonitionblock important">
 <table>
@@ -331,7 +376,8 @@ Domain 'edge-1' destroyed
 <li>
 <p>Build and publish a bootc container image which includes a container runtime.</p>
 <div class="paragraph">
-<p>Remember that the enrollment image, which you used at the beggining of this course, provided only a mininum RHEL system with the Edge Manager agent.</p>
+<p>Remember that the enrollment image, which you used at the beggining of this course, provided only a mininum RHEL system with the Edge Manager agent.
+That image did not include Podman or any other container runtime, so any attempt to run managed applications will fail unless you first update your devices to a suitable system image.</p>
 </div>
 <div class="olist loweralpha">
 <ol class="loweralpha" type="a">
@@ -347,7 +393,8 @@ $ <strong>cp -r ../rhde-rhem-samples/managedapp/* .</strong></code></pre>
 </li>
 <li>
 <p>Review the containerfile.
-It adds the container-tools meta-package, which includes Podman, and also the qemu-guest-agent, which should solve clock skew issues of local VMs.</p>
+It adds the container-tools meta-package, which includes Podman.
+It also includes the qemu-guest-agent, which should resolve clock skew issues of local VMs.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-console" data-lang="console">$ <strong>cat Containerfile</strong>
@@ -413,58 +460,29 @@ Writing manifest to image destination</code></pre>
 </div>
 </li>
 <li>
-<p>Publish, on your private container registry, a static web site that mocks as a client-side web application.</p>
+<p>Build and publish a container image which contains a PHP web application.</p>
 <div class="olist loweralpha">
 <ol class="loweralpha" type="a">
 <li>
-<p>Copy an HTTP server image to your private registry.</p>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-You can ignore the error about writing signatures, because the private registry in the classroom environment does not support storing image signatues and other OCI artifacts.
-</td>
-</tr>
-</table>
-</div>
+<p>Review the contents of the PHP application.
+It just displays the version of its PHP runtime.</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>skopeo copy docker://registry.redhat.io/ubi9/httpd-24 docker://registry.lab.example.com:5000/ubi9/httpd-24</strong>
-...
-Writing manifest to image destination
-Storing signatures
-FATA[0003] copying system image from manifest list: writing signatures: writing sigstore attachments is disabled by configuration</code></pre>
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>cat index.php</strong>
+&lt;?php printf ("Mock web app running PHP %s\n", phpversion()) ?&gt;</code></pre>
 </div>
 </div>
 </li>
 <li>
-<p>Review the contents of the <code>data</code> directory.</p>
+<p>Build and publish your application container.</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>tree data</strong>
-data
-└── html
-    └── index.html
-
-2 directories, 1 file
-$ <strong>cat data/html/index.html</strong>
-Mock of the web application</code></pre>
-</div>
-</div>
-</li>
-<li>
-<p>Build and publish a scratch container container with the contents of the <code>data</code> directory to use as a volume for the HTTP server container.</p>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>podman build -t webappvol -f Containerfile-html .</strong>
-STEP 1/2: FROM scratch
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>podman build -t webapp -f Containerfile-webapp .</strong>
+STEP 1/8: FROM registry.redhat.io/ubi9/ubi
 ...
-Successfully tagged localhost/webappvol:latest
+Successfully tagged localhost/webapp:latest
 8d7d6217f71a22f4f890b34708922569c479367dcd46f73eb6f910ea9963a4e2
-$ <strong>skopeo copy containers-storage:localhost/webappvol:latest docker://registry.lab.example.com:5000/webappvol:v1.0</strong>
+$ <strong>skopeo copy containers-storage:localhost/webapp:latest docker://registry.lab.example.com:5000/webapp:v1.0</strong>
 ...
 Writing manifest to image destination</code></pre>
 </div>
@@ -513,23 +531,16 @@ spec:
       applications:
       - appType: container
         envVars: {}
-        image: registry.lab.example.com:5000/ubi9/httpd-24:latest
+        image: registry.lab.example.com:5000/webapp:v1.0
         name: httpd
         ports:
-        - 80:8080
-        volumes:
-        - image:
-            reference: registry.lab.example.com:5000/webappvol:v1.0
-          mount:
-            path: /var/www
-          name: html</code></pre>
+        - 80:8080</code></pre>
 </div>
 </div>
 </li>
 <li>
 <p>Create an authentication file for the private registry, and add it to the fleet configuration.
-Notice it must be added in two places, because the container runtime and the bootc subsystems do NOT share the registry authentication files.
-course series, just to show you can mix and match them at your convenience.</p>
+Notice it must be added in two places, because the container runtime and the bootc subsystems do NOT share the registry authentication files.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-console" data-lang="console">$ <strong>podman login --authfile auth.json -u student -p redhat registry.lab.example.com:5000</strong>
@@ -544,8 +555,21 @@ $ <strong>sed -i "s|REPLACE_WITH_ROOT_AUTH_JSON|$AUTH_JSON|" frontend.yaml</stro
 <p>Review your fleet manifest and ensure it does not contains any <code>REPLACE</code> markers anymore.</p>
 </li>
 <li>
-<p>Review the repository manifest, which defines the <code>webapp</code> git repository referenced by the <code>frontend</code> fleet.
-We provide this here just as an example of using configuration files from Git from the Edge Manager CLI.</p>
+<p>Review the repository manifest, which defines the <code>webapp</code> git repository referenced by the <code>frontend</code> fleet.</p>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+The <code>webapps</code> repository points to the course samples repository.
+We could have used the <code>pos</code> repository from a <a href="../ch2-fleets/s3-git-provider-lab.html" class="xref page">previous lab</a>.
+This lab creates a new repository in Edge Manager just as an example of doing it from CLI.
+</td>
+</tr>
+</table>
+</div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-console" data-lang="console">$ <strong>cat webapp.yaml</strong>
@@ -593,68 +617,141 @@ frontend        &lt;none&gt;  role=frontend   True</code></pre>
 <div class="olist loweralpha">
 <ol class="loweralpha" type="a">
 <li>
-<p>Also show the app status on RHEM</p>
-</li>
-<li>
-<p>Show the motd from the git config</p>
-</li>
-<li>
-<p>TBD</p>
-</li>
-</ol>
+<p>Edit the <code>edge-1</code> device manifest so its labels match the new fleet selector.</p>
+<div class="paragraph">
+<p>Edit any existing with key <code>role</code>, or add it it doesn&#8217;t exist.
+Also ensure you remove any label with key <code>location</code>, to prevent the device matching multiple other fleets, from previous labs.</p>
 </div>
-</li>
-<li>
-<p>Verify the application is accessible.</p>
-<div class="olist loweralpha">
-<ol class="loweralpha" type="a">
-<li>
-<p>TBD</p>
-</li>
-</ol>
-</div>
-</li>
-<li>
-<p>Simulate downtime in the application and show that RHEM perceives it.</p>
-<div class="olist loweralpha">
-<ol class="loweralpha" type="a">
-<li>
-<p>TBD</p>
-</li>
-</ol>
-</div>
-</li>
-<li>
-<p>Task or outcome.</p>
-<div class="olist loweralpha">
-<ol class="loweralpha" type="a">
-<li>
-<p>Something to do, using a graphical or web UI.
-Click <b class="menuref">Save As</b> to save your work.</p>
-</li>
-<li>
-<p>More things to do</p>
-</li>
-</ol>
-</div>
-</li>
-<li>
-<p>Task or outcome.</p>
-<div class="olist loweralpha">
-<ol class="loweralpha" type="a">
-<li>
-<p>Something to do, using a shell.</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>command --options fixed-arguments <em>variable-arguments</em></strong>
-output of the command
-highlight <strong>something</strong> in the output</code></pre>
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>UUID=$( flightctl get device -l alias=edge-1 -o name )</strong>
+$ <strong>flightctl edit device $UUID</strong>
+apiVersion: flightctl.io/v1beta1
+kind: Device
+metadata:
+  ...
+  labels:
+    alias: edge-1
+    rhel: "9.6"
+    type: noapps
+    <strong>role: frontend</strong>
+  name: 1u63hvsgtua9tjjbmla9bgh5h2s77cb8esepphnf68m3ocf8qfng
+  ...
+spec:
+...
+device/1u63hvsgtua9tjjbmla9bgh5h2s77cb8esepphnf68m3ocf8qfng edited</code></pre>
 </div>
 </div>
 </li>
 <li>
-<p>More things to do.
-Press <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>C</kbd></span> to interrupt.</p>
+<p>Wait until the device status changes to <code>UptoDate</code>.
+Notice that the device now displays a <code>Helthty</code> status on the <code>APPLICATIONS</code> column, instead of <code>NoApplications</code>.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl get device $UUID</strong>
+NAME                                                    ALIAS   OWNER           SYSTEM  UPDATED         APPLICATIONS
+1u63hvsgtua9tjjbmla9bgh5h2s77cb8esepphnf68m3ocf8qfng    edge-1  Fleet/frontend  Online  UpToDate        <strong>Healthy</strong></code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Alternatively, you could verify the status of all devices in the fleet.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl get --field-selector metadata.owner=Fleet/frontend</strong>
+1u63hvsgtua9tjjbmla9bgh5h2s77cb8esepphnf68m3ocf8qfng    edge-1  Fleet/frontend  Online  UpToDate        <strong>Healthy</strong></code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Show the "message of day" to prove that the device got the settings from the git configuration provider.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>ssh -i ../temp-enroll/edge-key -p 8122 core@127.0.0.1</strong>
+Managed device running a containerized web app
+
+Last login: Wed Mar 11 19:30:01 2026 from 172.25.250.254
+[core@enroll ~]$ <strong>exit</strong>
+logout
+Connection to 127.0.0.1 closed.</code></pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>Verify the application is accessible, then simulate downtime in the application to show how Edge Manager reacts.</p>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p>Access the mock of your web application.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>curl 127.0.0.1:8108</strong>
+Mock web app running PHP 8.0.30</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Find the container id of the application container and stop it.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl console device $UUID -- podman ps</strong>
+CONTAINER ID  IMAGE                                      COMMAND               CREATED         STATUS         PORTS                 NAMES
+<strong>ac31d8eae297</strong>  registry.lab.example.com:5000/webapp:v1.0  /bin/sh -c php-fp...  12 minutes ago  Up 12 minutes  0.0.0.0:80-&gt;8080/tcp  systemd-httpd-317337-app</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl console device $UUID -- podman kill <em>ac31d8eae297</em></strong>
+ac31d8eae297</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Alternatively, you can open a SSH session to your local VM and run podman from a root prompt.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>ssh -i ../temp-enroll/edge-key -p 8122 core@127.0.0.1</strong>
+...
+[core@enroll ~]$ <strong>sudo -i</strong>
+[root@enroll ~]#</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Verify that Edge Manager reports a change in application status.
+It may take a few moments until you can see the change.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl get device $UUID</strong>
+NAME                                                    ALIAS   OWNER           SYSTEM  UPDATED         APPLICATIONS
+1u63hvsgtua9tjjbmla9bgh5h2s77cb8esepphnf68m3ocf8qfng    edge-1  Fleet/frontend  Online  UpToDate        <strong>Error</strong></code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Verify that your web application is indeed off-line.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>curl 127.0.0.1:8108</strong>
+curl: (56) Recv failure: Connection reset by peer</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>After a few moments, Edge Manager restarts the container and the application status is back to healthy.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl get device $UUID</strong>
+NAME                                                    ALIAS   OWNER           SYSTEM  UPDATED         APPLICATIONS
+1u63hvsgtua9tjjbmla9bgh5h2s77cb8esepphnf68m3ocf8qfng    edge-1  Fleet/frontend  Online  UpToDate        <strong>Healthy</strong></code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>If you wish, you can verify that the application is again accessible and a new container is running on the managed device.</p>
 </li>
 </ol>
 </div>
@@ -662,7 +759,8 @@ Press <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>C</kbd></span> to interrupt.</p>
 </ol>
 </div>
 <div class="paragraph">
-<p>Summary of what you acomplished.</p>
+<p>You demonstrated that Edge Manager can deploy, monitor, and keep containerized application running on managed devices.
+This give organizations the flexibility of managing application life cycles independently of operating systems updates, if they wish.</p>
 </div>
 </div>
 </div>
