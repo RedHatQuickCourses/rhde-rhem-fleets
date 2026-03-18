@@ -197,7 +197,34 @@ Not started  yet.
 <h2 id="_before_you_begin"><a class="anchor" href="#_before_you_begin"></a>Before you begin</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Describe requirements, such as customer portal accounts, Red Hat Developer free sub, already configured machines, access to container registries, etc.</p>
+<p>You need a <em>development machine</em> running RHEL, and hosting a few local VMs which stand in for managed devices.
+These local VMs are already provisioned and enrolled in Edge Manager.</p>
+</div>
+<div class="paragraph">
+<p>You also need a <em>server machine</em> running RHEL, which is already configured as an Edge Manager server.</p>
+</div>
+<div class="paragraph">
+<p>Both your <em>development machine</em> and <em>server machine</em> were configured by performing the <a href="../ch1-scale/s3-environment-lab.html" class="xref page">first lab</a>.</p>
+</div>
+<div class="paragraph">
+<p>If you are using the course classroom, your <em>development machine</em> is the <code>workstation</code> VM.
+Log in as the user <code>student</code> with password <code>student</code>.
+From that machine, you may start SSH sessions to the <code>servera</code> VM, which is your <em>server</em> machine, using the same user.
+Alternatively, you can open a shell or a console directly on the <code>servera</code> VM.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+This lab does not require the outcomes of any of the previous labs, you could perform just the first lab and skip to here.
+The example outputs of commands assume that you are performing all labs sequentially, in the same environment.
+If you skipped any of previous labs, your outputs may display different sets of VMs, devices, and fleets, but that should not affect the expected outcomes of this lab.
+</td>
+</tr>
+</table>
 </div>
 </div>
 </div>
@@ -207,14 +234,433 @@ Not started  yet.
 <div class="paragraph">
 <p>High-level summary of what you will perform in this lab, but more detailed than the objective.</p>
 </div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>The classroom environment has an issue which requires setting SELinux to permissive mode. This is something Red Hat do <strong>NOT</strong> advises doing to any production system, including developer machines and CI/CD servers.</p>
+</div>
+<div class="paragraph">
+<p>On your <em>development machine</em>, perform the following before you attempt any lab of this course.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>sudo setenforce Permissive</strong></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Note tat SELinux is still in enforcing mode on your <em>server machine</em> and also on all test VMs which stand in for managed devices.
+Only your <em>development machine</em> needs SELinux set to permissive mode.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
-<p>Something</p>
+<p>On your <em>developer machine</em>, verify that you have the prerequisites from the <a href="../ch1-scale/s3-environment-lab.html" class="xref page">first lab</a>.
+If any of the prerequisites are missing, please return to the first lab and ensure that you did not skip any step.</p>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p>Verify that you have a clone of the course samples repository.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>cd</strong>
+$ <strong>ls rhde-rhem-samples</strong>
+antora.yml  config  enroll ...</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Verify that you have at least two local VMs.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>virsh list --all</strong>
+ Id   Name     State
+------------------------
+ 1    edge-1   running
+ 2    edge-2   running
+ 3    edge-3   running</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>If your VMs are not running, start them, but ensuring they are booting from power on instead of resumed from saved state.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>virsh list --all</strong>
+ Id   Name     State
+-------------------------
+ -    edge-1   shut off
+ -    edge-2   shut off
+ -    edge-3   shut off</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>virsh start edge-1 --force-boot</strong>
+Domain 'edge-1' started
+# repeat for the remaining VMs</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Give your local VMs a few moments to finish boot.
+Then, log in on Edge Manager as a non-administrator and verify that there are two managed devices, which are on-line and up-to-date.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl login -u student -p student https://servera.lab.example.com:3443</strong>
+Auto-selected organization: 00000000-0000-0000-0000-000000000000 Default
+Login successful.</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl get device</strong>
+NAME                                                    ALIAS   OWNER            SYSTEM  UPDATED         APPLICATIONS
+mpr39vjcj5fup095de4pqnld6h4snt2ud79g74p7spv5i00jjid0    edge-3  Fleet/warehouse  Online  UpToDate        NoApplications
+g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g    edge-2  Fleet/store      Online  UpToDate        NoApplications
+1u63hvsgtua9tjjbmla9bgh5h2s77cb8esepphnf68m3ocf8qfng    edge-1  &lt;none&gt;           Online  UpToDate        NoApplications</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>If you devices keep displaying as off-line for too long, it might be related to clock skew.
+In that case, stop each of your local VMs and return to the beginning of this lab.</p>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Clock skew prevents a device from synchronizing with Edge Manager, and is known to happen if your ROLE classroom is stopped without first shutting down local VMs on your <em>develoment machine</em> and later your VMs are restarted from saved state.
+</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>virsh destroy edge-1</strong>
+Domain 'edge-1' destroyed
+# repeat for the remaining VMs</code></pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>Ensure there is a <code>warehouse</code> fleet with two devices.</p>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p>Verify that a fleet named <code>warehouse</code> already exists.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl get fleet warehouse</strong>
+NAME            OWNER   SELECTOR                VALID
+warehouse       &lt;none&gt;  location=warehouse      True</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>If it does not exist, create the fleet using the provided manifest file.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl get fleet warehouse</strong>
+Error: response status: 404, message: Fleet of name "warehouse" not found</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl apply -f rhde-rhem-samples/fleet/warehouse.yaml</strong>
+warehouse.yaml: applying fleet/warehouse: 201 Created</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Verify that managed devices <code>edge-1</code> and <code>edge-2</code> are members of the <code>warehouse</code> fleet.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl get device --field-selector metadata.owner=Fleet/warehouse</strong>
+NAME                                                    ALIAS   OWNER            SYSTEM  UPDATED         APPLICATIONS
+1u63hvsgtua9tjjbmla9bgh5h2s77cb8esepphnf68m3ocf8qfng    edge-1  Fleet/warehouse  Online  UpToDate        NoApplications
+g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g    edge-2  Fleet/warehouse  Online  UpToDate        NoApplications</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>If the fleet contains no devices, or only one device, join the device which is not in any fleet (or which is on a different fleet) to the warehouse fleet.</p>
+<div class="paragraph">
+<p>Edit the device to include a <code>location</code> label which matches the selector of the <code>warehouse</code> fleet.
+Make such edits to <code>edge-1</code> and <code>edge-2</code> by following the example.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>UUID=$( flightctl get device -l alias=edge-1 -o name )</strong>
+$ <strong>flightctl edit device $UUID</strong>
+apiVersion: flightctl.io/v1beta1
+kind: Device
+metadata:
+  ...
+  labels:
+    alias: edge-1
+    rhel: "9.6"
+    type: noapps
+    <strong>location: warehouse</strong>
+  name: 1u63hvsgtua9tjjbmla9bgh5h2s77cb8esepphnf68m3ocf8qfng
+  ...
+spec:
+...
+device/1u63hvsgtua9tjjbmla9bgh5h2s77cb8esepphnf68m3ocf8qfng edited</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>If you made any edits, wait until both <code>edge-1</code> and <code>edge-2</code> managed devices are up-to-date.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl get device --field-selector metadata.owner=Fleet/warehouse</strong>
+NAME                                                    ALIAS   OWNER            SYSTEM  UPDATED         APPLICATIONS
+1u63hvsgtua9tjjbmla9bgh5h2s77cb8esepphnf68m3ocf8qfng    edge-1  Fleet/warehouse  Online  UpToDate        NoApplications
+g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g    edge-2  Fleet/warehouse  Online  UpToDate        NoApplications</code></pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>Add a device monitor to the fleet, using the provided manifest.</p>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p>Create a temporary working directory, and copy example files to it.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>mkdir temp-monitor</strong>
+$ <strong>cd temp-monitor</strong>
+$ <strong>cp -r ../rhde-rhem-samples/monitor/* .</strong></code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Review the new manifest for the <code>warehouse</code> fleet.
+It adds a disk space monitor, which trigger alerts when the disk is 50% and 80% full.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>cat disk-monitor.yaml</strong>
+apiVersion: flightctl.io/v1beta1
+kind: Fleet
+metadata:
+  name: warehouse
+spec:
+  selector:
+    matchLabels:
+      location: warehouse
+  template:
+    spec:
+      applications: []
+      config:
+      - inline:
+        - content: |-
+            export PS1="managed device: {{ .metadata.labels.alias }}\$ "
+
+          path: /etc/profile.d/managed-device.sh
+        name: ps1
+      resources:
+      - monitorType: Disk
+        samplingInterval: 5s
+        path: /
+        alertRules:
+        - severity: Warning
+          duration: 1m          
+          percentage: 50
+          description: Disk is over 50% full for over 1min.
+        - severity: Critical
+          duration: 5m
+          percentage: 80
+          description: Disk is over 80% full over 5min.</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Apply the modifications to the fleet.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl apply -f disk-monitor.yaml</strong>
+disk-monitor.yaml: applying fleet/warehouse: 200 OK</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Wait until both devices in the fleet are up-to-date.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl get device --field-selector metadata.owner=Fleet/warehouse</strong>
+NAME                                                    ALIAS   OWNER            SYSTEM  UPDATED         APPLICATIONS
+1u63hvsgtua9tjjbmla9bgh5h2s77cb8esepphnf68m3ocf8qfng    edge-1  Fleet/warehouse  Online  OutDated        NoApplications
+g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g    edge-2  Fleet/warehouse  Online  OutDated        NoApplications</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">NAME                                                    ALIAS   OWNER            SYSTEM  UPDATED         APPLICATIONS
+$ <strong>flightctl get --field-selector metadata.owner=Fleet/warehouse</strong>
+1u63hvsgtua9tjjbmla9bgh5h2s77cb8esepphnf68m3ocf8qfng    edge-1  Fleet/warehouse  Online  UpToDate        NoApplications
+g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g    edge-2  Fleet/warehouse  Online  UpToDate        NoApplications</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Is there a way of showing the monitors? Maybe querying device status?</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl get dev $UUID -o json | jq '.status.resources'</strong>
+{
+  "cpu": "Healthy",
+  "disk": "Healthy",
+  "memory": "Healthy"
+}</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>TBD</p>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>Fill in the disk of one of the devices to alert to trigger in one of the devices.</p>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p>SSH into device</p>
+</li>
+<li>
+<p>fill disk to about 50%. web UI shows a warning sign and a "degraded" message.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ df -h /sysroot
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/vda2        19G  5.3G   14G  28% /sysroot
+$ dd if=/dev/zero of=largefile1 bs=1k count=5000000
+5000000+0 records in
+5000000+0 records out
+5120000000 bytes (5.1 GB, 4.8 GiB) copied, 12.741 s, 402 MB/s
+$ ls -lh largefile1
+-rw-r--r--. 1 core wheel 4.8G Mar 18 23:32 largefile1
+$ df -h /sysroot
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/vda2        19G   11G  8.9G  54% /sysroot</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Check degraded/warning status</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl get device --field-selector metadata.owner=Fleet/warehouse</strong>
+NAME                                                    ALIAS   OWNER           SYSTEM          UPDATED         APPLICATIONS
+g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g    edge-2  Fleet/warehouse Degraded        UpToDate        NoApplications
+1u63hvsgtua9tjjbmla9bgh5h2s77cb8esepphnf68m3ocf8qfng    edge-1  Fleet/warehouse Online          UpToDate        NoApplications
+$ <strong>flightctl get dev $UUID -o json | jq '.status.resources'</strong>
+{
+  "cpu": "Healthy",
+  "disk": "Warning",
+  "memory": "Healthy"
+}</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Fill in more disk on the device</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ df -h /sysroot
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/vda2        19G   11G  8.9G  54% /sysroot
+$ dd if=/dev/zero of=largefile2 bs=1k count=8000000
+8000000+0 records in
+8000000+0 records out
+8192000000 bytes (8.2 GB, 7.6 GiB) copied, 15.8843 s, 516 MB/s
+$ ls -lh largefile*
+-rw-r--r--. 1 core wheel 4.8G Mar 18 23:32 largefile1
+-rw-r--r--. 1 core wheel 7.7G Mar 18 23:40 largefile2
+$ df -h /sysroot
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/vda2        19G   18G  1.3G  94% /sysroot</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Check error/critical status. Maybe 5min is too long a wait</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl get device --field-selector metadata.owner=Fleet/warehouse</strong>
+NAME                                                    ALIAS   OWNER           SYSTEM          UPDATED         APPLICATIONS
+g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g    edge-2  Fleet/warehouse Error        UpToDate        NoApplications
+1u63hvsgtua9tjjbmla9bgh5h2s77cb8esepphnf68m3ocf8qfng    edge-1  Fleet/warehouse Online          UpToDate        NoApplications
+$ <strong>flightctl get dev $UUID -o json | jq '.status.resources'</strong>
+{
+  "cpu": "Healthy",
+  "disk": "Critical",
+  "memory": "Healthy"
+}</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Also check the Events tab on the device details page.</p>
+</li>
+<li>
+<p>Also check the "donut" graphics on the fleet details page and the overview page.</p>
+</li>
+<li>
+<p>TBD</p>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>Clean the disk of the device to clear the alert.</p>
 <div class="olist loweralpha">
 <ol class="loweralpha" type="a">
 <li>
 <p>TBD</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ rm largefile*
+$ df -h  /sysroot
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/vda2        19G  5.3G   14G  28% /sysroot</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>TBD</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl get device --field-selector metadata.owner=Fleet/warehouse</strong>
+NAME                                                    ALIAS   OWNER           SYSTEM          UPDATED         APPLICATIONS
+g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g    edge-2  Fleet/warehouse Online        UpToDate        NoApplications
+1u63hvsgtua9tjjbmla9bgh5h2s77cb8esepphnf68m3ocf8qfng    edge-1  Fleet/warehouse Online          UpToDate        NoApplications
+$ <strong>flightctl get dev $UUID -o json | jq '.status.resources'</strong>
+{
+  "cpu": "Healthy",
+  "disk": "Healthy",
+  "memory": "Healthy"
+}</code></pre>
+</div>
+</div>
 </li>
 </ol>
 </div>
