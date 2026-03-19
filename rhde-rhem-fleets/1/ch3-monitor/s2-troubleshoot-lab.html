@@ -169,13 +169,13 @@
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p><em>Estimated reading time: <strong>5 minutes</strong>.</em></p>
+<p><em>Estimated reading time: <strong>12 minutes</strong>.</em></p>
 </div>
 <div class="dlist">
 <dl>
 <dt class="hdlist1">Objective</dt>
 <dd>
-<p>Practice troubleshooting by creating scenarios with configuration differences and health issues, then extract diagnostic information using RHEM tools.</p>
+<p>Practice troubleshooting by creating scenarios with health issues, then extract diagnostic information using RHEM tools.</p>
 </dd>
 </dl>
 </div>
@@ -186,7 +186,7 @@
 <i class="fa icon-warning" title="Warning"></i>
 </td>
 <td class="content">
-Not started  yet.
+Pending Review
 </td>
 </tr>
 </table>
@@ -221,7 +221,7 @@ Alternatively, you can open a shell or a console directly on the <code>servera</
 <td class="content">
 This lab does not require the outcomes of any of the previous labs, you could perform just the first lab and skip to here.
 The example outputs of commands assume that you are performing all labs sequentially, in the same environment.
-If you skipped any of previous labs, your outputs may display different sets of VMs, devices, and fleets, but that should not affect the expected outcomes of this lab.
+If you skipped any of previous labs, or if you had to destroy and recrete your enviromnent, your actual outputs may display different sets of VMs, devices, and fleets, but that should not affect the expected outcomes of this lab.
 </td>
 </tr>
 </table>
@@ -232,7 +232,9 @@ If you skipped any of previous labs, your outputs may display different sets of 
 <h2 id="_instructions"><a class="anchor" href="#_instructions"></a>Instructions</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>High-level summary of what you will perform in this lab, but more detailed than the objective.</p>
+<p>You will configure a fleet with two devices and a disk utilization monitor.
+Then you will simulate a disk full condition, on one of the devices, and detect the condition using Edge Manager.
+Finally, you will resolve the disk condition and verify that Edge Manager reports the device back to healthy.</p>
 </div>
 <div class="admonitionblock important">
 <table>
@@ -454,6 +456,33 @@ $ <strong>cp -r ../rhde-rhem-samples/monitor/* .</strong></code></pre>
 <li>
 <p>Review the new manifest for the <code>warehouse</code> fleet.
 It adds a disk space monitor, which trigger alerts when the disk is 50% and 80% full.</p>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+the sampling interval and durations used in the example may not be suitable for production environments, but are intended to trigger events very quickly, so this lab doesn&#8217;t take too long to complete.
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+In image mode systems, the root (<code>/</code>) directory is a bind mount.
+The real root disk is mounted on the '/sysroot' directory.
+Your test VMs do not set any other disk partitions, so <code>/var</code> and <code>/etc</code> are in the same root disk.
+The only other disk partition is the <code>/boot</code> filesystem, which we can ignore for a disk monitor.
+</td>
+</tr>
+</table>
+</div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-console" data-lang="console">$ <strong>cat disk-monitor.yaml</strong>
@@ -478,16 +507,16 @@ spec:
       resources:
       - monitorType: Disk
         samplingInterval: 5s
-        path: /
+        path: /sysroot
         alertRules:
         - severity: Warning
           duration: 1m          
           percentage: 50
           description: Disk is over 50% full for over 1min.
         - severity: Critical
-          duration: 5m
+          duration: 3m
           percentage: 80
-          description: Disk is over 80% full over 5min.</code></pre>
+          description: Disk is over 80% full over 3min.</code></pre>
 </div>
 </div>
 </li>
@@ -518,12 +547,17 @@ $ <strong>flightctl get --field-selector metadata.owner=Fleet/warehouse</strong>
 g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g    edge-2  Fleet/warehouse  Online  UpToDate        NoApplications</code></pre>
 </div>
 </div>
+<div class="paragraph">
+<p>The <code>OnLine</code> status ont he <code>SYSTEM</code> column, in the previous command, indicates that there are no monitors triggering alerts.</p>
+</div>
 </li>
 <li>
-<p>Is there a way of showing the monitors? Maybe querying device status?</p>
+<p>To view the detailed status of each monitor, you must use either the YAML or JSON output of a managed device.
+The following <code>jq</code> filter shows only the status of monitors, for a shorter and more manageable output.</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl get dev $UUID -o json | jq '.status.resources'</strong>
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>UUID=$( flightctl get device -l alias=edge-2 -o name )</strong>
+$ <strong>flightctl get dev $UUID -o json | jq '.status.resources'</strong>
 {
   "cpu": "Healthy",
   "disk": "Healthy",
@@ -532,77 +566,102 @@ g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g    edge-2  Fleet/warehouse 
 </div>
 </div>
 </li>
-<li>
-<p>TBD</p>
-</li>
 </ol>
 </div>
 </li>
 <li>
-<p>Fill in the disk of one of the devices to alert to trigger in one of the devices.</p>
+<p>Fill in the disk of one of the devices to trigger a degraded state in one of the devices.</p>
 <div class="olist loweralpha">
 <ol class="loweralpha" type="a">
 <li>
-<p>SSH into device</p>
-</li>
-<li>
-<p>fill disk to about 50%. web UI shows a warning sign and a "degraded" message.</p>
+<p>Open a new terminal window, and start an SSH on the <code>edge-2</code> VM/managed device.
+Keep it open as you will alternate between that terminal and the terminal running the Edge Manager CLI.</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-console" data-lang="console">$ df -h /sysroot
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>ssh -i ../temp-enroll/edge-key -p 8222 core@127.0.0.1</strong>
+Last login: Wed Mar 18 23:25:16 2026 from 172.25.250.254
+managed device: edge-2$</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>On your <em>managed device</em>, create a file which consumes about 50% of the available disk capacity.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>df -h /sysroot</strong>
 Filesystem      Size  Used Avail Use% Mounted on
 /dev/vda2        19G  5.3G   14G  28% /sysroot
-$ dd if=/dev/zero of=largefile1 bs=1k count=5000000
+$ <strong>dd if=/dev/zero of=largefile1 bs=1k count=5000000</strong>
 5000000+0 records in
 5000000+0 records out
 5120000000 bytes (5.1 GB, 4.8 GiB) copied, 12.741 s, 402 MB/s
-$ ls -lh largefile1
+$ <strong>ls -lh largefile1</strong>
 -rw-r--r--. 1 core wheel 4.8G Mar 18 23:32 largefile1
-$ df -h /sysroot
+$ <strong>df -h /sysroot</strong>
 Filesystem      Size  Used Avail Use% Mounted on
 /dev/vda2        19G   11G  8.9G  54% /sysroot</code></pre>
 </div>
 </div>
 </li>
 <li>
-<p>Check degraded/warning status</p>
+<p>On your <em>development machine</em>, wait a few moments and verify that the device displays a degraded status, and its disk monitor displays a warming status.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl get device --field-selector metadata.owner=Fleet/warehouse</strong>
 NAME                                                    ALIAS   OWNER           SYSTEM          UPDATED         APPLICATIONS
-g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g    edge-2  Fleet/warehouse Degraded        UpToDate        NoApplications
+g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g    edge-2  Fleet/warehouse <strong>Degraded</strong>        UpToDate        NoApplications
 1u63hvsgtua9tjjbmla9bgh5h2s77cb8esepphnf68m3ocf8qfng    edge-1  Fleet/warehouse Online          UpToDate        NoApplications
 $ <strong>flightctl get dev $UUID -o json | jq '.status.resources'</strong>
 {
   "cpu": "Healthy",
-  "disk": "Warning",
+  "disk": "<strong>Warning</strong>",
   "memory": "Healthy"
 }</code></pre>
 </div>
 </div>
 </li>
 <li>
-<p>Fill in more disk on the device</p>
+<p>Open a web browser and enter <code>https://servera.lab.example.com</code>.
+Log in as <code>student</code> using the <code>student</code> password.
+Verify that the <b class="menuref">Overview</b> page indicates one degraded device (yellow) on its <strong>Device status</strong> graph.</p>
+</li>
+<li>
+<p>Enter the <b class="menuref">Fleets</b> page and click the <code>warehouse</code> fleet to enter its details page.
+Scroll down and verify that its its <strong>Device status</strong> graph also shows one degraded device.</p>
+</li>
+<li>
+<p>Finally, enter the <b class="menuref">Devices</b> page and verify that the <code>edge-2</code> device displays a warning icon and a <code>Degraded</code> status.
+Click the warning icon or its status messages to see a popup which states disk utilization reached a warning level.</p>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>Fill in the disk the same device even more, to trigger an error state.</p>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p>On your <em>managed device</em> create another file, which reduces avaibale capacity to less than 10% of the total disk capacity.</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-console" data-lang="console">$ df -h /sysroot
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>df -h /sysroot</strong>
 Filesystem      Size  Used Avail Use% Mounted on
 /dev/vda2        19G   11G  8.9G  54% /sysroot
-$ dd if=/dev/zero of=largefile2 bs=1k count=8000000
+<strong>$ dd if=/dev/zero of=largefile2 bs=1k count=8000000</strong>
 8000000+0 records in
 8000000+0 records out
 8192000000 bytes (8.2 GB, 7.6 GiB) copied, 15.8843 s, 516 MB/s
-$ ls -lh largefile*
+$ <strong>ls -lh largefile</strong>*
 -rw-r--r--. 1 core wheel 4.8G Mar 18 23:32 largefile1
 -rw-r--r--. 1 core wheel 7.7G Mar 18 23:40 largefile2
-$ df -h /sysroot
+$ <strong>df -h /sysroot</strong>
 Filesystem      Size  Used Avail Use% Mounted on
 /dev/vda2        19G   18G  1.3G  94% /sysroot</code></pre>
 </div>
 </div>
 </li>
 <li>
-<p>Check error/critical status. Maybe 5min is too long a wait</p>
+<p>On your <em>development machine</em>, wait until the device status changes to error, and verify that its disk monitor reports a critical status.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl get device --field-selector metadata.owner=Fleet/warehouse</strong>
@@ -619,34 +678,72 @@ $ <strong>flightctl get dev $UUID -o json | jq '.status.resources'</strong>
 </div>
 </li>
 <li>
-<p>Also check the Events tab on the device details page.</p>
+<p>On the Edge Manager web UI, verify the changes on the fleet and device pages.
+The device status and the circunference graphs now indicate the error and critical states.</p>
 </li>
 <li>
-<p>Also check the "donut" graphics on the fleet details page and the overview page.</p>
+<p>You can also notice, on the <b class="menuref">Events</b> tab of the <code>edge-2</code> device details page, that there are warnings about disk utilization.</p>
 </li>
 <li>
-<p>TBD</p>
+<p>You can view events on the CLI too.
+They are listed from the most recent to the oldest.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl get event | head</strong>
+AGE             INVOLVEDOBJECT.KIND     INVOLVEDOBJECT.NAME                                     TYPE    MESSAGE
+16 minutes ago  Device                  g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g    Warning Disk utilization has reached a critical level.
+30 minutes ago  Device                  g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g    Warning Disk utilization has reached a warning level.
+54 minutes ago  Device                  1u63hvsgtua9tjjbmla9bgh5h2s77cb8esepphnf68m3ocf8qfng    Normal  Device has not reported any application workloads yet.
+54 minutes ago  Device                  1u63hvsgtua9tjjbmla9bgh5h2s77cb8esepphnf68m3ocf8qfng    Normal  Device's system resources are healthy.
+1 hour ago      Device                  1u63hvsgtua9tjjbmla9bgh5h2s77cb8esepphnf68m3ocf8qfng    Warning Device is disconnected (last seen more than 5 minutes ago).
+1 hour ago      Device                  1u63hvsgtua9tjjbmla9bgh5h2s77cb8esepphnf68m3ocf8qfng    Normal  Device has not reported any application workloads yet.
+1 hour ago      Device                  1u63hvsgtua9tjjbmla9bgh5h2s77cb8esepphnf68m3ocf8qfng    Normal  Device's system resources are healthy.
+1 hour ago      Device                  g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g    Normal  Device has not reported any application workloads yet.
+1 hour ago      Device                  g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g    Normal  Device's system resources are healthy</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>You filter events on fields like type (which acts like a severity) and the object they refer to.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl get event --field-selector type=Warning | head</strong>
+AGE             INVOLVEDOBJECT.KIND     INVOLVEDOBJECT.NAME                                     TYPE    MESSAGE
+21 minutes ago  Device                  g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g    Warning Disk utilization has reached a critical level.
+35 minutes ago  Device                  g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g    Warning Disk utilization has reached a warning level.
+1 hour ago      Device                  1u63hvsgtua9tjjbmla9bgh5h2s77cb8esepphnf68m3ocf8qfng    Warning Device is disconnected (last seen more than 5 minutes ago).
+1 hour ago      Device                  g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g    Warning Device is disconnected (last seen more than 5 minutes ago).
+$ <strong>flightctl get event --field-selector involvedObject.name=$UUID | head</strong>
+AGE             INVOLVEDOBJECT.KIND     INVOLVEDOBJECT.NAME                                     TYPE    MESSAGE
+21 minutes ago  Device                  g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g    Warning Disk utilization has reached a critical level.
+35 minutes ago  Device                  g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g    Warning Disk utilization has reached a warning level.
+1 hour ago      Device                  g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g    Normal  Device has not reported any application workloads yet.
+1 hour ago      Device                  g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g    Normal  Device's system resources are healthy.
+1 hour ago      Device                  g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g    Warning Device is disconnected (last seen more than 5 minutes ago).</code></pre>
+</div>
+</div>
 </li>
 </ol>
 </div>
 </li>
 <li>
-<p>Clean the disk of the device to clear the alert.</p>
+<p>Clean the disk of the device to restore its healhy status.</p>
 <div class="olist loweralpha">
 <ol class="loweralpha" type="a">
 <li>
-<p>TBD</p>
+<p>On your <em>managed device</em>, remove the large files you created.</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-console" data-lang="console">$ rm largefile*
-$ df -h  /sysroot
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>rm largefile</strong>*
+$ <strong>df -h  /sysroot</strong>
 Filesystem      Size  Used Avail Use% Mounted on
 /dev/vda2        19G  5.3G   14G  28% /sysroot</code></pre>
 </div>
 </div>
 </li>
 <li>
-<p>TBD</p>
+<p>On your <em>development machine</em>, wait until the <code>edge-2</code> device is back to online, that is, not in degraded or error states.
+Then, verify that the disk monitor is back to healthy.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl get device --field-selector metadata.owner=Fleet/warehouse</strong>
@@ -665,45 +762,11 @@ $ <strong>flightctl get dev $UUID -o json | jq '.status.resources'</strong>
 </ol>
 </div>
 </li>
-<li>
-<p>Task or outcome.</p>
-<div class="olist loweralpha">
-<ol class="loweralpha" type="a">
-<li>
-<p>Something to do, using a graphical or web UI.
-Click <b class="menuref">Save As</b> to save your work.</p>
-</li>
-<li>
-<p>More things to do</p>
-</li>
-</ol>
-</div>
-</li>
-<li>
-<p>Task or outcome.</p>
-<div class="olist loweralpha">
-<ol class="loweralpha" type="a">
-<li>
-<p>Something to do, using a shell.</p>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>command --options fixed-arguments <em>variable-arguments</em></strong>
-output of the command
-highlight <strong>something</strong> in the output</code></pre>
-</div>
-</div>
-</li>
-<li>
-<p>More things to do.
-Press <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>C</kbd></span> to interrupt.</p>
-</li>
-</ol>
-</div>
-</li>
 </ol>
 </div>
 <div class="paragraph">
-<p>Summary of what you acomplished.</p>
+<p>You demonstrated that Edge Manager resource monitors can alert about device capacity issues and support troubleshooting workflows.
+You also explored different ways of retrieving healh and status information from Edge Manager using its web UI and CLI.</p>
 </div>
 </div>
 </div>
