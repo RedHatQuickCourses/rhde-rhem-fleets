@@ -1,4 +1,4 @@
-:time_estimate: 5
+:time_estimate: 12
 
 = Lab: Troubleshoot Device and Fleet Issues
 
@@ -6,9 +6,9 @@ _Estimated reading time: *{time_estimate} minutes*._
 
 Objective::
 
-Practice troubleshooting by creating scenarios with configuration differences and health issues, then extract diagnostic information using RHEM tools.
+Practice troubleshooting by creating scenarios with health issues, then extract diagnostic information using RHEM tools.
 
-WARNING: Not started  yet.
+WARNING: Pending Review
 
 == Before you begin
 
@@ -16,7 +16,9 @@ include::ch2-fleets:partial$before-you-begin.adoc[]
 
 == Instructions
 
-High-level summary of what you will perform in this lab, but more detailed than the objective.
+You will configure a fleet with two devices and a disk utilization monitor.
+Then you will simulate a disk full condition, on one of the devices, and detect the condition using Edge Manager.
+Finally, you will resolve the disk condition and verify that Edge Manager reports the device back to healthy.
 
 include::ch1-scale:partial$set-permissive.adoc[]
 
@@ -180,6 +182,13 @@ $ **cp -r ../rhde-rhem-samples/monitor/* .**
 .. Review the new manifest for the `warehouse` fleet.
 It adds a disk space monitor, which trigger alerts when the disk is 50% and 80% full.
 +
+NOTE: the sampling interval and durations used in the example may not be suitable for production environments, but are intended to trigger events very quickly, so this lab doesn't take too long to complete.
++
+IMPORTANT: In image mode systems, the root (`/`) directory is a bind mount.
+The real root disk is mounted on the '/sysroot' directory.
+Your test VMs do not set any other disk partitions, so `/var` and `/etc` are in the same root disk.
+The only other disk partition is the `/boot` filesystem, which we can ignore for a disk monitor.
++
 [source,console,subs="verbatim,quotes"]
 --
 $ *cat disk-monitor.yaml*
@@ -212,46 +221,14 @@ $ *flightctl get --field-selector metadata.owner=Fleet/warehouse*
 {edge-2-uuid-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}    edge-2  Fleet/warehouse  Online  UpToDate        NoApplications
 --
 +
-////
-Got SYSTEM error?!? LoL their disks are already full :-P
+The `OnLine` status ont he `SYSTEM` column, in the previous command, indicates that there are no monitors triggering alerts.
 
-student@workstation:~/temp-monitor$ flightctl get device --field-selector metadata.owner=Fleet/warehouse
-NAME                                                    ALIAS   OWNER           SYSTEM  UPDATED         APPLICATIONS
-0ka6b5nv4vk1pj08mmsmogg8qn57s5ngvtnhfeuofm6dadpg9p20    edge-2  Fleet/warehouse Error   UpToDate        NoApplications
-mpr39vjcj5fup095de4pqnld6h4snt2ud79g74p7spv5i00jjid0    edge-1  Fleet/warehouse Error   UpToDate        NoApplications
-
-Not quite... I guess it's the definition of the monitor that needs tweaking.
-See, the composefs at / is full, but the real fs at /sysroot is at 27%
-
-student@workstation:~/temp-managedapp$ ssh -i ../temp-enroll/edge-key -p 8122 core@127.0.0.1
-Last login: Wed Mar 18 16:29:08 2026 from 172.25.250.254
-managed device: edge-1$ 
-managed device: edge-1$ df -h
-Filesystem      Size  Used Avail Use% Mounted on
-devtmpfs        4.0M     0  4.0M   0% /dev
-tmpfs           2.0G   84K  2.0G   1% /dev/shm
-tmpfs           783M  576K  782M   1% /run
-/dev/vda2        19G  5.1G   14G  27% /sysroot
-composefs       6.6M  6.6M     0 100% /
-tmpfs           2.0G     0  2.0G   0% /tmp
-/dev/vda1       960M  152M  809M  16% /boot
-tmpfs           392M     0  392M   0% /run/user/1000
-
-Attempting to use /sysroot on the monitor. It worked. :-)
-
-The status field shows only:
-  resources:
-    cpu: Healthy
-    disk: Healthy
-    memory: Healthy
-
-No actual values. Only good or not good?
-////
-
-.. Is there a way of showing the monitors? Maybe querying device status?
+.. To view the detailed status of each monitor, you must use either the YAML or JSON output of a managed device.
+The following `jq` filter shows only the status of monitors, for a shorter and more manageable output.
 +
 [source,console,subs="verbatim,quotes"]
 --
+$ *UUID=$( flightctl get device -l alias=edge-2 -o name )*
 $ *flightctl get dev $UUID -o json | jq '.status.resources'*
 {
   "cpu": "Healthy",
@@ -260,66 +237,84 @@ $ *flightctl get dev $UUID -o json | jq '.status.resources'*
 }
 --
 
-.. TBD
+4. Fill in the disk of one of the devices to trigger a degraded state in one of the devices.
 
-4. Fill in the disk of one of the devices to alert to trigger in one of the devices.
-
-.. SSH into device
-
-.. fill disk to about 50%. web UI shows a warning sign and a "degraded" message.
+.. Open a new terminal window, and start an SSH on the `edge-2` VM/managed device.
+Keep it open as you will alternate between that terminal and the terminal running the Edge Manager CLI.
 +
 [source,console,subs="verbatim,quotes"]
 --
-$ df -h /sysroot
+$ *ssh -i ../temp-enroll/edge-key -p 8222 core@127.0.0.1*
+Last login: Wed Mar 18 23:25:16 2026 from 172.25.250.254
+managed device: edge-2$
+--
+
+.. On your _managed device_, create a file which consumes about 50% of the available disk capacity.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *df -h /sysroot*
 Filesystem      Size  Used Avail Use% Mounted on
 /dev/vda2        19G  5.3G   14G  28% /sysroot
-$ dd if=/dev/zero of=largefile1 bs=1k count=5000000
+$ *dd if=/dev/zero of=largefile1 bs=1k count=5000000*
 5000000+0 records in
 5000000+0 records out
 5120000000 bytes (5.1 GB, 4.8 GiB) copied, 12.741 s, 402 MB/s
-$ ls -lh largefile1 
+$ *ls -lh largefile1*
 -rw-r--r--. 1 core wheel 4.8G Mar 18 23:32 largefile1
-$ df -h /sysroot
+$ *df -h /sysroot*
 Filesystem      Size  Used Avail Use% Mounted on
 /dev/vda2        19G   11G  8.9G  54% /sysroot
 --
 
-.. Check degraded/warning status
+.. On your _development machine_, wait a few moments and verify that the device displays a degraded status, and its disk monitor displays a warming status.
 +
 [source,console,subs="verbatim,quotes,attributes"]
 --
 $ *flightctl get device --field-selector metadata.owner=Fleet/warehouse*
 NAME                                                    ALIAS   OWNER           SYSTEM          UPDATED         APPLICATIONS
-{edge-2-uuid-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}    edge-2  Fleet/warehouse Degraded        UpToDate        NoApplications
+{edge-2-uuid-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}    edge-2  Fleet/warehouse *Degraded*        UpToDate        NoApplications
 {edge-1-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}    edge-1  Fleet/warehouse Online          UpToDate        NoApplications
 $ *flightctl get dev $UUID -o json | jq '.status.resources'*
 {
   "cpu": "Healthy",
-  "disk": "Warning",
+  "disk": "*Warning*",
   "memory": "Healthy"
 }
 --
 
-.. Fill in more disk on the device
+.. Open a web browser and enter `\https://servera.lab.example.com`.
+Log in as `student` using the `student` password.
+Verify that the menu:Overview[] page indicates one degraded device (yellow) on its *Device status* graph.
+
+.. Enter the menu:Fleets[] page and click the `warehouse` fleet to enter its details page.
+Scroll down and verify that its its *Device status* graph also shows one degraded device.
+
+.. Finally, enter the menu:Devices[] page and verify that the `edge-2` device displays a warning icon and a `Degraded` status.
+Click the warning icon or its status messages to see a popup which states disk utilization reached a warning level.
+
+5. Fill in the disk the same device even more, to trigger an error state.
+
+.. On your _managed device_ create another file, which reduces avaibale capacity to less than 10% of the total disk capacity.
 +
 [source,console,subs="verbatim,quotes"]
 --
-$ df -h /sysroot
+$ *df -h /sysroot*
 Filesystem      Size  Used Avail Use% Mounted on
 /dev/vda2        19G   11G  8.9G  54% /sysroot
-$ dd if=/dev/zero of=largefile2 bs=1k count=8000000
+*$ dd if=/dev/zero of=largefile2 bs=1k count=8000000*
 8000000+0 records in
 8000000+0 records out
 8192000000 bytes (8.2 GB, 7.6 GiB) copied, 15.8843 s, 516 MB/s
-$ ls -lh largefile* 
+$ **ls -lh largefile***
 -rw-r--r--. 1 core wheel 4.8G Mar 18 23:32 largefile1
 -rw-r--r--. 1 core wheel 7.7G Mar 18 23:40 largefile2
-$ df -h /sysroot
+$ *df -h /sysroot*
 Filesystem      Size  Used Avail Use% Mounted on
 /dev/vda2        19G   18G  1.3G  94% /sysroot
 --
 
-.. Check error/critical status. Maybe 5min is too long a wait
+.. On your _development machine_, wait until the device status changes to error, and verify that its disk monitor reports a critical status.
 +
 [source,console,subs="verbatim,quotes,attributes"]
 --
@@ -335,25 +330,62 @@ $ *flightctl get dev $UUID -o json | jq '.status.resources'*
 }
 --
 
-.. Also check the Events tab on the device details page.
+.. On the Edge Manager web UI, verify the changes on the fleet and device pages.
+The device status and the circunference graphs now indicate the error and critical states.
 
-.. Also check the "donut" graphics on the fleet details page and the overview page.
+.. You can also notice, on the menu:Events[] tab of the `edge-2` device details page, that there are warnings about disk utilization.
 
-.. TBD
+.. You can view events on the CLI too.
+They are listed from the most recent to the oldest.
++
+[source,console,subs="verbatim,quotes,attributes"]
+--
+$ *flightctl get event | head*
+AGE             INVOLVEDOBJECT.KIND     INVOLVEDOBJECT.NAME                                     TYPE    MESSAGE
+16 minutes ago  Device                  {edge-2-uuid-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}    Warning Disk utilization has reached a critical level.
+30 minutes ago  Device                  {edge-2-uuid-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}    Warning Disk utilization has reached a warning level.
+54 minutes ago  Device                  {edge-1-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}    Normal  Device has not reported any application workloads yet.
+54 minutes ago  Device                  {edge-1-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}    Normal  Device's system resources are healthy.
+1 hour ago      Device                  {edge-1-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}    Warning Device is disconnected (last seen more than 5 minutes ago).
+1 hour ago      Device                  {edge-1-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}    Normal  Device has not reported any application workloads yet.
+1 hour ago      Device                  {edge-1-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}    Normal  Device's system resources are healthy.
+1 hour ago      Device                  {edge-2-uuid-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}    Normal  Device has not reported any application workloads yet.
+1 hour ago      Device                  {edge-2-uuid-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}    Normal  Device's system resources are healthy
+--
 
-5. Clean the disk of the device to clear the alert.
+.. You filter events on fields like type (which acts like a severity) and the object they refer to.
++
+[source,console,subs="verbatim,quotes,attributes"]
+--
+$ *flightctl get event --field-selector type=Warning | head*
+AGE             INVOLVEDOBJECT.KIND     INVOLVEDOBJECT.NAME                                     TYPE    MESSAGE
+21 minutes ago  Device                  {edge-2-uuid-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}    Warning Disk utilization has reached a critical level.
+35 minutes ago  Device                  {edge-2-uuid-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}    Warning Disk utilization has reached a warning level.
+1 hour ago      Device                  {edge-1-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}    Warning Device is disconnected (last seen more than 5 minutes ago).
+1 hour ago      Device                  {edge-2-uuid-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}    Warning Device is disconnected (last seen more than 5 minutes ago).
+$ *flightctl get event --field-selector involvedObject.name=$UUID | head*
+AGE             INVOLVEDOBJECT.KIND     INVOLVEDOBJECT.NAME                                     TYPE    MESSAGE
+21 minutes ago  Device                  {edge-2-uuid-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}    Warning Disk utilization has reached a critical level.
+35 minutes ago  Device                  {edge-2-uuid-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}    Warning Disk utilization has reached a warning level.
+1 hour ago      Device                  {edge-2-uuid-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}    Normal  Device has not reported any application workloads yet.
+1 hour ago      Device                  {edge-2-uuid-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}    Normal  Device's system resources are healthy.
+1 hour ago      Device                  {edge-2-uuid-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}    Warning Device is disconnected (last seen more than 5 minutes ago).
+--
 
-.. TBD
+6. Clean the disk of the device to restore its healhy status.
+
+.. On your _managed device_, remove the large files you created.
 +
 [source,console,subs="verbatim,quotes"]
 --
-$ rm largefile*
-$ df -h  /sysroot
+$ **rm largefile***
+$ *df -h  /sysroot*
 Filesystem      Size  Used Avail Use% Mounted on
 /dev/vda2        19G  5.3G   14G  28% /sysroot
 --
 
-.. TBD
+.. On your _development machine_, wait until the `edge-2` device is back to online, that is, not in degraded or error states.
+Then, verify that the disk monitor is back to healthy.
 +
 [source,console,subs="verbatim,quotes,attributes"]
 --
@@ -369,30 +401,8 @@ $ *flightctl get dev $UUID -o json | jq '.status.resources'*
 }
 --
 
-
-1. Task or outcome.
-
-.. Something to do, using a graphical or web UI.
-Click menu:Save As[] to save your work.
-
-.. More things to do
-
-2. Task or outcome.
-
-.. Something to do, using a shell.
-+
-[source,console,subs="verbatim,quotes"]
---
-$ *command --options fixed-arguments _variable-arguments_*
-output of the command
-highlight *something* in the output
---
-
-
-.. More things to do.
-Press kbd:[Ctrl+C] to interrupt.
-
-Summary of what you acomplished.
+You demonstrated that Edge Manager resource monitors can alert about device capacity issues and support troubleshooting workflows.
+You also explored different ways of retrieving healh and status information from Edge Manager using its web UI and CLI.
 
 == What's next
 
