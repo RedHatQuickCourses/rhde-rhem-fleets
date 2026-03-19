@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Lab: Deploy Applications to a Fleet :: Managing Edge Device Fleets and Applications with Red Hat Edge Manager</title>
+    <link rel="prev" href="s1-containers.html">
+    <meta name="generator" content="Antora 3.1.3">
+    <link rel="stylesheet" href="../../../_/css/site.css">
+    <script>var uiRootPath = '../../../_'</script>
+  </head>
+  <body class="article">
+<header class="header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="https://www.redhat.com" target="_blank"><img src="../../../_/img/redhat-logo.png" height="40px" alt="Red Hat"></a>
+      <a class="navbar-item" style="font-size: 24px; color: white" href="../../..">Managing Edge Device Fleets and Applications with Red Hat Edge Manager</a>
+      <button class="navbar-burger" data-target="topbar-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <div id="topbar-nav" class="navbar-menu">
+      <div class="navbar-end">
+        <a class="navbar-item" href="https://github.com/RedHatQuickCourses/rhde-rhem-fleets/issues" target="_blank">Report Issues</a>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="body">
+<div class="nav-container" data-component="rhde-rhem-fleets" data-version="1">
+  <aside class="nav">
+    <div class="panels">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="../index.html">Managing Edge Device Fleets and Applications with Red Hat Edge Manager</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../index.html">Home</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../LABENV/index.html">Lab Environment</a>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../ch1-scale/index.html">Managing Edge Devices at Scale</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../ch1-scale/s1-cattle-pets.html">Cattle vs Pets: Managing Edge Devices at Scale</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../ch1-scale/s3-environment-lab.html">Lab: Prepare the Classroom Environment</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../ch2-fleets/index.html">Creating and Managing Device Fleets</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../ch2-fleets/s1-fleet-concept.html">Understanding the Fleet Concept in RHEM</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../ch2-fleets/s2-configure-fleets-lab.html">Lab: Configure and Manage Device Fleets</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../ch2-fleets/s3-git-provider-lab.html">Lab: Configure Devices Using Git Repositories</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="../ch3-monitor/index.html">Monitoring and Troubleshooting Devices and Fleets</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../ch3-monitor/s1-monitoring.html">Monitoring Device and Fleet Status</a>
+  </li>
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="../ch3-monitor/s2-troubleshoot-lab.html">Lab: Troubleshoot Device and Fleet Issues</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <button class="nav-item-toggle"></button>
+    <a class="nav-link" href="index.html">Configuring and Managing Containerized Applications</a>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="2">
+    <a class="nav-link" href="s1-containers.html">Understanding Containerized Applications in RHEM</a>
+  </li>
+  <li class="nav-item is-current-page" data-depth="2">
+    <a class="nav-link" href="s2-deploy-lab.html">Lab: Deploy Applications to a Fleet</a>
+  </li>
+</ul>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="nav-panel-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">Managing Edge Device Fleets and Applications with Red Hat Edge Manager</span>
+    <span class="version">1</span>
+  </div>
+  <ul class="components">
+    <li class="component is-current">
+      <a class="title" href="../index.html">Managing Edge Device Fleets and Applications with Red Hat Edge Manager</a>
+      <ul class="versions">
+        <li class="version is-current is-latest">
+          <a href="../index.html">1</a>
+        </li>
+      </ul>
+    </li>
+    <li class="component">
+      <a class="title" href="../../../samples/1/index.html">samples</a>
+      <ul class="versions">
+        <li class="version is-latest">
+          <a href="../../../samples/1/index.html">1</a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</div>
+    </div>
+  </aside>
+</div>
+<main class="article">
+<div class="toolbar" role="navigation">
+<button class="nav-toggle"></button>
+  <a href="../index.html" class="home-link"></a>
+<nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="../index.html">Managing Edge Device Fleets and Applications with Red Hat Edge Manager</a></li>
+    <li><a href="index.html">Configuring and Managing Containerized Applications</a></li>
+    <li><a href="s2-deploy-lab.html">Lab: Deploy Applications to a Fleet</a></li>
+  </ul>
+</nav>
+</div>
+  <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
+<article class="doc">
+<h1 class="page">Lab: Deploy Applications to a Fleet</h1>
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p><em>Estimated reading time: <strong>10 minutes</strong>.</em></p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">Objective</dt>
+<dd>
+<p>Deploy a containerized application to a device fleet and observe its rollout and operation.</p>
+</dd>
+</dl>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+Pending Review
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_before_you_begin"><a class="anchor" href="#_before_you_begin"></a>Before you begin</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>You need a <em>development machine</em> running RHEL, and hosting a few local VMs which stand in for managed devices.
+These local VMs are already provisioned and enrolled in Edge Manager.</p>
+</div>
+<div class="paragraph">
+<p>You also need a <em>server machine</em> running RHEL, which is already configured as an Edge Manager server.</p>
+</div>
+<div class="paragraph">
+<p>Both your <em>development machine</em> and <em>server machine</em> were configured by performing the <a href="../ch1-scale/s3-environment-lab.html" class="xref page">first lab</a>.</p>
+</div>
+<div class="paragraph">
+<p>If you are using the course classroom, your <em>development machine</em> is the <code>workstation</code> VM.
+Log in as the user <code>student</code> with password <code>student</code>.
+From that machine, you may start SSH sessions to the <code>servera</code> VM, which is your <em>server</em> machine, using the same user.
+Alternatively, you can open a shell or a console directly on the <code>servera</code> VM.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+This lab does not require the outcomes of any of the previous labs, you could perform just the first lab and skip to here.
+The example outputs of commands assume that you are performing all labs sequentially, in the same environment.
+If you skipped any of previous labs, or if you had to destroy and recrete your enviromnent, your actual outputs may display different sets of VMs, devices, and fleets, but that should not affect the expected outcomes of this lab.
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_instructions"><a class="anchor" href="#_instructions"></a>Instructions</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>You will create a fleet which contains both inline and git configuration files, and, more importantly, also contains a single-container application.
+Then you will join a device to the new fleet, verify that the application is running, and simulate unexpected application downtime.</p>
+</div>
+<div class="paragraph">
+<p>The inline configurations provide credentials to access a private registry.
+The private registry, in turn, provides:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>a bootc container image, which is ready to run containerized application using Podman;</p>
+</li>
+<li>
+<p>an application container, which runs a simple PHP application.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The git configuration is not really necessary for this simplistic scenario, it just shows that you could include multiple configuration providers on the same fleet.</p>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>The classroom environment has an issue which requires setting SELinux to permissive mode. This is something Red Hat do <strong>NOT</strong> advises doing to any production system, including developer machines and CI/CD servers.</p>
+</div>
+<div class="paragraph">
+<p>On your <em>development machine</em>, perform the following before you attempt any lab of this course.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>sudo setenforce Permissive</strong></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Note tat SELinux is still in enforcing mode on your <em>server machine</em> and also on all test VMs which stand in for managed devices.
+Only your <em>development machine</em> needs SELinux set to permissive mode.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>On your <em>developer machine</em>, verify that you have the prerequisites from the <a href="../ch1-scale/s3-environment-lab.html" class="xref page">first lab</a>.
+If any of the prerequisites are missing, please return to the first lab and ensure that you did not skip any step.</p>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p>Verify that you have a clone of the course samples repository.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>cd</strong>
+$ <strong>ls rhde-rhem-samples</strong>
+antora.yml  config  enroll ...</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Verify that you have at least two local VMs.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>virsh list --all</strong>
+ Id   Name     State
+------------------------
+ 1    edge-1   running
+ 2    edge-2   running
+ 3    edge-3   running</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>If your VMs are not running, start them, but ensuring they are booting from power on instead of resumed from saved state.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>virsh list --all</strong>
+ Id   Name     State
+-------------------------
+ -    edge-1   shut off
+ -    edge-2   shut off
+ -    edge-3   shut off</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>virsh start edge-1 --force-boot</strong>
+Domain 'edge-1' started
+# repeat for the remaining VMs</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Give your local VMs a few moments to finish boot.
+Then, log in on Edge Manager as a non-administrator and verify that there are two managed devices, which are on-line and up-to-date.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl login -u student -p student https://servera.lab.example.com:3443</strong>
+Auto-selected organization: 00000000-0000-0000-0000-000000000000 Default
+Login successful.</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl get device</strong>
+NAME                                                    ALIAS   OWNER            SYSTEM  UPDATED         APPLICATIONS
+mpr39vjcj5fup095de4pqnld6h4snt2ud79g74p7spv5i00jjid0    edge-3  Fleet/warehouse  Online  UpToDate        NoApplications
+g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g    edge-2  Fleet/store      Online  UpToDate        NoApplications
+1u63hvsgtua9tjjbmla9bgh5h2s77cb8esepphnf68m3ocf8qfng    edge-1  &lt;none&gt;           Online  UpToDate        NoApplications</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>If you devices keep displaying as off-line for too long, it might be related to clock skew.
+In that case, stop each of your local VMs and return to the beginning of this lab.</p>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Clock skew prevents a device from synchronizing with Edge Manager, and is known to happen if your ROLE classroom is stopped without first shutting down local VMs on your <em>develoment machine</em> and later your VMs are restarted from saved state.
+</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>virsh destroy edge-1</strong>
+Domain 'edge-1' destroyed
+# repeat for the remaining VMs</code></pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>Build and publish a bootc container image which includes a container runtime.</p>
+<div class="paragraph">
+<p>Remember that the enrollment image, which you used at the beggining of this course, provided only a mininum RHEL system with the Edge Manager agent.
+That image did not include Podman or any other container runtime, so any attempt to run managed applications will fail unless you first update your devices to a suitable system image.</p>
+</div>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p>Create a temporary working directory, and copy example files to it.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>mkdir temp-managedapp</strong>
+$ <strong>cd temp-managedapp</strong>
+$ <strong>cp -r ../rhde-rhem-samples/managedapp/* .</strong></code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Review the containerfile.
+It adds the container-tools meta-package, which includes Podman.
+It also includes the qemu-guest-agent, which should resolve clock skew issues of local VMs.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>cat Containerfile</strong>
+FROM registry.redhat.io/rhel9/rhel-bootc:9.6
+# To use the upstream packages:
+#RUN dnf -y config-manager --add-repo https://rpm.flightctl.io/flightctl-epel.repo &amp;&amp; \
+#    dnf -y install flightctl-agent-1.0.2 &amp;&amp; \
+# To use local copies of the packages:
+ADD rpms /tmp
+RUN dnf -y install /tmp/flightctl*.rpm &amp;&amp; \
+    dnf -y install container-tools qemu-guest-agent &amp;&amp; \
+    dnf clean all &amp;&amp; \
+    systemctl enable flightctl-agent &amp;&amp; \
+    systemctl enable qemu-guest-agent &amp;&amp; \
+    systemctl mask bootc-fetch-apply-updates.timer
+ADD domain.crt /etc/pki/ca-trust/source/anchors/
+RUN update-ca-trust</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Copy from the working directory of the enrollment image some auxiliary files which you neeed to include in your bootc container image, such as the private registry CAs and SSH keys.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>cp ../temp-enroll/domain.crt .</strong>
+$ <strong>cp ../temp-enroll/edge-key.pub .</strong>
+$ <strong>cp -r ../temp-enroll/rpms .</strong></code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Log in on the Red Hat container registry, so you can pull the RHEL 9 base bootc container, and build your new bootc container image.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>podman login registry.redhat.io</strong>
+...
+Login Succeeded!</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>podman build -t rhem-containers .</strong>
+STEP 1/2: FROM registry.redhat.io/rhel9/rhel-bootc:9.6
+...
+Successfully tagged localhost/rhem-containers:latest
+b78ad6382056022b5430359c9a3ad488464c2c8466219113784611b355d28f17</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Log in on your private container registry and publish your new bootc container image there.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>podman login -u student -p redhat registry.lab.example.com:5000</strong>
+Login Succeeded!
+$ <strong>skopeo copy containers-storage:localhost/rhem-containers:latest docker://registry.lab.example.com:5000/rhem-containers:v1.0</strong>
+...
+Writing manifest to image destination</code></pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>Build and publish a container image which contains a PHP web application.</p>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p>Review the contents of the PHP application.
+It just displays the version of its PHP runtime.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>cat index.php</strong>
+&lt;?php printf ("Mock web app running PHP %s\n", phpversion()) ?&gt;</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Build and publish your application container.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>podman build -t webapp -f Containerfile-webapp .</strong>
+STEP 1/8: FROM registry.redhat.io/ubi9/ubi
+...
+Successfully tagged localhost/webapp:latest
+8d7d6217f71a22f4f890b34708922569c479367dcd46f73eb6f910ea9963a4e2
+$ <strong>skopeo copy containers-storage:localhost/webapp:latest docker://registry.lab.example.com:5000/webapp:v1.0</strong>
+...
+Writing manifest to image destination</code></pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>Create a fleet which uses the new bootc container and also defines a single-container application.</p>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p>Review the fleet manifest, which uses all three configuration providers taught in this course series, just to show you can mix and match them at your convenience.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>cat frontend.yaml</strong>
+apiVersion: flightctl.io/v1beta1
+kind: Fleet
+metadata:
+  name: frontend
+spec:
+  selector:
+    matchLabels:
+      role: frontend
+  template:
+    spec:
+      os:
+        image: registry.lab.example.com:5000/containerhost:v1.0
+      config:
+      - inline:
+        - content: |
+            REPLACE_WITH_OSTREE_AUTH_JSON
+          path: /etc/ostree/auth.json
+        name: bootc-registry-auth
+      - inline:
+        - content: |
+            REPLACE_WITH_ROOT_AUTH_JSON
+          path: /root/.config/containers/auth.json
+        name: app-registry-auth
+      - gitRef:
+          path: /managedapp/config
+          repository: webapp
+          targetRevision: main
+        name: webapp
+      applications:
+      - appType: container
+        envVars: {}
+        image: registry.lab.example.com:5000/webapp:v1.0
+        name: httpd
+        ports:
+        - 80:8080</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Create an authentication file for the private registry, and add it to the fleet configuration.
+Notice it must be added in two places, because the container runtime and the bootc subsystems do NOT share the registry authentication files.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>podman login --authfile auth.json -u student -p redhat registry.lab.example.com:5000</strong>
+Login Succeeded!
+$ <strong>AUTH_JSON=$( jq -c . auth.json )</strong>
+$ <strong>sed -i "s|REPLACE_WITH_OSTREE_AUTH_JSON|$AUTH_JSON|" frontend.yaml</strong>
+$ <strong>sed -i "s|REPLACE_WITH_ROOT_AUTH_JSON|$AUTH_JSON|" frontend.yaml</strong></code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Review your fleet manifest and ensure it does not contains any <code>REPLACE</code> markers anymore.</p>
+</li>
+<li>
+<p>Review the repository manifest, which defines the <code>webapp</code> git repository referenced by the <code>frontend</code> fleet.
+It points to the course samples repository.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>cat webapp.yaml</strong>
+apiVersion: flightctl.io/v1beta1
+kind: Repository
+metadata:
+  name: webapp-repo
+spec:
+  type: git
+  url: https://github.com/RedHatQuickCourses/rhde-rhem-samples.git</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Apply the manifests to your Edge Manager server.</p>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+The status of the fleet may be <code>Unknown</code> for a while, while Edge Manager fetches the configation files from the Git repository.
+</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl apply -f webapp.yaml</strong>
+webapp.yaml: applying repository/webapp: 201 Created
+$ <strong>flightctl apply -f frontend.yaml</strong>
+frontend.yaml: applying fleet/frontend: 201 Created
+$ <strong>flightctl get fleet frontend</strong>
+NAME            OWNER   SELECTOR        VALID
+frontend        &lt;none&gt;  role=frontend   True</code></pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>Join a managed device to the new fleet.</p>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p>Edit the <code>edge-1</code> device manifest so its labels match the new fleet selector.</p>
+<div class="paragraph">
+<p>Edit any existing with key <code>role</code>, or add it it doesn&#8217;t exist.
+Also ensure you remove any label with key <code>location</code>, to prevent the device matching multiple other fleets, from previous labs.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>UUID=$( flightctl get device -l alias=edge-1 -o name )</strong>
+$ <strong>flightctl edit device $UUID</strong>
+apiVersion: flightctl.io/v1beta1
+kind: Device
+metadata:
+  ...
+  labels:
+    alias: edge-1
+    rhel: "9.6"
+    type: noapps
+    <strong>role: frontend</strong>
+  name: 1u63hvsgtua9tjjbmla9bgh5h2s77cb8esepphnf68m3ocf8qfng
+  ...
+spec:
+...
+device/1u63hvsgtua9tjjbmla9bgh5h2s77cb8esepphnf68m3ocf8qfng edited</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Wait until the device status changes to <code>UptoDate</code>.
+Notice that the device now displays a <code>Helthty</code> status on the <code>APPLICATIONS</code> column, instead of <code>NoApplications</code>.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl get device $UUID</strong>
+NAME                                                    ALIAS   OWNER           SYSTEM  UPDATED         APPLICATIONS
+1u63hvsgtua9tjjbmla9bgh5h2s77cb8esepphnf68m3ocf8qfng    edge-1  Fleet/frontend  Online  UpToDate        <strong>Healthy</strong></code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Alternatively, you could verify the status of all devices in the fleet.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl get --field-selector metadata.owner=Fleet/frontend</strong>
+1u63hvsgtua9tjjbmla9bgh5h2s77cb8esepphnf68m3ocf8qfng    edge-1  Fleet/frontend  Online  UpToDate        <strong>Healthy</strong></code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Show the "message of day" to prove that the device got the settings from the git configuration provider.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>ssh -i ../temp-enroll/edge-key -p 8122 core@127.0.0.1</strong>
+Managed device running a containerized web app
+
+Last login: Wed Mar 11 19:30:01 2026 from 172.25.250.254
+[core@enroll ~]$ <strong>exit</strong>
+logout
+Connection to 127.0.0.1 closed.</code></pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>Verify the application is accessible, then simulate downtime in the application to show how Edge Manager reacts.</p>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p>Access the mock of your web application.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>curl 127.0.0.1:8108</strong>
+Mock web app running PHP 8.0.30</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Find the container id of the application container and stop it.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl console device $UUID -- podman ps</strong>
+CONTAINER ID  IMAGE                                      COMMAND               CREATED         STATUS         PORTS                 NAMES
+<strong>ac31d8eae297</strong>  registry.lab.example.com:5000/webapp:v1.0  /bin/sh -c php-fp...  12 minutes ago  Up 12 minutes  0.0.0.0:80-&gt;8080/tcp  systemd-httpd-317337-app</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl console device $UUID -- podman kill <em>ac31d8eae297</em></strong>
+ac31d8eae297</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Alternatively, you can open a SSH session to your local VM and run podman from a root prompt.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>ssh -i ../temp-enroll/edge-key -p 8122 core@127.0.0.1</strong>
+...
+[core@enroll ~]$ <strong>sudo -i</strong>
+[root@enroll ~]#</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Verify that Edge Manager reports a change in application status.
+It may take a few moments until you can see the change.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl get device $UUID</strong>
+NAME                                                    ALIAS   OWNER           SYSTEM  UPDATED         APPLICATIONS
+1u63hvsgtua9tjjbmla9bgh5h2s77cb8esepphnf68m3ocf8qfng    edge-1  Fleet/frontend  Online  UpToDate        <strong>Error</strong></code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>Verify that your web application is indeed off-line.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>curl 127.0.0.1:8108</strong>
+curl: (56) Recv failure: Connection reset by peer</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>After a few moments, Edge Manager restarts the container and the application status is back to healthy.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl get device $UUID</strong>
+NAME                                                    ALIAS   OWNER           SYSTEM  UPDATED         APPLICATIONS
+1u63hvsgtua9tjjbmla9bgh5h2s77cb8esepphnf68m3ocf8qfng    edge-1  Fleet/frontend  Online  UpToDate        <strong>Healthy</strong></code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>If you wish, you can verify that the application is again accessible and a new container is running on the managed device.</p>
+</li>
+</ol>
+</div>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>You demonstrated that Edge Manager can deploy, monitor, and keep containerized application running on managed devices.
+This give organizations the flexibility of managing application life cycles independently of operating systems updates, if they wish.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_whats_next"><a class="anchor" href="#_whats_next"></a>What&#8217;s next</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Congratulations! You have completed this course and learned how to configure, manage, and monitor edge device fleets and deploy containerized applications using Red Hat Edge Manager.</p>
+</div>
+</div>
+</div>
+<nav class="pagination">
+  <span class="prev"><a href="s1-containers.html">Understanding Containerized Applications in RHEM</a></span>
+</nav>
+</article>
+  </div>
+</main>
+</div>
+<footer class="footer">
+  <img src="../../../_/img/rhl-logo-red.png" height="40px" alt="Red Hat"  href="https://redhat.com" >
+</footer><script id="site-script" src="../../../_/js/site.js" data-ui-root-path="../../../_"></script>
+<script async src="../../../_/js/vendor/highlight.js"></script>
+  </body>
+</html>
