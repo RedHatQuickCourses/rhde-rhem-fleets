@@ -1,3 +1,3 @@
 * xref:index.adoc[]
-** xref:s1-quadlets.adoc[]
+** xref:s1-containers.adoc[]
 ** xref:s2-deploy-lab.adoc[]

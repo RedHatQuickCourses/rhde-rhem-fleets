@@ -11,11 +11,11 @@ On completing this course, you should be able to:
 
 * Understand the challenges of managing edge devices at scale
 
-* Create and Manage Device Fleets
+* Create and manage fleets of devices
 
-* Monitor and Troubleshoot Devices and Fleets
+* Monitor and troubleshoot devices and fleets
 
-* Configure and Manage Quadlet Applications
+* Configure and manage containerized applications
 
 == Audience
 

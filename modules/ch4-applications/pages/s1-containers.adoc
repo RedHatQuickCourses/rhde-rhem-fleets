@@ -1,12 +1,12 @@
 :time_estimate: 5
 
-= Understanding Quadlet Applications in RHEM
+= Understanding Containerized Applications in RHEM
 
 _Estimated reading time: *{time_estimate} minutes*._
 
 Objective::
 
-Learn how to deploy applications on devices and fleets using the Quadlet application type and understand how RHEM integrates with Podman and systemd.
+Learn how to deploy applications on devices and fleets using the container application type and understand how Edge Manager integrates with Podman.
 
 WARNING: Not started  yet.
 
