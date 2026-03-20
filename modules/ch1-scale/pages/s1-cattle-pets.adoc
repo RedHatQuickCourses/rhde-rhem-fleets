@@ -1,4 +1,4 @@
-:time_estimate: 5
+:time_estimate: 6
 
 = Considerations When Managing Edge Devices at Scale
 
