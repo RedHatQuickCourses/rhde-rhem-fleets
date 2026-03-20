@@ -291,7 +291,7 @@ spec:
 In that case, all of them must match for a device to belong to the fleet.</p>
 </div>
 <div class="paragraph">
-<p>A device may set many other labels which are not in a fleet selector and they are ignored.</p>
+<p>A device may set many other labels which are not in any fleet selector and they are ignored.</p>
 </div>
 <div class="admonitionblock important">
 <table>
@@ -301,14 +301,17 @@ In that case, all of them must match for a device to belong to the fleet.</p>
 </td>
 <td class="content">
 A device may belong to one and only one fleet.
-If the labels on a device make it match multiple fleets, them the device enters an error state and these fleets are said to overlap.
 </td>
 </tr>
 </table>
 </div>
 <div class="paragraph">
-<p>Notice that the error state of "overlapping fleets" is only visible on device resources.
-The fleet resources provide no indication that there&#8217;s an overlap, even if you create two fleets containing exactly the same selectors.</p>
+<p>If the labels on a device match multiple fleets, them the device enters an error state and these fleets are said to overlap.
+The device gets no updates until the overlap is resolved.</p>
+</div>
+<div class="paragraph">
+<p>The error state of "overlapping fleets" is only visible on the affected device resources.
+The corresponding fleet resources provide no indication that there&#8217;s an overlap, even if you create multiple fleets containing exactly the same selectors.</p>
 </div>
 </div>
 </div>
@@ -330,14 +333,14 @@ Another example, the Git configuration provider allows Go templates on the branc
 <div class="sectionbody">
 <div class="paragraph">
 <p>There is no imperative operation to add or remove devices from fleets.
-Any time you change the selectors in a fleet resource, or you change the labels on a device resource, you may change membership of devices within fleets.</p>
+Any time you change the selectors in a fleet resource, and anytime you change the labels on a device resource, you may change membership of devices within fleets.</p>
 </div>
 <div class="paragraph">
 <p>This is convenient when enrolling devices, because when you approve an enrollment request you can also set labels for the device.
 This way a device is enrolled and join a fleet at the same time.</p>
 </div>
 <div class="paragraph">
-<p>But it also means it is easy to inadvertidely make a device leave or switch fleets if you change its labels.</p>
+<p>But it also means it is easy to inadvertidely make a device leave or switch fleets when you change its labels.</p>
 </div>
 <div class="paragraph">
 <p>Consider the following scenarios of devices and fleets:</p>
@@ -367,13 +370,15 @@ The only exception, when a device leaves a fleet and retains its configuration, 
 <h2 id="_the_git_configuration_provider_and_repository_resources"><a class="anchor" href="#_the_git_configuration_provider_and_repository_resources"></a>The Git configuration provider and repository resources</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The Git configuration provide enables Edge Manager to getch configuration file contents from a Git repository, instead of having these contents inline in a device or fleet resource, enabling an approach of configuration-as-code.</p>
+<p>The Git configuration provide enables Edge Manager to fetch configuration file contents from a Git repository, instead of having these contents inline in a device or fleet resource, enabling an approach of configuration-as-code.
+Only the Edge Manager server access Git servers.
+Managed devices get file contents from Edge Manager and do not contact any Git server.</p>
 </div>
 <div class="paragraph">
 <p>The Git configuration provider is very convenient because most IT professionals already know Git and use it on their development and automation workflows.</p>
 </div>
 <div class="paragraph">
-<p>It also enables different teams from managing rollout of configurations to managed devices and the actual configurations settings: the first team gets permissions to operate Edge Manager itself, while the second team gets permissions to commit and push to the Git repository.</p>
+<p>It also enables different teams to manage rollout of configurations and the actual configurations settings: the first team gets permissions to operate Edge Manager itself, while the second team gets permissions to commit and push to the Git repository.</p>
 </div>
 <div class="paragraph">
 <p>Another advantage of the Git configuration providder is that configuration files are actual files on the Git repository.
@@ -393,7 +398,7 @@ You can copy the configuration files, after you validate them in a test system, 
 </ul>
 </div>
 <div class="paragraph">
-<p>A configuration element of a device or fleet specifies:</p>
+<p>A configuration element on a device or fleet specifies:</p>
 </div>
 <div class="ulist">
 <ul>
