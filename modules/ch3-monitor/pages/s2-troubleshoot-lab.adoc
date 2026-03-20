@@ -353,28 +353,21 @@ AGE             INVOLVEDOBJECT.KIND     INVOLVEDOBJECT.NAME                     
 1 hour ago      Device                  {edge-2-uuid-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}    Normal  Device's system resources are healthy
 --
 
-.. You filter events on fields like type (which acts like a severity) and the object they refer to.
+.. You can filter events on fields like type (which acts like a severity) and the object they refer to.
 +
 [source,console,subs="verbatim,quotes,attributes"]
 --
-$ *flightctl get event --field-selector type=Warning | head*
+$ *flightctl get event --field-selector involvedObject.name=$UUID,type=Warning | head*
 AGE             INVOLVEDOBJECT.KIND     INVOLVEDOBJECT.NAME                                     TYPE    MESSAGE
 21 minutes ago  Device                  {edge-2-uuid-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}    Warning Disk utilization has reached a critical level.
 35 minutes ago  Device                  {edge-2-uuid-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}    Warning Disk utilization has reached a warning level.
-1 hour ago      Device                  {edge-1-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}    Warning Device is disconnected (last seen more than 5 minutes ago).
-1 hour ago      Device                  {edge-2-uuid-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}    Warning Device is disconnected (last seen more than 5 minutes ago).
-$ *flightctl get event --field-selector involvedObject.name=$UUID | head*
-AGE             INVOLVEDOBJECT.KIND     INVOLVEDOBJECT.NAME                                     TYPE    MESSAGE
-21 minutes ago  Device                  {edge-2-uuid-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}    Warning Disk utilization has reached a critical level.
-35 minutes ago  Device                  {edge-2-uuid-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}    Warning Disk utilization has reached a warning level.
-1 hour ago      Device                  {edge-2-uuid-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}    Normal  Device has not reported any application workloads yet.
-1 hour ago      Device                  {edge-2-uuid-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}    Normal  Device's system resources are healthy.
 1 hour ago      Device                  {edge-2-uuid-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}    Warning Device is disconnected (last seen more than 5 minutes ago).
 --
 
 6. Clean the disk of the device to restore its healhy status.
 
 .. On your _managed device_, remove the large files you created.
+You can close the SSH session after that.
 +
 [source,console,subs="verbatim,quotes"]
 --
@@ -391,12 +384,12 @@ Then, verify that the disk monitor is back to healthy.
 --
 $ *flightctl get device --field-selector metadata.owner=Fleet/warehouse*
 NAME                                                    ALIAS   OWNER           SYSTEM          UPDATED         APPLICATIONS
-{edge-2-uuid-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}    edge-2  Fleet/warehouse Online        UpToDate        NoApplications
+{edge-2-uuid-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}    edge-2  Fleet/warehouse Online          *UpToDate*        NoApplications
 {edge-1-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}    edge-1  Fleet/warehouse Online          UpToDate        NoApplications
 $ *flightctl get dev $UUID -o json | jq '.status.resources'*
 {
   "cpu": "Healthy",
-  "disk": "Healthy",
+  "disk": "*Healthy*",
   "memory": "Healthy"
 }
 --

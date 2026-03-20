@@ -21,11 +21,11 @@ On completing this course, you should be able to:
 
 * Operations-focused customer roles, who manage edge devices, but are not usually in-person at edge sites:
 
-  * System Administrations (IT and OT)
+  ** System Administrations (IT and OT)
 
-  * Site Reliability Engineers (SREs)
+  ** Site Reliability Engineers (SREs)
 
-  * Platform Engineers and DevOps Engineers
+  ** Platform Engineers and DevOps Engineers
 
 * Red Hat and Partner roles that perform demonstrations, PoC and PoV of Red Hat Edge Manager as part of a sales motion, such as Solutions Architects.
 
@@ -35,24 +35,23 @@ On completing this course, you should be able to:
 
 This course assumes that you have the following experience:
 
+* Having completed https://redhatquickcourses.github.io/rhde-rhem-devices/[Deploying Red Hat Edge Manager and Managing Edge Devices] or having equivalent skills.
+
 * Familiarity with RHEL system administration, to the level of RHCA (Red Hat Certified System Administrator) or equivalent knowledge.
 
 * Familiarity with Linux container tools, such as Podman, and technologies compatible with Open Container Initiative (OCI) specifications, such as container registries.
 
 * Familiarity with image mode for RHEL, especially building bootc container images and provisioning and updating image mode systems.
 
-It's recommended that learners already prossess skills from the image mode with Red Hat Device Edge quick course series.
-
-* Having completed or having equivalent skills to Deploying Red Hat Edge Manager and Managing Edge Devices.
+It is recommended that learners already prossess skills from the image mode with https://redhatquickcourses.github.io/rhde-bootc-build/[Red Hat Device Edge quick course series^].
 
 Notice that no prior knowledge of Kubernetes and OpenShift is assumed nor required.
 
 == Classroom environment
 
-Describe the classroom environment, especially if it's on ROLE.
+You can perform all activities in this course using the virtual classroom lab from HOL019: Image Mode with Red Hat Device Edge Quick Course Series, in the Red Hat Online Learning Environment (ROLE), which is shared with the quick courses about image mode with Red Hat Device Edge and will be updated in the future to better support Red Hat Edge Manager and other Red Hat Device Edge training.
 
-////
-Uncomment and fill if sharing a ROLE classroom with other quick courses
+NOTE:	The Red Hat Edge Manager quick courses use ROLE for their virtual classroom labs only, and hosts course materials outside of ROLE, as GitHub pages. 
 
 === For Red Hat associates and partners
 
@@ -93,11 +92,10 @@ You must be enrolled in a Red Hat Training course or subscription to have access
 
 A basic https://www.redhat.com/en/services/training/learning-subscription[Red Hat Learning Subscription^] offers access to a number of Red Hat Training courses and virtual classroom lab time.
 Higher subscription tiers offer additional benefits, such as Red Hat Certification Exam vouchers.
-////
 
 == Other sources of information about Red Hat Edge Manager
 
-For documentation about Red Hat Edge Manager, see either its https://docs.redhat.com/en/documentation/TBD[product documentation^] or its https://github.com/TBD[upstream project documentation^].
+For documentation about Red Hat Edge Manager, see either its https://docs.redhat.com/en/documentation/red_hat_edge_manager/1.0[product documentation^] or its https://github.com/flightctl/flightctl/blob/main/docs/user/README.md[upstream Flight Control project documentation^].
 
 == Author
 
@@ -105,6 +103,4 @@ For documentation about Red Hat Edge Manager, see either its https://docs.redhat
 Training Content Architect +
 Red Hat - Product Portfolio Marketing & Learning
 
-////
-Special thanks to people for their support while designing and writing this course.
-////
+Special thanks to Ken Osborn, Sam Batschelet, and Sean O'Keffe for their support while designing and writing this course.
