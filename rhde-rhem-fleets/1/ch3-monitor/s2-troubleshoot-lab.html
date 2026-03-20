@@ -58,7 +58,7 @@
     <a class="nav-link" href="../ch1-scale/index.html">Managing Edge Devices at Scale</a>
 <ul class="nav-list">
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../ch1-scale/s1-cattle-pets.html">Cattle vs Pets: Managing Edge Devices at Scale</a>
+    <a class="nav-link" href="../ch1-scale/s1-cattle-pets.html">Considerations When Managing Edge Devices at Scale</a>
   </li>
   <li class="nav-item" data-depth="2">
     <a class="nav-link" href="../ch1-scale/s3-environment-lab.html">Lab: Prepare the Classroom Environment</a>
@@ -704,21 +704,13 @@ AGE             INVOLVEDOBJECT.KIND     INVOLVEDOBJECT.NAME                     
 </div>
 </li>
 <li>
-<p>You filter events on fields like type (which acts like a severity) and the object they refer to.</p>
+<p>You can filter events on fields like type (which acts like a severity) and the object they refer to.</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl get event --field-selector type=Warning | head</strong>
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl get event --field-selector involvedObject.name=$UUID,type=Warning | head</strong>
 AGE             INVOLVEDOBJECT.KIND     INVOLVEDOBJECT.NAME                                     TYPE    MESSAGE
 21 minutes ago  Device                  g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g    Warning Disk utilization has reached a critical level.
 35 minutes ago  Device                  g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g    Warning Disk utilization has reached a warning level.
-1 hour ago      Device                  1u63hvsgtua9tjjbmla9bgh5h2s77cb8esepphnf68m3ocf8qfng    Warning Device is disconnected (last seen more than 5 minutes ago).
-1 hour ago      Device                  g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g    Warning Device is disconnected (last seen more than 5 minutes ago).
-$ <strong>flightctl get event --field-selector involvedObject.name=$UUID | head</strong>
-AGE             INVOLVEDOBJECT.KIND     INVOLVEDOBJECT.NAME                                     TYPE    MESSAGE
-21 minutes ago  Device                  g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g    Warning Disk utilization has reached a critical level.
-35 minutes ago  Device                  g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g    Warning Disk utilization has reached a warning level.
-1 hour ago      Device                  g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g    Normal  Device has not reported any application workloads yet.
-1 hour ago      Device                  g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g    Normal  Device's system resources are healthy.
 1 hour ago      Device                  g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g    Warning Device is disconnected (last seen more than 5 minutes ago).</code></pre>
 </div>
 </div>
@@ -731,7 +723,8 @@ AGE             INVOLVEDOBJECT.KIND     INVOLVEDOBJECT.NAME                     
 <div class="olist loweralpha">
 <ol class="loweralpha" type="a">
 <li>
-<p>On your <em>managed device</em>, remove the large files you created.</p>
+<p>On your <em>managed device</em>, remove the large files you created.
+You can close the SSH session after that.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-console" data-lang="console">$ <strong>rm largefile</strong>*
@@ -748,12 +741,12 @@ Then, verify that the disk monitor is back to healthy.</p>
 <div class="content">
 <pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl get device --field-selector metadata.owner=Fleet/warehouse</strong>
 NAME                                                    ALIAS   OWNER           SYSTEM          UPDATED         APPLICATIONS
-g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g    edge-2  Fleet/warehouse Online        UpToDate        NoApplications
+g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g    edge-2  Fleet/warehouse Online          <strong>UpToDate</strong>        NoApplications
 1u63hvsgtua9tjjbmla9bgh5h2s77cb8esepphnf68m3ocf8qfng    edge-1  Fleet/warehouse Online          UpToDate        NoApplications
 $ <strong>flightctl get dev $UUID -o json | jq '.status.resources'</strong>
 {
   "cpu": "Healthy",
-  "disk": "Healthy",
+  "disk": "<strong>Healthy</strong>",
   "memory": "Healthy"
 }</code></pre>
 </div>

@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Cattle vs Pets: Managing Edge Devices at Scale :: Managing Edge Device Fleets and Applications with Red Hat Edge Manager</title>
+    <title>Considerations When Managing Edge Devices at Scale :: Managing Edge Device Fleets and Applications with Red Hat Edge Manager</title>
     <link rel="prev" href="index.html">
     <link rel="next" href="s3-environment-lab.html">
     <meta name="generator" content="Antora 3.1.3">
@@ -58,7 +58,7 @@
     <a class="nav-link" href="index.html">Managing Edge Devices at Scale</a>
 <ul class="nav-list">
   <li class="nav-item is-current-page" data-depth="2">
-    <a class="nav-link" href="s1-cattle-pets.html">Cattle vs Pets: Managing Edge Devices at Scale</a>
+    <a class="nav-link" href="s1-cattle-pets.html">Considerations When Managing Edge Devices at Scale</a>
   </li>
   <li class="nav-item" data-depth="2">
     <a class="nav-link" href="s3-environment-lab.html">Lab: Prepare the Classroom Environment</a>
@@ -156,7 +156,7 @@
   <ul>
     <li><a href="../index.html">Managing Edge Device Fleets and Applications with Red Hat Edge Manager</a></li>
     <li><a href="index.html">Managing Edge Devices at Scale</a></li>
-    <li><a href="s1-cattle-pets.html">Cattle vs Pets: Managing Edge Devices at Scale</a></li>
+    <li><a href="s1-cattle-pets.html">Considerations When Managing Edge Devices at Scale</a></li>
   </ul>
 </nav>
 </div>
@@ -165,7 +165,7 @@
   <div class="toc-menu"></div>
 </aside>
 <article class="doc">
-<h1 class="page">Cattle vs Pets: Managing Edge Devices at Scale</h1>
+<h1 class="page">Considerations When Managing Edge Devices at Scale</h1>
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
@@ -186,7 +186,7 @@
 <i class="fa icon-warning" title="Warning"></i>
 </td>
 <td class="content">
-Not started  yet.
+Work In Progress.
 </td>
 </tr>
 </table>
@@ -194,18 +194,125 @@ Not started  yet.
 </div>
 </div>
 <div class="sect1">
-<h2 id="_heading"><a class="anchor" href="#_heading"></a>Heading</h2>
+<h2 id="_review_of_red_hat_edge_manager"><a class="anchor" href="#_review_of_red_hat_edge_manager"></a>Review of Red Hat Edge Manager</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Lorem ipsum</p>
+<p>Managing infrastructure and applications at the edge is complex given the edge technology landscape.
+Organizations face challenges with connectivity, device management, diversity in hardware, operational management, scalability, and security.
+To effectively manage fleets of edge devices, solutions must provide a simple, scalable experience that reduces costs and enhances control, security, and visibility for customers.</p>
+</div>
+<div class="paragraph">
+<p>Red Hat Edge Manager offers a comprehensive solution for managing fleets of edge devices at scale.
+It provides security-focused full lifecycle management—from deployment to decommissioning—including OS and configuration updates, workload management, and fleet-wide observability.
+Built for modern, containerized environments, it simplifies device and application management, supporting image-mode Red Hat Enterprise Linux.</p>
+</div>
+<div class="paragraph">
+<p>Edge Manager is offered in Red Hat Device Edge or with Red Hat Enterprise Linux for distributed compute.</p>
+</div>
+<div class="sect2">
+<h3 id="_architecture_of_red_hat_edge_manager"><a class="anchor" href="#_architecture_of_red_hat_edge_manager"></a>Architecture of Red Hat Edge Manager</h3>
+<div class="paragraph">
+<p>The main components of Edge Manager are composed its API server, which fronts a collection of microservices and maintains state about managed devices, and its agent, which runs on each managed device.</p>
+</div>
+<div class="imageblock unresolved">
+<div class="content">
+<img src="agent-vs-server.svg" alt="agent vs server">
+</div>
+<div class="title">Figure 1. Edge Manager agent (on managed devices) and Edge Manager server</div>
+</div>
+<div class="paragraph">
+<p>Communication between Edge Manager agents and its API server is always secured using TLS.
+Managed devices authenticate using mTLS certificate.
+First, by using a shared enrollment-time certificate, and then by using a per-device certificate, which is generated at the time a device enrolls to become a managed device.</p>
+</div>
+<div class="paragraph">
+<p>Managed devices are expected to run image mode for RHEL, that is, to be provisioned by using bootc container images.
+The system images of managed devices must already include the Edge Manager agent before these devices can be enrolled.</p>
+</div>
+<div class="paragraph">
+<p>The push-based approach of Edge Manager makes it suitable for handing edge devices with inconsistent or low-bandwidth network connectivty.
+Even if the agent loses connection to its server, it can still keep its last known state and, when connection is restored, the agent can fetch any configuration change and apply it locally.</p>
+</div>
+<div class="paragraph">
+<p>Edge Manager provides both a web UI and a CLI to perform management operations, including enrolling, configuring, and decomissioning managed devices.</p>
+</div>
+<div class="paragraph">
+<p>Edge Manager can be deployed standalone on RHEL and on OpenShift, or integrated with either Red Hat Advanced Cluster Managmenet or Red Hat Ansible Automation Platforms.
+In all these deployment models, Edge Manager provides a consistent set of features and APIs.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_gitops_for_the_operating_system"><a class="anchor" href="#_gitops_for_the_operating_system"></a>GitOps for the operating system</h3>
+<div class="paragraph">
+<p>Edge Manager controls three aspects of a device configuration:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>The operating system image, that is, the bootc container image the device boots with.</p>
+</li>
+<li>
+<p>Operating system and application configuration files, stored the edge device.</p>
+</li>
+<li>
+<p>Containerized applications running on the device.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Edge Manager apply these three aspects atomatically, meaning that any change on the configuration of a managed device is either applied in its entirety or the device is considered outdated.</p>
+</div>
+<div class="paragraph">
+<p>If there are multiple changes, the agent first stages all artifacts it needs on the device, including new and changed configuration files, or new container images.
+Only when all content is already staged, the agent switches to the new configuration.</p>
+</div>
+<div class="paragraph">
+<p>The Edge Manager agent continuously observes the configuration of its device and detects any drift from the configuration declared in its Edge Manager server.
+Upon detecting drift, the agent reconciliates the local configuration, so it matches the state on its server.</p>
+</div>
+<div class="paragraph">
+<p>Configurations may be stored in Edge Manager database, that is, on the device or fleet resources managed using the Edge Manager API, or in an external Git repository.</p>
+</div>
+<div class="paragraph">
+<p>Edge Manager API resources are declarative.
+They state the desired state of a device: which bootc container image it boots, the contents of key configuration files, and the applications it runs.
+You change device settings by changing the configuration stated by these API resources and then letting the agents reconcilliate the state on their devices.</p>
+</div>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_another_heading"><a class="anchor" href="#_another_heading"></a>Another heading</h2>
+<h2 id="_managing_devices_as_units_or_as_fleets"><a class="anchor" href="#_managing_devices_as_units_or_as_fleets"></a>Managing devices as units or as fleets</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Lorem ipsum</p>
+<p>You can manage devices as unique individual entities using Edge Manager, and the <a href="https://redhatquickcourses.github.io/rhde-rhem-devices/" target="_blank" rel="noopener">first course</a> focused on that, so learners could explore the drift and reconcilliation process, and familiarize themselves with the web UI and CLI of the product.</p>
+</div>
+<div class="paragraph">
+<p>This second course focuses on managing devices grouped in <em>fleets</em>.
+All devices on a fleet boot from the same operating system image, contain the same configuration files, and run the same applications.</p>
+</div>
+<div class="paragraph">
+<p>Consider that most edge locations, such as a retail store, include a potentially large number of devices which should be configured in exactly the same way, for example: multiple point-of-sale systems.
+Edge Manager allows defining the required configuration only once, and then applying it to a number of devices automatically.</p>
+</div>
+<div class="paragraph">
+<p>Edge Manager also provides templating for a fleet configuration, so it can accomodate small variations that may be required per individual device of a fleet.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_managing_devices_as_appliances_versus_separation_of_concerns"><a class="anchor" href="#_managing_devices_as_appliances_versus_separation_of_concerns"></a>Managing devices as appliances versus separation of concerns</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>You are not required to manage applications using Edge Manager.
+It is a common approach to embed applications into an operating system image, so updating the bootc container image of a device updates both its operating system and its applications at once.</p>
+</div>
+<div class="paragraph">
+<p>But many organizations prefer to have different teams which own the operating system patching and application code and their dependencies.
+Packaging and running applications as containers is currently the preferred way of enabling such separation of concerns and let infrastructure teams manage the operating system lifecycle independently of development teams that their application life cycles.</p>
+</div>
+<div class="paragraph">
+<p>Edge Manager supports such separation of concerns by explicitly managing containerized applications which it deploys and monitors on managed devices.</p>
 </div>
 </div>
 </div>
@@ -213,7 +320,7 @@ Not started  yet.
 <h2 id="_whats_next"><a class="anchor" href="#_whats_next"></a>What&#8217;s Next</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Now that you understand the fundamental approaches to managing edge devices and applications, the next section provides a quiz to review and assess your knowledge of Red Hat Edge Manager fundamentals from the previous course.</p>
+<p>In the next section, you will prepare your classroom environment by deploying Red Hat Edge Manager, creating bootc container images, and provisioning test devices to practice the concepts learned in this course.</p>
 </div>
 </div>
 </div>
