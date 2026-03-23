@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Understanding Containerized Applications in RHEM :: Managing Edge Device Fleets and Applications with Red Hat Edge Manager</title>
+    <title>Understanding Containerized Applications in Edge Manager :: Managing Edge Device Fleets and Applications with Red Hat Edge Manager</title>
     <link rel="prev" href="index.html">
     <link rel="next" href="s2-deploy-lab.html">
     <meta name="generator" content="Antora 3.1.3">
@@ -109,7 +109,7 @@
     <a class="nav-link" href="index.html">Configuring and Managing Containerized Applications</a>
 <ul class="nav-list">
   <li class="nav-item is-current-page" data-depth="2">
-    <a class="nav-link" href="s1-containers.html">Understanding Containerized Applications in RHEM</a>
+    <a class="nav-link" href="s1-containers.html">Understanding Containerized Applications in Edge Manager</a>
   </li>
   <li class="nav-item" data-depth="2">
     <a class="nav-link" href="s2-deploy-lab.html">Lab: Deploy Applications to a Fleet</a>
@@ -156,7 +156,7 @@
   <ul>
     <li><a href="../index.html">Managing Edge Device Fleets and Applications with Red Hat Edge Manager</a></li>
     <li><a href="index.html">Configuring and Managing Containerized Applications</a></li>
-    <li><a href="s1-containers.html">Understanding Containerized Applications in RHEM</a></li>
+    <li><a href="s1-containers.html">Understanding Containerized Applications in Edge Manager</a></li>
   </ul>
 </nav>
 </div>
@@ -165,11 +165,11 @@
   <div class="toc-menu"></div>
 </aside>
 <article class="doc">
-<h1 class="page">Understanding Containerized Applications in RHEM</h1>
+<h1 class="page">Understanding Containerized Applications in Edge Manager</h1>
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p><em>Estimated reading time: <strong>5 minutes</strong>.</em></p>
+<p><em>Estimated reading time: <strong>4 minutes</strong>.</em></p>
 </div>
 <div class="dlist">
 <dl>
@@ -186,7 +186,7 @@
 <i class="fa icon-warning" title="Warning"></i>
 </td>
 <td class="content">
-Not started  yet.
+Work In Progress
 </td>
 </tr>
 </table>
@@ -194,18 +194,75 @@ Not started  yet.
 </div>
 </div>
 <div class="sect1">
-<h2 id="_heading"><a class="anchor" href="#_heading"></a>Heading</h2>
+<h2 id="_application_management_with_edge_manager"><a class="anchor" href="#_application_management_with_edge_manager"></a>Application Management with Edge Manager</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Lorem ipsum</p>
+<p>Application management with Edge Manager enables you to separate the lifecycle of applications running on edge devices from the lifecycle of the operating system images and operating system configurtions on those edge devices.
+This approach suits organizations where different teams own the operating system and applications.</p>
+</div>
+<div class="paragraph">
+<p>Edge Manager can start containerized applications directly using Podman or it can provide <a href="https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html" target="_blank" rel="noopener">quadlet</a> configuration files for the System Daemon (Systemd).</p>
+</div>
+<div class="paragraph">
+<p>Each choice offers different levels of configurability.
+For example, quadlets offer dependency management, so you can control the startup order of multiple containers.
+For single containers, Edge Manager can forward ports, mount volumes, and set environment variables.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+The 1.1 release of Edge Manager will add support for Helm applications with MicroShift.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>You could deploy and start certain kinds of containerized applications using Edge Manager operating system configurations instead of applications.
+For example, nothing prevents you from installing quadlet files on <code>/etc/systemd/system</code> or Kubernetes manifest on <code>/etc/microshift/manifests</code> for MicroShift.
+If you do that, your applications would not be managed by Edge Manager.</p>
+</div>
+<div class="paragraph">
+<p>Edge Manager monitors the status of applications it manages and can report a healthy or unhealthy state for each of them.
+In the case of containers that Edge Manager starts directly using Podman, it also restarts applications which fail with an error status.
+In the case of containers started as quadlets, restarting depends on the configuration on the quadlet itself.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_another_heading"><a class="anchor" href="#_another_heading"></a>Another heading</h2>
+<h2 id="_container_registry_authentication"><a class="anchor" href="#_container_registry_authentication"></a>Container registry authentication</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Lorem ipsum</p>
+<p>Unlike fetching configurations from a Git repository, which are performed only by an Edge Manager server and never by its agents, managed devices must pull container images directly from a container image registry.
+This means managed devices require credentials for acessing such container image registries.
+The location you store those credentails depend on the user under which the containerized applications run.</p>
+</div>
+<div class="paragraph">
+<p>For example: if containerized applications run as the root user, registry authentication is stored at <code>/root/.config/containers/auth.json</code>.
+Notice this is different from the bootc registry authentication file, required to pull bootc container images, stored at <code>/etc/ostree/auth.json</code>.</p>
+</div>
+<div class="paragraph">
+<p>It is up to the user providing these files in a bootc container image, at provisioning or on boarding time (from ignition or kickstart), or from any other means.
+You could provide those files using Edge Manager itself, but in that case it is recommended that you use inline configurations to avoid leaking secrets in a Git repository.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_updating_containerized_applications"><a class="anchor" href="#_updating_containerized_applications"></a>Updating containerized applications</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>With single container applications, it is recommended that you refer to non-floating tags or container image hashes so you can effectively control application updates from Edge Manager.
+Using a floating tag may lead to devices running different versions of the container image, depending on which one was associated to the floating tag at the time each device first pulled it.</p>
+</div>
+<div class="paragraph">
+<p>With quadlet applications, you could consider using quadlet features to auto-update containers on devices, but that means Edge Manager would have no control of when those updates happen nor which version of a container is effectively running on each of its managed devices.
+It is recommended that you avoid using such features, like it is recommended that you disable the bootc auto-update timer and let Edge Manager control updates to the system image running on managed devices.</p>
+</div>
+<div class="paragraph">
+<p>It is out of scope of this course, but worthy knowing that Edge Manager update policies affect application updates as well as operating system images and configurations, enabling you to rolling out updates progressively to a fleet of devices or to implement strategies such as A/B testing, in conjuntion with device labels and configuration templating.</p>
 </div>
 </div>
 </div>
@@ -213,7 +270,7 @@ Not started  yet.
 <h2 id="_whats_next"><a class="anchor" href="#_whats_next"></a>What&#8217;s Next</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>In the next section, you will deploy a containerized application to a device fleet and verify its rollout and operation using both RHEM and device-level tools.</p>
+<p>In the next section, you will deploy a containerized application to a fleet and verify its rollout and operation using both Edge Manager and device-level tools.</p>
 </div>
 </div>
 </div>
