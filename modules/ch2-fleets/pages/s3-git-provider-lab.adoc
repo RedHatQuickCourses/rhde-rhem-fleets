@@ -16,7 +16,7 @@ include::ch2-fleets:partial$before-you-begin.adoc[]
 
 == Instructions
 
-You will create a fleet using the Git configuation provider, and then you will update files in a git repository and pull those updates to the fleet configuration.
+You will create a fleet using the Git configuration provider, and then you will update files in a git repository and pull those updates to the fleet configuration.
 
 include::ch1-scale:partial$set-permissive.adoc[]
 
@@ -113,7 +113,7 @@ Scroll down
 ////
 
 .. The repository details page shows the repository with a status of `Sync pending`.
-After a few monents the status of the repository should change to `Accessible`.
+After a few moments the status of the repository should change to `Accessible`.
 +
 If you experience any errors, click the status icons for a descriptive message of the error and make any required fix.
 +
@@ -225,7 +225,7 @@ You demonstrated that Edge Manager can fetch configuration files from a git repo
 
 Now that you have organized your devices into fleets which pull configuration files from a git repository, the next chapter explores how to monitor device and fleet status, troubleshoot issues, and extract meaningful data from Red Hat Edge Manager.
 
-The next chapter also provides an example of creating and managing fleets configurations using Git repositoryes by using the CLI.
+The next chapter also provides an example of creating and managing fleets configurations using Git repositories by using the CLI.
 Unlike the previous lab, which demonstrated both web UI and CLI management of fleets, using inline configurations, this lab uses only the web UI to make it shorter.
 
 NOTE: Review previous statements in case we scope down or remove the monitoring chapter.

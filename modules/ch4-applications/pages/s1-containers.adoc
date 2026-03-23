@@ -35,12 +35,12 @@ In the case of containers started as quadlets, restarting depends on the configu
 
 Unlike fetching configurations from a Git repository, which are performed only by an Edge Manager server and never by its agents, managed devices must pull container images directly from a container image registry.
 This means managed devices require credentials for acessing such container image registries.
-The location you store those credentails depend on the Linux user under which each containerized applications runs.
+The location where those credentials must be stored depend on the Linux user under which each containerized applications runs.
 
-For example: if a containerized applications runs as the root user, registry authentication is stored at `/root/.config/containers/auth.json`.
+For example: if a containerized application runs as the root user, registry authentication is stored at `/root/.config/containers/auth.json`.
 Notice this is different from the bootc registry authentication file, required to pull bootc container images, stored at `/etc/ostree/auth.json`.
 
-It is up to the user providing these files in a bootc container image, at provisioning or on boarding time (from ignition or kickstart), or by any other means.
+It is up to the user providing these files in a bootc container image, at provisioning or onboarding time (from ignition or kickstart), or by any other means.
 You can provide those files using Edge Manager itself, but in that case it is recommended that you use inline configurations to avoid leaking secrets in a Git repository.
 
 == Updating containerized applications

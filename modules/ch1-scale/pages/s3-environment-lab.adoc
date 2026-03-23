@@ -585,7 +585,7 @@ RUN dnf -y install /tmp/flightctl-agent-1.0.2 && \
 ////
 
 .. Copy the CA certificate of the private container registry.
-Notice that the last argument of the `scp` command is a period, for the current directory.
+Notice that the last argument of the `scp` command is a dot, for the current directory.
 +
 [source,console,subs="verbatim,quotes"]
 --
@@ -594,7 +594,7 @@ domain.crt
 --
 
 .. Build the bootc container image.
-Notice that the `podman build` command finishes with a period.
+Notice that the `podman build` command finishes with a dot.
 +
 [source,console,subs="verbatim,quotes,attributes"]
 --

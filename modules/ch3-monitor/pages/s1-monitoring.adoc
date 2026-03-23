@@ -35,7 +35,7 @@ Edge Manager provides two ways of filtering data at the server side:
 * Field selectors (option `--field-selector`), which filter on a subset of the resource available fields, which are indexed by the server and vary by resource type.
 
 Both kinds of selectors can be combined in the same command or API call.
-Both kinds accept different operators and can be contatenated to filter on multiple labels and/or multiple fields.
+Both kinds accept different operators and can be combined to filter on multiple labels and/or multiple fields.
 
 This course shows only a small sample of the allowed combinations, you are encouraged to check the product docs and experiment with more complex filters.
 

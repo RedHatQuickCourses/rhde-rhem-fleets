@@ -29,7 +29,7 @@ This course assumes that you have the following experience:
 
 * Familiarity with task, concept, or technology.
 
-It's recommended that learners already prossess skills from prerequisite course.
+It's recommended that learners already possess skills from prerequisite course.
 
 Notice that no prior knowledge of task, concept, or technology is assumed or required.
 

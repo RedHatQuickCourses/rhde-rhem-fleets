@@ -289,7 +289,7 @@ logout
 Connection to 127.0.0.1 closed.
 --
 
-.. Attempt to access the virtual console of the device, and verify that you cannt get a log in prompt.
+.. Attempt to access the virtual console of the device, and verify that you can't get a log in prompt.
 Press kbd:[Enter] a few times and dettach from the VM using kbd:[Ctrl+\]].
 +
 [source,console,subs="verbatim,quotes,macros"]
@@ -729,7 +729,7 @@ metadata:
 device/{edge-1-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa} edited
 --
 
-.. Verify that the device does belong to any fleet, and wait until it is `Up-to-Date`.
+.. Verify that the device does not belong to any fleet, and wait until it is `Up-to-Date`.
 +
 [source,console,subs="verbatim,quotes,attributes"]
 --
@@ -776,9 +776,9 @@ status:
 ...
 --
 
-You demonstrated that Edge keeps track of the configurations it puts on managed devices, as they join and switch fleets.
+You demonstrated that Edge Manager keeps track of the configurations it puts on managed devices, as they join and switch fleets.
 You also demonstrated that, when a device switches to no fleet, it keeps its last configuration.
-Devices also keep their last applied configuation in case there's a conflict and they end up belonging to multiple fleets.
+Devices also keep their last applied configuration in case there's a conflict and they end up belonging to multiple fleets.
 
 == What's next
 

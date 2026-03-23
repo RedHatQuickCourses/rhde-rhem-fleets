@@ -180,7 +180,7 @@ $ **cp -r ../rhde-rhem-samples/monitor/* .**
 --
 
 .. Review the new manifest for the `warehouse` fleet.
-It adds a disk space monitor, which trigger alerts when the disk is 50% and 80% full.
+It adds a disk space monitor, which triggers warnings when the disk usage is at 50% capacity, and critical alerts when its usage is at 80% capacity.
 +
 NOTE: the sampling interval and durations used in the example may not be suitable for production environments, but are intended to trigger events very quickly, so this lab doesn't take too long to complete.
 +
@@ -221,7 +221,7 @@ $ *flightctl get --field-selector metadata.owner=Fleet/warehouse*
 {edge-2-uuid-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}    edge-2  Fleet/warehouse  Online  UpToDate        NoApplications
 --
 +
-The `OnLine` status ont he `SYSTEM` column, in the previous command, indicates that there are no monitors triggering alerts.
+The `OnLine` status on the `SYSTEM` column, in the previous command, indicates that there are no monitors triggering alerts.
 
 .. To view the detailed status of each monitor, you must use either the YAML or JSON output of a managed device.
 The following `jq` filter shows only the status of monitors, for a shorter and more manageable output.

@@ -24,7 +24,7 @@ Edge Manager is offered in Red Hat Device Edge or with Red Hat Enterprise Linux 
 
 === Architecture of Red Hat Edge Manager
 
-The main components of Edge Manager are composed its API server, which fronts a collection of microservices and maintains state about managed devices, and its agent, which runs on each managed device.
+The main components of Edge Manager are its API server, which fronts a collection of microservices and maintains state about managed devices, and its agent, which runs on each managed device.
 
 image::agent-vs-server.svg[title="Edge Manager agent (on managed devices) and Edge Manager server"]
 
@@ -47,29 +47,29 @@ In all these deployment models, Edge Manager provides a consistent set of featur
 
 Edge Manager controls three aspects of a device configuration:
 
-* The operating system image, that is, the bootc container image the device boots with.
+* The operating system image, that is, the bootc container image the device boots from.
 
-* Operating system and application configuration files, stored the edge device.
+* Operating system and application configuration files, stored on the edge device.
 
 * Containerized applications running on the device.
 
-Edge Manager apply these three aspects atomatically, meaning that any change on the configuration of a managed device is either applied in its entirety or the device is considered outdated.
+Edge Manager apply these three aspects atomically, meaning that any change on the configuration of a managed device is either applied in its entirety or the device is considered outdated.
 
 If there are multiple changes, the agent first stages all artifacts it needs on the device, including new and changed configuration files, or new container images.
 Only when all content is already staged, the agent switches to the new configuration.
 
 The Edge Manager agent continuously observes the configuration of its device and detects any drift from the configuration declared in its Edge Manager server.
-Upon detecting drift, the agent reconciliates the local configuration, so it matches the state on its server.
+Upon detecting drift, the agent reconciles the local configuration, so it matches the state on its server.
 
-Configurations may be stored in Edge Manager database, that is, on the device or fleet resources managed using the Edge Manager API, or in an external Git repository.
+You can define configurations on fleet and device resources in Edge Manager, or keep them in external repositories that can be referenced through the Edge Manager API.
 
 Edge Manager API resources are declarative.
 They state the desired state of a device: which bootc container image it boots, the contents of key configuration files, and the applications it runs.
-You change device settings by changing the configuration stated by these API resources and then letting the agents reconcilliate the state on their devices.
+You change device settings by changing the configuration stated by these API resources and then letting the agents reconcile the state on their devices.
 
 == Managing devices as units or as fleets
 
-You can manage devices as unique individual entities using Edge Manager, and the https://redhatquickcourses.github.io/rhde-rhem-devices/[first course^] focused on that, so learners could explore the drift and reconcilliation process, and familiarize themselves with the web UI and CLI of the product.
+You can manage devices as unique individual entities using Edge Manager, and the https://redhatquickcourses.github.io/rhde-rhem-devices/[first course^] focused on that, so learners could explore the drift and reconciliation process, and familiarize themselves with the web UI and CLI of the product.
 
 This second course focuses on managing devices grouped in _fleets_.
 All devices on a fleet boot from the same operating system image, contain the same configuration files, and run the same applications.

@@ -62,7 +62,7 @@ spec:
 ...
 --
 
-So, of a fleet declares a selector `class=terminal`, it matches any device containing a label `class=terminal` and these devices belong to the fleet.
+A fleet that declares a selector `class=terminal`, matches any device containing a label `class=terminal` and these devices belong to the fleet.
 See a YAML snippet of a device resource which matches the previous fleet:
 
 [source,subs="verbatim,quotes"]
@@ -94,11 +94,11 @@ The corresponding fleet resources provide no indication that there's an overlap,
 
 == Device templates and labels
 
-The device template in a fleet resource supports a subset of the https://pkg.go.dev/text/template[Go template^] syntax, which enables text substitutions of the values of fiedls of device resources, usually label values.
+The device template in a fleet resource supports a subset of the https://pkg.go.dev/text/template[Go template^] syntax, which enables text substitutions of the values of fields of device resources, usually label values.
 
 The allowed places of Go templates vary depending on the configuration provider.
-For example, the inlide configuration providers allows Go templates in the content of any configuration file.
-Another example, the Git configuration provider allows Go templates on the branch/commit and path fiedls, but NOT inside the file contents retrieved from a Git repository.
+For example, the inline configuration provider allows Go templates in the content of any configuration file.
+Another example, the Git configuration provider allows Go templates on the branch/commit and path fields, but NOT inside the file contents retrieved from a Git repository.
 
 == Joining, leaving, and switching fleets
 
@@ -106,9 +106,9 @@ There is no imperative operation to add or remove devices from fleets.
 Any time you change the selectors in a fleet resource, and anytime you change the labels on a device resource, you may change membership of devices within fleets.
 
 This is convenient when enrolling devices, because when you approve an enrollment request you can also set labels for the device.
-This way a device is enrolled and join a fleet at the same time.
+This way a device may enroll and join a fleet at the same time.
 
-But it also means it is easy to inadvertidely make a device leave or switch fleets when you change its labels.
+But it also means it is easy to inadvertently make a device leave or switch fleets when you change its labels.
 
 Consider the following scenarios of devices and fleets:
 
@@ -118,22 +118,22 @@ You cannot mix device and fleet configurations for the same managed device.
 * _If a device switches to a different fleet_, all configurations from the previous fleet are discarded and replaced by the configurations of the new fleet.
 
 * _If a device leaves a fleet, but does not join any other fleet_, it retains its latest rendered configuration.
-This way, if you remove a device inadveridely from a fleet, there's no downtime, and you can rejoin the the device to its previous fleet without any impact.
+This way, if you remove a device inadvertently from a fleet, there's no downtime, and you can rejoin the the device to its previous fleet without any impact.
 
 The overall theme is that Edge Manager clears after itself automatically, and you do not have to worry about left overs when a device changes its fleet membership.
 The only exception, when a device leaves a fleet and retains its configuration, is similar to when a device is decomissioned, and also retains its last configuration.
 
 == The Git configuration provider and repository resources
 
-The Git configuration provide enables Edge Manager to fetch configuration file contents from a Git repository, instead of having these contents inline in a device or fleet resource, enabling an approach of configuration-as-code.
-Only the Edge Manager server access Git servers.
+The Git configuration provider enables Edge Manager to fetch configuration file contents from a Git repository, instead of having these contents inline in a device or fleet resource, enabling an approach of configuration-as-code.
+Only the Edge Manager server will access the configured Git servers.
 Managed devices get file contents from Edge Manager and do not contact any Git server.
 
 The Git configuration provider is very convenient because most IT professionals already know Git and use it on their development and automation workflows.
 
 It also enables different teams to manage rollout of configurations and the actual configurations settings: the first team gets permissions to operate Edge Manager itself, while the second team gets permissions to commit and push to the Git repository.
 
-Another advantage of the Git configuration providder is that configuration files are actual files on the Git repository.
+Another advantage of the Git configuration provider is that configuration files are actual files on the Git repository.
 You can copy the configuration files, after you validate them in a test system, as they are, one by one, instead of having to embed them inside a YAML or JSON file, which makes testing  quicker and simpler.
 
 The Git configuration provider requires a _repository_ resource, which specifies:

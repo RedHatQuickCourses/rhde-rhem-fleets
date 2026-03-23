@@ -225,7 +225,7 @@ include::1@samples:managedapp:example$webapp.yaml[]
 
 .. Apply the manifests to your Edge Manager server.
 +
-NOTE: The status of the fleet may be `Unknown` for a while, while Edge Manager fetches the configation files from the Git repository.
+NOTE: The status of the fleet may be `Unknown` for a while, while Edge Manager fetches the configuration files from the Git repository.
 +
 [source,console,subs="verbatim,quotes"]
 --
@@ -242,7 +242,7 @@ frontend        <none>  role=frontend   True
 
 .. Edit the `edge-1` device manifest so its labels match the new fleet selector.
 +
-Edit any existing with key `role`, or add it it doesn't exist.
+Edit the existing label with key `role`, or add it if it doesn't exist yet.
 Also ensure you remove any label with key `location`, to prevent the device matching multiple other fleets, from previous labs.
 +
 [source,console,subs="verbatim,quotes,attributes"]
@@ -361,7 +361,7 @@ NAME                                                    ALIAS   OWNER           
 .. If you wish, you can verify that the application is again accessible and a new container is running on the managed device.
 
 You demonstrated that Edge Manager can deploy, monitor, and keep containerized application running on managed devices.
-This give organizations the flexibility of managing application life cycles independently of operating systems updates, if they wish.
+This gives organizations the flexibility of managing application life cycles independently of operating systems updates, if they wish.
 
 == What's next
 

@@ -43,7 +43,7 @@ This course assumes that you have the following experience:
 
 * Familiarity with image mode for RHEL, especially building bootc container images and provisioning and updating image mode systems.
 
-It is recommended that learners already prossess skills from the image mode with https://redhatquickcourses.github.io/rhde-bootc-build/[Red Hat Device Edge quick course series^].
+It is recommended that learners already possess skills from the image mode with https://redhatquickcourses.github.io/rhde-bootc-build/[Red Hat Device Edge quick course series^].
 
 Notice that no prior knowledge of Kubernetes and OpenShift is assumed nor required.
 
