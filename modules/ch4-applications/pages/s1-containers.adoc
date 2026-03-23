@@ -1,6 +1,6 @@
-:time_estimate: 5
+:time_estimate: 4
 
-= Understanding Containerized Applications in RHEM
+= Understanding Containerized Applications in Edge Manager
 
 _Estimated reading time: *{time_estimate} minutes*._
 
@@ -8,19 +8,53 @@ Objective::
 
 Learn how to deploy applications on devices and fleets using the container application type and understand how Edge Manager integrates with Podman.
 
-WARNING: Not started  yet.
+WARNING: Work In Progress
 
-== Heading
+== Application Management with Edge Manager
 
-Lorem ipsum
+Application management with Edge Manager enables you to separate the lifecycle of applications running on edge devices from the lifecycle of the operating system images and operating system configurtions on those edge devices.
+This approach suits organizations where different teams own the operating system and applications.
 
-== Another heading
+Edge Manager can start containerized applications directly using Podman or it can provide https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html[quadlet^] configuration files for the System Daemon (Systemd).
 
-Lorem ipsum
+Each choice offers different levels of configurability.
+For example, quadlets offer dependency management, so you can control the startup order of multiple containers.
+For single containers, Edge Manager can forward ports, mount volumes, and set environment variables.
+
+NOTE: The 1.1 release of Edge Manager will add support for Helm applications with MicroShift.
+
+You could deploy and start certain kinds of containerized applications using Edge Manager operating system configurations instead of applications.
+For example, nothing prevents you from installing quadlet files on `/etc/systemd/system` or Kubernetes manifest on `/etc/microshift/manifests` for MicroShift.
+If you do that, your applications would not be managed by Edge Manager.
+
+Edge Manager monitors the status of applications it manages and can report a healthy or unhealthy state for each of them.
+In the case of containers that Edge Manager starts directly using Podman, it also restarts applications which fail with an error status.
+In the case of containers started as quadlets, restarting depends on the configuration on the quadlet itself.
+
+== Container registry authentication
+
+Unlike fetching configurations from a Git repository, which are performed only by an Edge Manager server and never by its agents, managed devices must pull container images directly from a container image registry.
+This means managed devices require credentials for acessing such container image registries.
+The location you store those credentails depend on the user under which the containerized applications run.
+
+For example: if containerized applications run as the root user, registry authentication is stored at `/root/.config/containers/auth.json`.
+Notice this is different from the bootc registry authentication file, required to pull bootc container images, stored at `/etc/ostree/auth.json`.
+
+It is up to the user providing these files in a bootc container image, at provisioning or on boarding time (from ignition or kickstart), or from any other means.
+You could provide those files using Edge Manager itself, but in that case it is recommended that you use inline configurations to avoid leaking secrets in a Git repository.
+
+== Updating containerized applications
+
+With single container applications, it is recommended that you refer to non-floating tags or container image hashes so you can effectively control application updates from Edge Manager.
+Using a floating tag may lead to devices running different versions of the container image, depending on which one was associated to the floating tag at the time each device first pulled it.
+
+With quadlet applications, you could consider using quadlet features to auto-update containers on devices, but that means Edge Manager would have no control of when those updates happen nor which version of a container is effectively running on each of its managed devices.
+It is recommended that you avoid using such features, like it is recommended that you disable the bootc auto-update timer and let Edge Manager control updates to the system image running on managed devices.
+
+It is out of scope of this course, but worthy knowing that Edge Manager update policies affect application updates as well as operating system images and configurations, enabling you to rolling out updates progressively to a fleet of devices or to implement strategies such as A/B testing, in conjuntion with device labels and configuration templating.
 
 == What's Next
-
-In the next section, you will deploy a containerized application to a device fleet and verify its rollout and operation using both RHEM and device-level tools.
+In the next section, you will deploy a containerized application to a fleet and verify its rollout and operation using both Edge Manager and device-level tools.
 
 ////
 Deploy applications on devices and fleets by using RHEM The quadlet application type. RHEM applications vs bounded containers in bootc images. Overview of podman with systemd (quadlets and specialized unit types) because most "docker-like" users of podman are new to such features.

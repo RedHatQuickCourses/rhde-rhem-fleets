@@ -1,4 +1,4 @@
-:time_estimate: 5
+:time_estimate: 6
 
 = Monitoring Device and Fleet Status
 
