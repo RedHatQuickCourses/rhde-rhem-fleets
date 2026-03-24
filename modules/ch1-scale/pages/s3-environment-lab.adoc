@@ -8,7 +8,7 @@ Objective::
 
 Set up and configure the classroom environment for practicing Red Hat Edge Manager fleet management.
 
-WARNING: Work in Progress
+WARNING: Pending Review
 
 == Before you begin
 
