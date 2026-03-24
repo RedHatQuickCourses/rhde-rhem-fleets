@@ -722,6 +722,20 @@ Domain 'edge-2' has been undefined
 $ *rm ~/.local/share/libvirt/images/edge-2.qcow2*
 --
 
+.. If there were any VMs, also remove their host keys from your SSH user configuration.
++
+[source,console,subs="verbatim,quotes"]
+--
+$ *ssh-keygen -R [127.0.0.1]:8122*
+...
+/home/student/.ssh/known_hosts updated.
+...
+$ *ssh-keygen -R [127.0.0.1]:8222*
+...
+/home/student/.ssh/known_hosts updated.
+...
+--
+
 .. Verify that there are no managed devices in Edge Manager.
 +
 [source,console,subs="verbatim,quotes"]
