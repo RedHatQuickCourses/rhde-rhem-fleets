@@ -74,7 +74,7 @@
     <a class="nav-link" href="index.html">Creating and Managing Device Fleets</a>
 <ul class="nav-list">
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="s1-fleet-concept.html">Understanding the Fleet Concept in RHEM</a>
+    <a class="nav-link" href="s1-fleet-concept.html">Understanding the Fleet Concept in Edge Manager</a>
   </li>
   <li class="nav-item" data-depth="2">
     <a class="nav-link" href="s2-configure-fleets-lab.html">Lab: Configure and Manage Device Fleets</a>
@@ -175,7 +175,7 @@
 <dl>
 <dt class="hdlist1">Objective</dt>
 <dd>
-<p>Configure multiple devies, which belong to fleets, from files stored in a git repository.</p>
+<p>Configure multiple devices, which belong to fleets, from files stored in a git repository.</p>
 </dd>
 </dl>
 </div>
@@ -232,7 +232,7 @@ If you skipped any of previous labs, or if you had to destroy and recrete your e
 <h2 id="_instructions"><a class="anchor" href="#_instructions"></a>Instructions</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>You will create a fleet using the Git configuation provider, and then you will update files in a git repository and pull those updates to the fleet configuration.</p>
+<p>You will create a fleet using the Git configuration provider, and then you will update files in a git repository and pull those updates to the fleet configuration.</p>
 </div>
 <div class="admonitionblock important">
 <table>
@@ -340,7 +340,7 @@ In that case, stop each of your local VMs and return to the beginning of this la
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-Clock skew prevents a device from synchronizing with Edge Manager, and is known to happen if your ROLE classroom is stopped without first shutting down local VMs on your <em>develoment machine</em> and later your VMs are restarted from saved state.
+Clock skew prevents a device from synchronizing with Edge Manager, and is known to happen if your ROLE classroom is stopped without first shutting down local VMs on your <em>development machine</em> and later your VMs are restarted from saved state.
 </td>
 </tr>
 </table>
@@ -371,11 +371,11 @@ It should display a page which states "No repositories yet".</p>
 Name your repository as <code>samples</code> and, for the <strong>Repository URL</strong>, type <code>https://github.com/RedHatQuickCourses/rhde-rhem-samples.git</code> which is the URL of the samples repository of this course.</p>
 </li>
 <li>
-<p>Unckeck <b class="menuref">Use resource syncs</b> and click <b class="menuref">Create repository</b>.</p>
+<p>Uncheck <b class="menuref">Use resource syncs</b> and click <b class="menuref">Create repository</b>.</p>
 </li>
 <li>
 <p>The repository details page shows the repository with a status of <code>Sync pending</code>.
-After a few monents the status of the repository should change to <code>Accessible</code>.</p>
+After a few moments the status of the repository should change to <code>Accessible</code>.</p>
 <div class="paragraph">
 <p>If you experience any errors, click the status icons for a descriptive message of the error and make any required fix.</p>
 </div>
@@ -410,7 +410,7 @@ Type <code>role=pos</code> as the device selector, and press <kbd>Tab</kbd> to l
 Ignore the warning that "There are no devices matching these labels" and click <b class="menuref">Next</b>.</p>
 </li>
 <li>
-<p>Under <strong>Host configuration (files)</strong>, click <b class="menuref">Add configuration</b> and type <code>store</code> on the <strong>Source name</strong> field.
+<p>Under <strong>Host configuration (files)</strong>, click <b class="menuref">Add configuration</b> and type <code>pos</code> on the <strong>Source name</strong> field.
 Select <code>Git configuration</code> as the <strong>Source type</strong> field and select <code>samples</code> as the <strong>Repository</strong>.</p>
 </li>
 <li>
@@ -465,14 +465,14 @@ If you do not have one, create one.</p>
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-Keep two brower tabs open, one on the Edge Manager web UI, another on GitHub.
+Keep two browser tabs open, one on the Edge Manager web UI, another on GitHub.
 </td>
 </tr>
 </table>
 </div>
 </li>
 <li>
-<p>Once logged in on GitHub, visit <a href="https://github.com/RedHatQuickCourses/rhde-rhem-samples.git" class="bare">https://github.com/RedHatQuickCourses/rhde-rhem-samples.git</a> and click <b class="menuref">Fork</b> on the top bar to create a fork opf the samples repository on your personal GitHub account.</p>
+<p>Once logged in on GitHub, visit <a href="https://github.com/RedHatQuickCourses/rhde-rhem-samples.git" class="bare">https://github.com/RedHatQuickCourses/rhde-rhem-samples.git</a> and click <b class="menuref">Fork</b> on the top bar to create a fork of the samples repository on your personal GitHub account.</p>
 </li>
 <li>
 <p>On your personal fork of the samples repository, click <b class="menuref">Code</b> and then click on the copy icon, to copy the URL of your fork to the clipboard.</p>
@@ -532,7 +532,8 @@ Its configurations are set by Red Hat Edge Manager.</code></pre>
 </ol>
 </div>
 <div class="paragraph">
-<p>You demonstrated that Edge Manager can fetch configuration files from a git repository, but it requires that you update the fleet definition, by changing the commit ID, to fetch updates from the repository.</p>
+<p>You demonstrated that Edge Manager can fetch configuration files from a git repository, but it requires that you update the fleet definition, by changing the commit ID, to fetch updates from the repository.
+Alternatively, you could have created a tag on your git repository fork, and set the fleet to use the git tag.</p>
 </div>
 </div>
 </div>
@@ -543,7 +544,7 @@ Its configurations are set by Red Hat Edge Manager.</code></pre>
 <p>Now that you have organized your devices into fleets which pull configuration files from a git repository, the next chapter explores how to monitor device and fleet status, troubleshoot issues, and extract meaningful data from Red Hat Edge Manager.</p>
 </div>
 <div class="paragraph">
-<p>The next chapter also provides an example of creating and managing fleets configurations using Git repositoryes by using the CLI.
+<p>The next chapter also provides an example of creating and managing fleets configurations using Git repositories by using the CLI.
 Unlike the previous lab, which demonstrated both web UI and CLI management of fleets, using inline configurations, this lab uses only the web UI to make it shorter.</p>
 </div>
 <div class="admonitionblock note">
