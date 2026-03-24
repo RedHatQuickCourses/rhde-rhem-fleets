@@ -6,7 +6,7 @@ _Estimated reading time: *{time_estimate} minutes*._
 
 Objective::
 
-Practice troubleshooting by creating scenarios with health issues, then extract diagnostic information using RHEM tools.
+Practice troubleshooting by creating scenarios with health issues, then extract diagnostic information using Edge Manager.
 
 WARNING: Pending Review
 
@@ -18,11 +18,11 @@ include::ch2-fleets:partial$before-you-begin.adoc[]
 
 You will configure a fleet with two devices and a disk utilization monitor.
 Then you will simulate a disk full condition, on one of the devices, and detect the condition using Edge Manager.
-Finally, you will resolve the disk condition and verify that Edge Manager reports the device back to healthy.
+Finally, you will resolve the disk condition and verify that Edge Manager reports the device is back to healthy.
 
 include::ch1-scale:partial$set-permissive.adoc[]
 
-1. On your _developer machine_, verify that you have the prerequisites from the xref:ch1-scale:s3-environment-lab.adoc[first lab].
+1. On your _developer machine_, verify that you have the prerequisites from the xref:ch1-scale:s3-environment-lab.adoc[first lab^].
 If any of the prerequisites are missing, please return to the first lab and ensure that you did not skip any step.
 
 .. Verify that you have a clone of the course samples repository.
@@ -79,15 +79,15 @@ Login successful.
 --
 $ *flightctl get device*
 NAME                                                    ALIAS   OWNER            SYSTEM  UPDATED         APPLICATIONS
-{edge-3-uuid-cccccccccccccccccccccccccccccccccccccc}    edge-3  Fleet/warehouse  Online  UpToDate        NoApplications
-{edge-2-uuid-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}    edge-2  Fleet/store      Online  UpToDate        NoApplications
-{edge-1-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}    edge-1  <none>           Online  UpToDate        NoApplications
+{edge-3-uuid-cccccccccccccccccccccccccccccccccccccc}    edge-3  Fleet/store      Online  UpToDate        NoApplications
+{edge-2-uuid-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}    edge-2  Fleet/warehouse  Online  UpToDate        NoApplications
+{edge-1-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}    edge-1  Fleet/pos       Online  UpToDate        NoApplications
 --
 
 .. If you devices keep displaying as off-line for too long, it might be related to clock skew.
 In that case, stop each of your local VMs and return to the beginning of this lab.
 +
-NOTE: Clock skew prevents a device from synchronizing with Edge Manager, and is known to happen if your ROLE classroom is stopped without first shutting down local VMs on your _develoment machine_ and later your VMs are restarted from saved state.
+NOTE: Clock skew prevents a device from synchronizing with Edge Manager, and is known to happen if your ROLE classroom is stopped without first shutting down local VMs on your _development machine_ and later your VMs are restarted from saved state.
 +
 [source,console,subs="verbatim,quotes"]
 --
@@ -182,7 +182,7 @@ $ **cp -r ../rhde-rhem-samples/monitor/* .**
 .. Review the new manifest for the `warehouse` fleet.
 It adds a disk space monitor, which trigger alerts when the disk is 50% and 80% full.
 +
-NOTE: the sampling interval and durations used in the example may not be suitable for production environments, but are intended to trigger events very quickly, so this lab doesn't take too long to complete.
+NOTE: the sampling interval and duration used in the example may not be suitable for production environments, but are intended to trigger events very quickly, so this lab doesn't take too long to complete.
 +
 IMPORTANT: In image mode systems, the root (`/`) directory is a bind mount.
 The real root disk is mounted on the '/sysroot' directory.
@@ -221,7 +221,7 @@ $ *flightctl get --field-selector metadata.owner=Fleet/warehouse*
 {edge-2-uuid-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}    edge-2  Fleet/warehouse  Online  UpToDate        NoApplications
 --
 +
-The `OnLine` status ont he `SYSTEM` column, in the previous command, indicates that there are no monitors triggering alerts.
+The `OnLine` status on the `SYSTEM` column, in the previous command, indicates that there are no monitors triggering alerts.
 
 .. To view the detailed status of each monitor, you must use either the YAML or JSON output of a managed device.
 The following `jq` filter shows only the status of monitors, for a shorter and more manageable output.
@@ -239,11 +239,12 @@ $ *flightctl get dev $UUID -o json | jq '.status.resources'*
 
 4. Fill in the disk of one of the devices to trigger a degraded state in one of the devices.
 
-.. Open a new terminal window, and start an SSH on the `edge-2` VM/managed device.
+.. Open another terminal, and start a SSH session on the `edge-2` VM.
 Keep it open as you will alternate between that terminal and the terminal running the Edge Manager CLI.
 +
 [source,console,subs="verbatim,quotes"]
 --
+$ *cd temp-monitor*
 $ *ssh -i ../temp-enroll/edge-key -p 8222 core@127.0.0.1*
 Last login: Wed Mar 18 23:25:16 2026 from 172.25.250.254
 managed device: edge-2$
@@ -255,16 +256,16 @@ managed device: edge-2$
 --
 $ *df -h /sysroot*
 Filesystem      Size  Used Avail Use% Mounted on
-/dev/vda2        19G  5.3G   14G  28% /sysroot
-$ *dd if=/dev/zero of=largefile1 bs=1k count=5000000*
-5000000+0 records in
-5000000+0 records out
-5120000000 bytes (5.1 GB, 4.8 GiB) copied, 12.741 s, 402 MB/s
+/dev/vda2        19G  2.1G   17G  11% /sysroot
+$ *dd if=/dev/zero of=largefile1 bs=1k count=8000000*
+8000000+0 records in
+8000000+0 records out
+8192000000 bytes (8.2 GB, 7.6 GiB) copied, 14.1557 s, 579 MB/s
 $ *ls -lh largefile1*
--rw-r--r--. 1 core wheel 4.8G Mar 18 23:32 largefile1
+-rw-r--r--. 1 core wheel 7.7G Mar 24 23:15 largefile1
 $ *df -h /sysroot*
 Filesystem      Size  Used Avail Use% Mounted on
-/dev/vda2        19G   11G  8.9G  54% /sysroot
+/dev/vda2        19G  9.7G  9.3G  52% /sysroot
 --
 
 .. On your _development machine_, wait a few moments and verify that the device displays a degraded status, and its disk monitor displays a warming status.
@@ -291,27 +292,27 @@ Verify that the menu:Overview[] page indicates one degraded device (yellow) on i
 Scroll down and verify that its its *Device status* graph also shows one degraded device.
 
 .. Finally, enter the menu:Devices[] page and verify that the `edge-2` device displays a warning icon and a `Degraded` status.
-Click the warning icon or its status messages to see a popup which states disk utilization reached a warning level.
+Click the warning icon or its status messages to see a pop-up which states disk utilization reached a warning level.
 
 5. Fill in the disk the same device even more, to trigger an error state.
 
-.. On your _managed device_ create another file, which reduces avaibale capacity to less than 10% of the total disk capacity.
+.. On your _managed device_ create another file, which reduces available capacity to less than 10% of the total disk capacity.
 +
 [source,console,subs="verbatim,quotes"]
 --
 $ *df -h /sysroot*
 Filesystem      Size  Used Avail Use% Mounted on
-/dev/vda2        19G   11G  8.9G  54% /sysroot
+/dev/vda2        19G  9.7G  9.3G  52% /sysroot
 *$ dd if=/dev/zero of=largefile2 bs=1k count=8000000*
 8000000+0 records in
 8000000+0 records out
 8192000000 bytes (8.2 GB, 7.6 GiB) copied, 15.8843 s, 516 MB/s
 $ **ls -lh largefile***
--rw-r--r--. 1 core wheel 4.8G Mar 18 23:32 largefile1
+-rw-r--r--. 1 core wheel 7.7G Mar 18 23:32 largefile1
 -rw-r--r--. 1 core wheel 7.7G Mar 18 23:40 largefile2
 $ *df -h /sysroot*
 Filesystem      Size  Used Avail Use% Mounted on
-/dev/vda2        19G   18G  1.3G  94% /sysroot
+/dev/vda2        19G   18G  1.7G  92% /sysroot
 --
 
 .. On your _development machine_, wait until the device status changes to error, and verify that its disk monitor reports a critical status.
@@ -331,7 +332,7 @@ $ *flightctl get dev $UUID -o json | jq '.status.resources'*
 --
 
 .. On the Edge Manager web UI, verify the changes on the fleet and device pages.
-The device status and the circunference graphs now indicate the error and critical states.
+The device status and the circumference graphs now indicate the error and critical states.
 
 .. You can also notice, on the menu:Events[] tab of the `edge-2` device details page, that there are warnings about disk utilization.
 
@@ -364,7 +365,7 @@ AGE             INVOLVEDOBJECT.KIND     INVOLVEDOBJECT.NAME                     
 1 hour ago      Device                  {edge-2-uuid-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}    Warning Device is disconnected (last seen more than 5 minutes ago).
 --
 
-6. Clean the disk of the device to restore its healhy status.
+6. Clean the disk of the device to restore its healthy status.
 
 .. On your _managed device_, remove the large files you created.
 You can close the SSH session after that.
@@ -374,7 +375,7 @@ You can close the SSH session after that.
 $ **rm largefile***
 $ *df -h  /sysroot*
 Filesystem      Size  Used Avail Use% Mounted on
-/dev/vda2        19G  5.3G   14G  28% /sysroot
+/dev/vda2        19G  2.1G   17G  11% /sysroot
 --
 
 .. On your _development machine_, wait until the `edge-2` device is back to online, that is, not in degraded or error states.
@@ -395,11 +396,11 @@ $ *flightctl get dev $UUID -o json | jq '.status.resources'*
 --
 
 You demonstrated that Edge Manager resource monitors can alert about device capacity issues and support troubleshooting workflows.
-You also explored different ways of retrieving healh and status information from Edge Manager using its web UI and CLI.
+You also explored different ways of retrieving health and status information from Edge Manager using its web UI and CLI.
 
 == What's next
 
-With a solid understanding of monitoring and troubleshooting devices and fleets, the next chapter explores how to deploy and manage containerized applications on your device fleets using Quadlets.
+With a solid understanding of monitoring and troubleshooting devices and fleets, the next chapter explores how to deploy and manage containerized applications on your device fleets.
 
 ////
 Create scenarios where devices have differences of configuration and health issues, and show how to get that information from RHEM. Most bullets are ideas, to be improved and detailed during course development time. Use a selector on metadata.owner to list all devices from a fleet. List all devices using a given bootc image (get devices from different fleets). Create a condition in a device (ex: disk full) and show how many devices in a fleet have a condition. Power down a device, or disconnect it from the virtual network, and verify that it's offline on RHEM. Focus on features of the RHEM CLI and webUI themselves, but find a good scenario which requires extracting raw JSON or YAML data and processing with a tool such as jq.

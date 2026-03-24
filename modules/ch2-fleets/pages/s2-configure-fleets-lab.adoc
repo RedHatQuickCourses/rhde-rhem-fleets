@@ -17,7 +17,7 @@ These local VMs are already provisioned and enrolled in Edge Manager.
 
 You also need a _server machine_ running RHEL, which is already configured as an Edge Manager server.
 
-Both your _development machine_ and _server machine_ were configured by performing the xref:ch1-scale:s3-environment-lab.adoc[first lab].
+Both your _development machine_ and _server machine_ were configured by performing the xref:ch1-scale:s3-environment-lab.adoc[first lab^].
 
 If you are using the course classroom, your _development machine_ is the `workstation` VM.
 Log in as the user `student` with password `student`.
