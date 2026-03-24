@@ -1,6 +1,6 @@
-:time_estimate: 9
+:time_estimate: 10
 
-= Understanding the Fleet Concept in RHEM
+= Understanding the Fleet Concept in Edge Manager
 
 _Estimated reading time: *{time_estimate} minutes*._
 
@@ -8,14 +8,14 @@ Objective::
 
 Learn how Red Hat Edge Manager organizes devices into fleets using labels and understand the GitOps approach to fleet configuration.
 
-WARNING: Work In Progress.
+WARNING: Pending Review.
 
 == Edge Manager device and fleet resources
 
 In the first course, you experimented with modifying device resources using the Edge Manager web UI and CLI to configure individual devices, and explored how the Edge Manager agent applied those configurations to devices themselves.
 
-You would configure a fleet resource basically the same way, providing the same information, using similar commands, pages, and syntax.
-If something can be configured in an individual device, it can be configured the same way in a fleet: all subfields of a device `spec` field are allowed inside a fleet `template` field.
+You would configure a fleet resource basically the same way, providing the same information, by using similar commands, pages, and syntax.
+If something can be configured in an individual device, it can be configured the same way in a fleet: all fields under the `spec` field of a device resource are allowed inside the `template` field of a fleet resource.
 
 The important difference between the configuration inside a device and a fleet is that a fleet configuration supports templates, which enable variation of configurations among different devices in the same fleet.
 
@@ -23,7 +23,7 @@ If a device is part of a fleet, it gets a _rendered_ copy of the fleet configura
 
 == Labels and selectors in a fleet
 
-All of the Edge Manager resources can declare labels, which are pairs of keys and their respective values.
+All Edge Manager resource types can declare labels, which are pairs of keys and their respective values.
 Most of the times, Edge Manager ignores these labels, which are left for the user to organize collections of resources and them query them based on the values of their labels by using _selectors_ in CLI commands and API requests.
 
 Using the web UI, you specify a label as `key=value` where both `key` and `value` are strings.
@@ -89,16 +89,17 @@ IMPORTANT: A device may belong to one and only one fleet.
 If the labels on a device match multiple fleets, them the device enters an error state and these fleets are said to overlap.
 The device gets no updates until the overlap is resolved.
 
-The error state of "overlapping fleets" is only visible on the affected device resources.
-The corresponding fleet resources provide no indication that there's an overlap, even if you create multiple fleets containing exactly the same selectors.
+The error state of "overlapping fleets" is only visible on the affected device resources by means of the `MultipleOwners` condition.
+The corresponding fleet resources provide no indication that there is any overlap, even when you create multiple fleets containing exactly the same selectors.
 
 == Device templates and labels
 
-The device template in a fleet resource supports a subset of the https://pkg.go.dev/text/template[Go template^] syntax, which enables text substitutions of the values of fiedls of device resources, usually label values.
+The device template in a fleet resource supports a subset of the https://pkg.go.dev/text/template[Go template^] syntax, which enables text substitutions on the values of its fields, usually by referring to the values of labels from matching devices.
+That is, the actual value of a template vary for different devices on the same fleet.
 
 The allowed places of Go templates vary depending on the configuration provider.
-For example, the inlide configuration providers allows Go templates in the content of any configuration file.
-Another example, the Git configuration provider allows Go templates on the branch/commit and path fiedls, but NOT inside the file contents retrieved from a Git repository.
+For example, the inline configuration providers allows Go templates in the content of any configuration file.
+Another example, the Git configuration provider allows Go templates on the branch/commit and path fields, but NOT inside the file contents retrieved from a Git repository.
 
 == Joining, leaving, and switching fleets
 
@@ -108,24 +109,41 @@ Any time you change the selectors in a fleet resource, and anytime you change th
 This is convenient when enrolling devices, because when you approve an enrollment request you can also set labels for the device.
 This way a device is enrolled and join a fleet at the same time.
 
-But it also means it is easy to inadvertidely make a device leave or switch fleets when you change its labels.
+But it also means it is easy to inadvertently make a device leave or switch fleets when you change its labels.
 
 Consider the following scenarios of devices and fleets:
 
 * _If a device was managed as an individual device and joins a fleet_, all configurations set at the device level are discarded, and replaced by configurations from the fleet.
-You cannot mix device and fleet configurations for the same managed device.
+You cannot mix device and fleet configurations on the same managed device.
 
 * _If a device switches to a different fleet_, all configurations from the previous fleet are discarded and replaced by the configurations of the new fleet.
 
 * _If a device leaves a fleet, but does not join any other fleet_, it retains its latest rendered configuration.
-This way, if you remove a device inadveridely from a fleet, there's no downtime, and you can rejoin the the device to its previous fleet without any impact.
+This way, if you remove a device inadvertently from a fleet, there's no downtime, and you can rejoin the the device to its previous fleet without any impact.
 
 The overall theme is that Edge Manager clears after itself automatically, and you do not have to worry about left overs when a device changes its fleet membership.
-The only exception, when a device leaves a fleet and retains its configuration, is similar to when a device is decomissioned, and also retains its last configuration.
+The only exception, when a device leaves a fleet and retains its configuration, is similar to when a device is decommissioned, and also retains its last configuration.
+
+== Imperative configuration using hooks
+
+Device configurations from Edge Manager are declarative.
+Most times, you are just providing the contents of configuration files, and those contents are copied to managed devices.
+
+Sometimes you cannot apply a configuration by just file copies.
+You must reboot the device or restart a system service.
+To address such scenarios, Edge Manager provides hooks.
+
+Hooks are actions, usually operating system commands, which are run on a managed device under specified conditions.
+Among the valid conditions, there are before and after applying updates to devices, and when files matching a given pattern changes.
+
+Edge Manager provides predefined hooks for common scenarios, for example: to reload the System daemon (Systemd) when new unit files appear at `/etc/systemd` and for reloading the Network Daemon if you provide new network interface configuration files.
+
+You can provide your own hooks as part of a device or fleet configuration and, because this enables you to run arbitrary commands, you could abuse hooks to perform imperative configuration of managed devices.
+Be aware that such interactive configurations are not undone when a device joins or switches fleets, unlike imperative configurations.
 
 == The Git configuration provider and repository resources
 
-The Git configuration provide enables Edge Manager to fetch configuration file contents from a Git repository, instead of having these contents inline in a device or fleet resource, enabling an approach of configuration-as-code.
+The Git configuration provider enables Edge Manager to fetch configuration file contents from a Git repository, instead of having these contents inline in a device or fleet resource, enabling an approach of configuration-as-code.
 Only the Edge Manager server access Git servers.
 Managed devices get file contents from Edge Manager and do not contact any Git server.
 
@@ -133,7 +151,7 @@ The Git configuration provider is very convenient because most IT professionals 
 
 It also enables different teams to manage rollout of configurations and the actual configurations settings: the first team gets permissions to operate Edge Manager itself, while the second team gets permissions to commit and push to the Git repository.
 
-Another advantage of the Git configuration providder is that configuration files are actual files on the Git repository.
+Another advantage of the Git configuration provider is that configuration files are actual files on the Git repository.
 You can copy the configuration files, after you validate them in a test system, as they are, one by one, instead of having to embed them inside a YAML or JSON file, which makes testing  quicker and simpler.
 
 The Git configuration provider requires a _repository_ resource, which specifies:
@@ -147,30 +165,30 @@ A configuration element on a device or fleet specifies:
 * A tag, branch, or commit ID
 * The starting path of configuration files, inside the Git repository
 
-All files found in the git repository at the path specifified are applied, recursively, on managed devices, starting at the root directory.
+All files found in the git repository at the path specified are applied, recursively, on managed devices, starting at the root directory.
 For example, to include a "message of day" file in the `/configuration/pos` path of a Git repository, you would create the `/configuration/pos/etc/motd`.
 
 == Updates to Edge Manager resources vs. updates to Git and image repositories
 
-When using the Git configuration provider, you could intuitively expect that commits to the "main" branch of a Git repository automatically update managed devices which reference that repository.
-In a similar vein, you could expect that pushes to the `latest` tag of a bootc container image automatically update managed devices which reference that system image.
+When using the Git configuration provider, you would intuitively expect that commits to the "main" branch of a Git repository automatically update managed devices which reference that repository.
+In a similar vein, you would expect that pushes to the `latest` tag of a bootc container image automatically update managed devices which reference that system image.
 
 The truth is that Edge Manager expects to control the timing of all updates, and would not monitor image or git repositories for updates.
-When you create a fleet or device resource which referneces git or image repositories, Edge Manger fechtes the current content on those repositories and ignores all subsequent updates.
+When you create a fleet or device resource which references git or image repositories, Edge Manager fetches the current content on those repositories and ignores all subsequent updates.
 
 If you wish to update a device to a new bootc container image, or to new configuration files stored in a Git repository, you must update the device or fleet resource themselves.
-Only then Edge Manager applies new configuration for devices.
+Only then Edge Manager applies new configuration on managed devices.
 
 That means you should maintain non-floating tags for you container images, and reference those tags explicitly in your device or fleet resources.
-Alternativelly, you could refer to image hashes.
+Alternatively, you could refer to image hashes.
 
-In a similar way, you should maintain tags on your Git repositories, and reference those tags explicity in your device or fleet configurations.
+In a similar way, you should maintain tags on your Git repositories, and reference those tags explicitly in your device or fleet configurations.
 Alternatively, you could refer to Git commit IDs.
 
 == What's Next
 
 In the next section, you will configure device fleets, assign devices to them, and observe how fleet-based configuration management works in practice.
-Then, in a second lab, you will configure devides from a fleet using files stored in a Git repository and update those configurations by commiting and pushing new content to a Git server.
+Then, in a second lab, you will configure devices from a fleet using files stored in a Git repository and update those configurations by committing and pushing new content to a Git server.
 
 ////
 The fleet concept in RHEM and how it organizes devices by means of labels. Devices can belong to only a single fleet at a time. Assign labels to devices at enrollment time or after. Gitops with RHEM and the git configuration provider.

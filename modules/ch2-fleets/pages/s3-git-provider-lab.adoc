@@ -6,7 +6,7 @@ _Estimated reading time: *{time_estimate} minutes*._
 
 Objective::
 
-Configure multiple devies, which belong to fleets, from files stored in a git repository.
+Configure multiple devices, which belong to fleets, from files stored in a git repository.
 
 WARNING: Pending Review
 
@@ -16,7 +16,7 @@ include::ch2-fleets:partial$before-you-begin.adoc[]
 
 == Instructions
 
-You will create a fleet using the Git configuation provider, and then you will update files in a git repository and pull those updates to the fleet configuration.
+You will create a fleet using the Git configuration provider, and then you will update files in a git repository and pull those updates to the fleet configuration.
 
 include::ch1-scale:partial$set-permissive.adoc[]
 
@@ -85,7 +85,7 @@ NAME                                                    ALIAS   OWNER           
 .. If you devices keep displaying as off-line for too long, it might be related to clock skew.
 In that case, stop each of your local VMs and return to the beginning of this lab.
 +
-NOTE: Clock skew prevents a device from synchronizing with Edge Manager, and is known to happen if your ROLE classroom is stopped without first shutting down local VMs on your _develoment machine_ and later your VMs are restarted from saved state.
+NOTE: Clock skew prevents a device from synchronizing with Edge Manager, and is known to happen if your ROLE classroom is stopped without first shutting down local VMs on your _development machine_ and later your VMs are restarted from saved state.
 +
 [source,console,subs="verbatim,quotes"]
 --
@@ -104,7 +104,7 @@ It should display a page which states "No repositories yet".
 .. Click menu:Create repository[].
 Name your repository as `samples` and, for the *Repository URL*, type `\https://github.com/RedHatQuickCourses/rhde-rhem-samples.git` which is the URL of the samples repository of this course.
 
-.. Unckeck menu:Use resource syncs[] and click menu:Create repository[].
+.. Uncheck menu:Use resource syncs[] and click menu:Create repository[].
 +
 ////
 checked and type `pos` as the name of the resource sync.
@@ -113,7 +113,7 @@ Scroll down
 ////
 
 .. The repository details page shows the repository with a status of `Sync pending`.
-After a few monents the status of the repository should change to `Accessible`.
+After a few moments the status of the repository should change to `Accessible`.
 +
 If you experience any errors, click the status icons for a descriptive message of the error and make any required fix.
 +
@@ -138,7 +138,7 @@ Name your new fleet as `pos` and, under *Device selector*, click on menu:Add lab
 Type `role=pos` as the device selector, and press kbd:[Tab] to leave the text box. 
 Ignore the warning that "There are no devices matching these labels" and click menu:Next[].
 
-.. Under *Host configuration (files)*, click menu:Add configuration[] and type `store` on the *Source name* field. 
+.. Under *Host configuration (files)*, click menu:Add configuration[] and type `pos` on the *Source name* field. 
 Select `Git configuration` as the *Source type* field and select `samples` as the *Repository*.
 
 .. Type `main` as the *Branch/tag/commit* field, and `/pos` as the *Path*.
@@ -174,9 +174,9 @@ Its configurations are set by Red Hat Edge Manager.
 Log in with your GitHub account.
 If you do not have one, create one.
 +
-NOTE: Keep two brower tabs open, one on the Edge Manager web UI, another on GitHub.
+NOTE: Keep two browser tabs open, one on the Edge Manager web UI, another on GitHub.
 
-.. Once logged in on GitHub, visit https://github.com/RedHatQuickCourses/rhde-rhem-samples.git and click menu:Fork[] on the top bar to create a fork opf the samples repository on your personal GitHub account.
+.. Once logged in on GitHub, visit https://github.com/RedHatQuickCourses/rhde-rhem-samples.git and click menu:Fork[] on the top bar to create a fork of the samples repository on your personal GitHub account.
 
 .. On your personal fork of the samples repository, click menu:Code[] and then click on the copy icon, to copy the URL of your fork to the clipboard.
 
@@ -218,6 +218,7 @@ Its configurations are set by Red Hat Edge Manager.
 --
 
 You demonstrated that Edge Manager can fetch configuration files from a git repository, but it requires that you update the fleet definition, by changing the commit ID, to fetch updates from the repository. 
+Alternatively, you could have created a tag on your git repository fork, and set the fleet to use the git tag.
 
 // Suppose resource syncs would auto-update from a branch or tag, but couldn't find info on them.
 
@@ -225,7 +226,7 @@ You demonstrated that Edge Manager can fetch configuration files from a git repo
 
 Now that you have organized your devices into fleets which pull configuration files from a git repository, the next chapter explores how to monitor device and fleet status, troubleshoot issues, and extract meaningful data from Red Hat Edge Manager.
 
-The next chapter also provides an example of creating and managing fleets configurations using Git repositoryes by using the CLI.
+The next chapter also provides an example of creating and managing fleets configurations using Git repositories by using the CLI.
 Unlike the previous lab, which demonstrated both web UI and CLI management of fleets, using inline configurations, this lab uses only the web UI to make it shorter.
 
 NOTE: Review previous statements in case we scope down or remove the monitoring chapter.
