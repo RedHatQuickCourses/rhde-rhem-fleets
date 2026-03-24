@@ -214,6 +214,8 @@ $ *sed -i "s|REPLACE_WITH_ROOT_AUTH_JSON|$AUTH_JSON|" frontend.yaml*
 
 .. Review your fleet manifest and ensure it does not contains any `REPLACE` markers anymore.
 
+Celia note: the lab shows different name in the doc (webapp) vs in the example file (webapp-repo)
+
 .. Review the repository manifest, which defines the `webapp` git repository referenced by the `frontend` fleet.
 It points to the course samples repository.
 +

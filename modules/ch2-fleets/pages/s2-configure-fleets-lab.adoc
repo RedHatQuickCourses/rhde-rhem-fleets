@@ -146,6 +146,7 @@ You should get a details page for a fleet in the `Valid` state and with no devic
 
 3. Alter the labels on the first managed device so it joins the fleet and verify it got the fleet configuration.
 
+Celia note: Any reason why you're not showing the "Terminal" tab in the UI, or the "console" command in the CLI then using "journalctl..."?
 .. Switch to a terminal and attempt to open the serial console of your local VM.
 It does not display a log in prompt, no matter which keys you press.
 Your only alternative is dettaching from the VM console using kbd:[Ctrl+\]].
