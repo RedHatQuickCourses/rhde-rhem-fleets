@@ -4,6 +4,6 @@ Goal::
 
 Understand the challenges of managing edge devices at scale
 
-WARNING: Work In Progress.
+WARNING: Pending Review.
 
 This chapter introduces the fundamental challenges of managing large numbers of edge devices and explores different approaches for handling applications in edge computing environments.

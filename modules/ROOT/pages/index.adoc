@@ -11,7 +11,7 @@ On completing this course, you should be able to:
 
 * Understand the challenges of managing edge devices at scale
 
-* Create and manage fleets of devices
+* Create and manage fleets of managed devices
 
 * Monitor and troubleshoot devices and fleets
 
@@ -35,17 +35,17 @@ On completing this course, you should be able to:
 
 This course assumes that you have the following experience:
 
-* Having completed https://redhatquickcourses.github.io/rhde-rhem-devices/[Deploying Red Hat Edge Manager and Managing Edge Devices] or having equivalent skills.
+* Having completed https://redhatquickcourses.github.io/rhde-rhem-devices/[Deploying Red Hat Edge Manager and Managing Edge Devices^] or having equivalent skills.
 
-* Familiarity with RHEL system administration, to the level of RHCA (Red Hat Certified System Administrator) or equivalent knowledge.
+* Familiarity with RHEL system administration, to the level of RHCSA (Red Hat Certified System Administrator) or equivalent knowledge.
 
 * Familiarity with Linux container tools, such as Podman, and technologies compatible with Open Container Initiative (OCI) specifications, such as container registries.
 
 * Familiarity with image mode for RHEL, especially building bootc container images and provisioning and updating image mode systems.
 
-It is recommended that learners already prossess skills from the image mode with https://redhatquickcourses.github.io/rhde-bootc-build/[Red Hat Device Edge quick course series^].
+It is recommended that learners already possess skills from the https://redhatquickcourses.github.io/rhde-bootc-build/[Image Mode with Red Hat Device Edge quick course series^].
 
-Notice that no prior knowledge of Kubernetes and OpenShift is assumed nor required.
+Notice that no prior knowledge about Kubernetes and OpenShift is assumed or required.
 
 == Classroom environment
 
