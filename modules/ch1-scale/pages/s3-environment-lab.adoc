@@ -112,7 +112,7 @@ $ *which skopeo*
 +
 [source,console,subs="verbatim,quotes"]
 --
-$ *sudo dnf install skopeo buildah*
+$ *sudo dnf install podman skopeo buildah*
 ...
 Complete!
 --
@@ -255,7 +255,7 @@ inactive
 +
 [source,console,subs="verbatim,quotes"]
 --
-$ *sudo dnf install podman skopeo*
+$ *sudo dnf install flightctl-services
 ...
 Complete!
 --
