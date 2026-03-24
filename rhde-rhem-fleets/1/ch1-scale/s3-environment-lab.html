@@ -1081,6 +1081,21 @@ $ <strong>rm ~/.local/share/libvirt/images/edge-2.qcow2</strong></code></pre>
 </div>
 </li>
 <li>
+<p>If there were any VMs, also remove their host keys from your SSH user configuration.</p>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>ssh-keygen -R [127.0.0.1]:8122</strong>
+...
+/home/student/.ssh/known_hosts updated.
+...
+$ <strong>ssh-keygen -R [127.0.0.1]:8222</strong>
+...
+/home/student/.ssh/known_hosts updated.
+...</code></pre>
+</div>
+</div>
+</li>
+<li>
 <p>Verify that there are no managed devices in Edge Manager.</p>
 <div class="listingblock">
 <div class="content">
