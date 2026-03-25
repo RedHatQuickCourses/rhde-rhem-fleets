@@ -8,7 +8,7 @@ Objective::
 
 Learn how to deploy applications on devices and fleets using the container application type and understand how Edge Manager integrates with Podman.
 
-WARNING: Work In Progress
+WARNING: Pending Review.
 
 == Application Management with Edge Manager
 
