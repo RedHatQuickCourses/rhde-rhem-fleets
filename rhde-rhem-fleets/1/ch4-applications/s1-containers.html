@@ -197,8 +197,8 @@ Work In Progress
 <h2 id="_application_management_with_edge_manager"><a class="anchor" href="#_application_management_with_edge_manager"></a>Application Management with Edge Manager</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Application management with Edge Manager enables you to separate the lifecycle of applications running on edge devices from the lifecycle of the operating system images and operating system configurtions on those edge devices.
-This approach suits organizations where different teams own the operating system and applications.</p>
+<p>Application management with Edge Manager enables you to separate the lifecycle of applications running on edge devices from the lifecycle of the operating system images and operating system configuration files on those edge devices.
+This approach suits organizations where different teams own the operating system and the applications.</p>
 </div>
 <div class="paragraph">
 <p>Edge Manager can start containerized applications directly using Podman or it can provide <a href="https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html" target="_blank" rel="noopener">quadlet</a> configuration files for the System Daemon (Systemd).</p>
@@ -227,8 +227,8 @@ If you do that, your applications would not be managed by Edge Manager.</p>
 </div>
 <div class="paragraph">
 <p>Edge Manager monitors the status of applications it manages and can report a healthy or unhealthy state for each of them.
-In the case of containers that Edge Manager starts directly using Podman, it also restarts applications which fail with an error status.
-In the case of containers started as quadlets, restarting depends on the configuration on the quadlet itself.</p>
+In the case of single containers, that Edge Manager starts directly using Podman, it also restarts applications which fail with an error status.
+In the case of containers started by quadlets, restarting depends on the configuration on the quadlets themselves.</p>
 </div>
 </div>
 </div>
@@ -236,16 +236,16 @@ In the case of containers started as quadlets, restarting depends on the configu
 <h2 id="_container_registry_authentication"><a class="anchor" href="#_container_registry_authentication"></a>Container registry authentication</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Unlike fetching configurations from a Git repository, which are performed only by an Edge Manager server and never by its agents, managed devices must pull container images directly from a container image registry.
-This means managed devices require credentials for acessing such container image registries.
-The location you store those credentails depend on the Linux user under which each containerized applications runs.</p>
+<p>Unlike fetching configuration files from a Git repository, which is performed only by an Edge Manager server and never by its agents, managed devices must pull container images directly from a container image registry.
+This means managed devices require credentials for accessing such container image registries.
+The location you store those credentials depend on the Linux user under which each containerized application runs.</p>
 </div>
 <div class="paragraph">
 <p>For example: if a containerized applications runs as the root user, registry authentication is stored at <code>/root/.config/containers/auth.json</code>.
 Notice this is different from the bootc registry authentication file, required to pull bootc container images, stored at <code>/etc/ostree/auth.json</code>.</p>
 </div>
 <div class="paragraph">
-<p>It is up to the user providing these files in a bootc container image, at provisioning or on boarding time (from ignition or kickstart), or by any other means.
+<p>It is up to the user providing these files in a bootc container image, at provisioning time (from ignition or kickstart), by an on-boarding process, or by any other means.
 You can provide those files using Edge Manager itself, but in that case it is recommended that you use inline configurations to avoid leaking secrets in a Git repository.</p>
 </div>
 </div>
@@ -262,7 +262,7 @@ Using a floating tag may lead to devices running different versions of the conta
 It is recommended that you avoid using such features, like it is recommended that you disable the bootc auto-update timer and let Edge Manager control updates to the system image running on managed devices.</p>
 </div>
 <div class="paragraph">
-<p>It is out of scope of this course, but worthy knowing that Edge Manager update policies affect application updates as well as operating system images and configurations, enabling you to rolling out updates progressively to a fleet of devices or to implement strategies such as A/B testing, in conjuntion with device labels and configuration templating.</p>
+<p>It is out of scope of this course, but worthy knowing that Edge Manager update policies affect application updates as well as operating system images and configurations, enabling you to rolling out updates progressively to a fleet of devices or to implement strategies such as A/B testing, in conjunction with device labels and configuration templating.</p>
 </div>
 </div>
 </div>

@@ -231,7 +231,7 @@ If you skipped any of previous labs, or if you had to destroy and recrete your e
 <h2 id="_instructions"><a class="anchor" href="#_instructions"></a>Instructions</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>You will create a fleet which contains both inline and git configuration files, and, more importantly, also contains a single-container application.
+<p>You will create a fleet which contains both inline and git configuration files, and, more importantly, a single-container application.
 Then you will join a device to the new fleet, verify that the application is running, and simulate unexpected application downtime.</p>
 </div>
 <div class="paragraph">
@@ -249,7 +249,7 @@ The private registry, in turn, provides:</p>
 </ul>
 </div>
 <div class="paragraph">
-<p>The git configuration is not really necessary for this simplistic scenario, it just shows that you could include multiple configuration providers on the same fleet.</p>
+<p>The git configuration is not really necessary for this simplistic scenario, it just shows that you use multiple configuration providers on the same fleet resource.</p>
 </div>
 <div class="admonitionblock important">
 <table>
@@ -280,7 +280,7 @@ Only your <em>development machine</em> needs SELinux set to permissive mode.</p>
 <div class="olist arabic">
 <ol class="arabic">
 <li>
-<p>On your <em>developer machine</em>, verify that you have the prerequisites from the <a href="../ch1-scale/s3-environment-lab.html" class="xref page">first lab</a>.
+<p>On your <em>development machine</em>, verify that you have the prerequisites from the <a href="../ch1-scale/s3-environment-lab.html" class="xref page">first lab</a>.
 If any of the prerequisites are missing, please return to the first lab and ensure that you did not skip any step.</p>
 <div class="olist loweralpha">
 <ol class="loweralpha" type="a">
@@ -341,9 +341,9 @@ Login successful.</code></pre>
 <div class="content">
 <pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl get device</strong>
 NAME                                                    ALIAS   OWNER            SYSTEM  UPDATED         APPLICATIONS
-mpr39vjcj5fup095de4pqnld6h4snt2ud79g74p7spv5i00jjid0    edge-3  Fleet/warehouse  Online  UpToDate        NoApplications
-g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g    edge-2  Fleet/store      Online  UpToDate        NoApplications
-1u63hvsgtua9tjjbmla9bgh5h2s77cb8esepphnf68m3ocf8qfng    edge-1  &lt;none&gt;           Online  UpToDate        NoApplications</code></pre>
+mpr39vjcj5fup095de4pqnld6h4snt2ud79g74p7spv5i00jjid0    edge-3  Fleet/store      Online  UpToDate        NoApplications
+g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g    edge-2  Fleet/warehouse  Online  UpToDate        NoApplications
+1u63hvsgtua9tjjbmla9bgh5h2s77cb8esepphnf68m3ocf8qfng    edge-1  Fleet/warehouse  Online  UpToDate        NoApplications</code></pre>
 </div>
 </div>
 </li>
@@ -357,7 +357,7 @@ In that case, stop each of your local VMs and return to the beginning of this la
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-Clock skew prevents a device from synchronizing with Edge Manager, and is known to happen if your ROLE classroom is stopped without first shutting down local VMs on your <em>develoment machine</em> and later your VMs are restarted from saved state.
+Clock skew prevents a device from synchronizing with Edge Manager, and is known to happen if your ROLE classroom is stopped without first shutting down local VMs on your <em>development machine</em> and later your VMs are restarted from saved state.
 </td>
 </tr>
 </table>
@@ -376,7 +376,7 @@ Domain 'edge-1' destroyed
 <li>
 <p>Build and publish a bootc container image which includes a container runtime.</p>
 <div class="paragraph">
-<p>Remember that the enrollment image, which you used at the beggining of this course, provided only a mininum RHEL system with the Edge Manager agent.
+<p>Remember that the enrollment image, which you used at the beginning of this course, provided only a minimum RHEL system with the Edge Manager agent.
 That image did not include Podman or any other container runtime, so any attempt to run managed applications will fail unless you first update your devices to a suitable system image.</p>
 </div>
 <div class="olist loweralpha">
@@ -392,7 +392,7 @@ $ <strong>cp -r ../rhde-rhem-samples/managedapp/* .</strong></code></pre>
 </div>
 </li>
 <li>
-<p>Review the containerfile.
+<p>Review the Containerfile.
 It adds the container-tools meta-package, which includes Podman.
 It also includes the qemu-guest-agent, which should resolve clock skew issues of local VMs.</p>
 <div class="listingblock">
@@ -416,7 +416,7 @@ RUN update-ca-trust</code></pre>
 </div>
 </li>
 <li>
-<p>Copy from the working directory of the enrollment image some auxiliary files which you neeed to include in your bootc container image, such as the private registry CAs and SSH keys.</p>
+<p>Copy from the working directory of the enrollment image some auxiliary files which you need to include in your bootc container image, such as the private registry CAs and SSH keys.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-console" data-lang="console">$ <strong>cp ../temp-enroll/domain.crt .</strong>
@@ -563,7 +563,7 @@ It points to the course samples repository.</p>
 apiVersion: flightctl.io/v1beta1
 kind: Repository
 metadata:
-  name: webapp-repo
+  name: webapp
 spec:
   type: git
   url: https://github.com/RedHatQuickCourses/rhde-rhem-samples.git</code></pre>
@@ -579,7 +579,7 @@ spec:
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-The status of the fleet may be <code>Unknown</code> for a while, while Edge Manager fetches the configation files from the Git repository.
+The status of the fleet may be <code>Unknown</code> for a while, while Edge Manager fetches the configuration files from the Git repository.
 </td>
 </tr>
 </table>
@@ -589,8 +589,12 @@ The status of the fleet may be <code>Unknown</code> for a while, while Edge Mana
 <pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl apply -f webapp.yaml</strong>
 webapp.yaml: applying repository/webapp: 201 Created
 $ <strong>flightctl apply -f frontend.yaml</strong>
-frontend.yaml: applying fleet/frontend: 201 Created
-$ <strong>flightctl get fleet frontend</strong>
+frontend.yaml: applying fleet/frontend: 201 Created</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl get fleet frontend</strong>
 NAME            OWNER   SELECTOR        VALID
 frontend        &lt;none&gt;  role=frontend   True</code></pre>
 </div>
@@ -632,7 +636,7 @@ device/1u63hvsgtua9tjjbmla9bgh5h2s77cb8esepphnf68m3ocf8qfng edited</code></pre>
 </li>
 <li>
 <p>Wait until the device status changes to <code>UptoDate</code>.
-Notice that the device now displays a <code>Helthty</code> status on the <code>APPLICATIONS</code> column, instead of <code>NoApplications</code>.</p>
+Notice that the device now displays a <code>Healthty</code> status on the <code>APPLICATIONS</code> column, instead of <code>NoApplications</code>.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl get device $UUID</strong>
@@ -642,25 +646,17 @@ NAME                                                    ALIAS   OWNER           
 </div>
 </li>
 <li>
-<p>Alternatively, you could verify the status of all devices in the fleet.</p>
+<p>Open another terminal and open a SSH session to your <code>edge-1</code> VM.
+Verify that you get the expected "message of day", proving that the device got the settings from the git configuration provider.
+Keep that SSH session open, as you will return to it.</p>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl get --field-selector metadata.owner=Fleet/frontend</strong>
-1u63hvsgtua9tjjbmla9bgh5h2s77cb8esepphnf68m3ocf8qfng    edge-1  Fleet/frontend  Online  UpToDate        <strong>Healthy</strong></code></pre>
-</div>
-</div>
-</li>
-<li>
-<p>Show the "message of day" to prove that the device got the settings from the git configuration provider.</p>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>ssh -i ../temp-enroll/edge-key -p 8122 core@127.0.0.1</strong>
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>cd temp-managedapp</strong>
+$ <strong>ssh -i ../temp-enroll/edge-key -p 8122 core@127.0.0.1</strong>
 Managed device running a containerized web app
 
 Last login: Wed Mar 11 19:30:01 2026 from 172.25.250.254
-[core@enroll ~]$ <strong>exit</strong>
-logout
-Connection to 127.0.0.1 closed.</code></pre>
+[core@enroll ~]$</code></pre>
 </div>
 </div>
 </li>
@@ -672,7 +668,7 @@ Connection to 127.0.0.1 closed.</code></pre>
 <div class="olist loweralpha">
 <ol class="loweralpha" type="a">
 <li>
-<p>Access the mock of your web application.</p>
+<p>On your <em>development machine</em>, access the mock of your web application.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-console" data-lang="console">$ <strong>curl 127.0.0.1:8108</strong>
@@ -681,35 +677,35 @@ Mock web app running PHP 8.0.30</code></pre>
 </div>
 </li>
 <li>
-<p>Find the container id of the application container and stop it.</p>
+<p>On your <code>edge-1</code> VM, find the container id of the application container and stop it.</p>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Remember that the password for the <code>core</code> user is <code>redhat123</code>.
+</td>
+</tr>
+</table>
+</div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl console device $UUID -- podman ps</strong>
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>sudo podman ps</strong>
 CONTAINER ID  IMAGE                                      COMMAND               CREATED         STATUS         PORTS                 NAMES
 <strong>ac31d8eae297</strong>  registry.lab.example.com:5000/webapp:v1.0  /bin/sh -c php-fp...  12 minutes ago  Up 12 minutes  0.0.0.0:80-&gt;8080/tcp  systemd-httpd-317337-app</code></pre>
 </div>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl console device $UUID -- podman kill <em>ac31d8eae297</em></strong>
+<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>sudo podman kill <em>ac31d8eae297</em></strong>
 ac31d8eae297</code></pre>
 </div>
 </div>
 </li>
 <li>
-<p>Alternatively, you can open a SSH session to your local VM and run podman from a root prompt.</p>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-console" data-lang="console">$ <strong>ssh -i ../temp-enroll/edge-key -p 8122 core@127.0.0.1</strong>
-...
-[core@enroll ~]$ <strong>sudo -i</strong>
-[root@enroll ~]#</code></pre>
-</div>
-</div>
-</li>
-<li>
-<p>Verify that Edge Manager reports a change in application status.
-It may take a few moments until you can see the change.</p>
+<p>On your <em>development machine</em>, wait until Edge Manager reports a change in application status.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl get device $UUID</strong>
@@ -738,7 +734,8 @@ NAME                                                    ALIAS   OWNER           
 </div>
 </li>
 <li>
-<p>If you wish, you can verify that the application is again accessible and a new container is running on the managed device.</p>
+<p>If you wish, you can verify that the application is again accessible and a new container is running on the managed device.
+You can now close the SSH session on your <code>edge-1</code> VM.</p>
 </li>
 </ol>
 </div>
