@@ -22,7 +22,7 @@ Finally, you will resolve the disk condition and verify that Edge Manager report
 
 include::ch1-scale:partial$set-permissive.adoc[]
 
-1. On your _developer machine_, verify that you have the prerequisites from the xref:ch1-scale:s3-environment-lab.adoc[first lab^].
+1. On your _developer machine_, verify that you have the prerequisites from the xref:ch1-scale:s3-environment-lab.adoc[first lab].
 If any of the prerequisites are missing, please return to the first lab and ensure that you did not skip any step.
 
 .. Verify that you have a clone of the course samples repository.

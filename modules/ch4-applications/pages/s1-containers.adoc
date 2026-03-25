@@ -12,8 +12,8 @@ WARNING: Work In Progress
 
 == Application Management with Edge Manager
 
-Application management with Edge Manager enables you to separate the lifecycle of applications running on edge devices from the lifecycle of the operating system images and operating system configurtions on those edge devices.
-This approach suits organizations where different teams own the operating system and applications.
+Application management with Edge Manager enables you to separate the lifecycle of applications running on edge devices from the lifecycle of the operating system images and operating system configuration files on those edge devices.
+This approach suits organizations where different teams own the operating system and the applications.
 
 Edge Manager can start containerized applications directly using Podman or it can provide https://docs.podman.io/en/latest/markdown/podman-systemd.unit.5.html[quadlet^] configuration files for the System Daemon (Systemd).
 
@@ -28,19 +28,19 @@ For example, nothing prevents you from installing quadlet files on `/etc/systemd
 If you do that, your applications would not be managed by Edge Manager.
 
 Edge Manager monitors the status of applications it manages and can report a healthy or unhealthy state for each of them.
-In the case of containers that Edge Manager starts directly using Podman, it also restarts applications which fail with an error status.
-In the case of containers started as quadlets, restarting depends on the configuration on the quadlet itself.
+In the case of single containers, that Edge Manager starts directly using Podman, it also restarts applications which fail with an error status.
+In the case of containers started by quadlets, restarting depends on the configuration on the quadlets themselves.
 
 == Container registry authentication
 
-Unlike fetching configurations from a Git repository, which are performed only by an Edge Manager server and never by its agents, managed devices must pull container images directly from a container image registry.
-This means managed devices require credentials for acessing such container image registries.
-The location you store those credentails depend on the Linux user under which each containerized applications runs.
+Unlike fetching configuration files from a Git repository, which is performed only by an Edge Manager server and never by its agents, managed devices must pull container images directly from a container image registry.
+This means managed devices require credentials for accessing such container image registries.
+The location you store those credentials depend on the Linux user under which each containerized application runs.
 
 For example: if a containerized applications runs as the root user, registry authentication is stored at `/root/.config/containers/auth.json`.
 Notice this is different from the bootc registry authentication file, required to pull bootc container images, stored at `/etc/ostree/auth.json`.
 
-It is up to the user providing these files in a bootc container image, at provisioning or on boarding time (from ignition or kickstart), or by any other means.
+It is up to the user providing these files in a bootc container image, at provisioning time (from ignition or kickstart), by an on-boarding process, or by any other means.
 You can provide those files using Edge Manager itself, but in that case it is recommended that you use inline configurations to avoid leaking secrets in a Git repository.
 
 == Updating containerized applications
@@ -51,7 +51,7 @@ Using a floating tag may lead to devices running different versions of the conta
 With quadlet applications, you could consider using quadlet features to auto-update containers on devices, but that means Edge Manager would have no control of when those updates happen nor which version of a container is effectively running on each of its managed devices.
 It is recommended that you avoid using such features, like it is recommended that you disable the bootc auto-update timer and let Edge Manager control updates to the system image running on managed devices.
 
-It is out of scope of this course, but worthy knowing that Edge Manager update policies affect application updates as well as operating system images and configurations, enabling you to rolling out updates progressively to a fleet of devices or to implement strategies such as A/B testing, in conjuntion with device labels and configuration templating.
+It is out of scope of this course, but worthy knowing that Edge Manager update policies affect application updates as well as operating system images and configurations, enabling you to rolling out updates progressively to a fleet of devices or to implement strategies such as A/B testing, in conjunction with device labels and configuration templating.
 
 == What's Next
 In the next section, you will deploy a containerized application to a fleet and verify its rollout and operation using both Edge Manager and device-level tools.

@@ -16,7 +16,7 @@ include::ch2-fleets:partial$before-you-begin.adoc[]
 
 == Instructions
 
-You will create a fleet which contains both inline and git configuration files, and, more importantly, also contains a single-container application.
+You will create a fleet which contains both inline and git configuration files, and, more importantly, a single-container application.
 Then you will join a device to the new fleet, verify that the application is running, and simulate unexpected application downtime.
 
 The inline configurations provide credentials to access a private registry.
@@ -25,11 +25,11 @@ The private registry, in turn, provides:
 * a bootc container image, which is ready to run containerized application using Podman;
 * an application container, which runs a simple PHP application.
 
-The git configuration is not really necessary for this simplistic scenario, it just shows that you could include multiple configuration providers on the same fleet.
+The git configuration is not really necessary for this simplistic scenario, it just shows that you use multiple configuration providers on the same fleet resource.
 
 include::ch1-scale:partial$set-permissive.adoc[]
 
-1. On your _developer machine_, verify that you have the prerequisites from the xref:ch1-scale:s3-environment-lab.adoc[first lab].
+1. On your _development machine_, verify that you have the prerequisites from the xref:ch1-scale:s3-environment-lab.adoc[first lab].
 If any of the prerequisites are missing, please return to the first lab and ensure that you did not skip any step.
 
 .. Verify that you have a clone of the course samples repository.
@@ -86,15 +86,15 @@ Login successful.
 --
 $ *flightctl get device*
 NAME                                                    ALIAS   OWNER            SYSTEM  UPDATED         APPLICATIONS
-{edge-3-uuid-cccccccccccccccccccccccccccccccccccccc}    edge-3  Fleet/warehouse  Online  UpToDate        NoApplications
-{edge-2-uuid-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}    edge-2  Fleet/store      Online  UpToDate        NoApplications
-{edge-1-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}    edge-1  <none>           Online  UpToDate        NoApplications
+{edge-3-uuid-cccccccccccccccccccccccccccccccccccccc}    edge-3  Fleet/store      Online  UpToDate        NoApplications
+{edge-2-uuid-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}    edge-2  Fleet/warehouse  Online  UpToDate        NoApplications
+{edge-1-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}    edge-1  Fleet/warehouse  Online  UpToDate        NoApplications
 --
 
 .. If you devices keep displaying as off-line for too long, it might be related to clock skew.
 In that case, stop each of your local VMs and return to the beginning of this lab.
 +
-NOTE: Clock skew prevents a device from synchronizing with Edge Manager, and is known to happen if your ROLE classroom is stopped without first shutting down local VMs on your _develoment machine_ and later your VMs are restarted from saved state.
+NOTE: Clock skew prevents a device from synchronizing with Edge Manager, and is known to happen if your ROLE classroom is stopped without first shutting down local VMs on your _development machine_ and later your VMs are restarted from saved state.
 +
 [source,console,subs="verbatim,quotes"]
 --
@@ -105,7 +105,7 @@ Domain 'edge-1' destroyed
 
 2. Build and publish a bootc container image which includes a container runtime.
 +
-Remember that the enrollment image, which you used at the beggining of this course, provided only a mininum RHEL system with the Edge Manager agent.
+Remember that the enrollment image, which you used at the beginning of this course, provided only a minimum RHEL system with the Edge Manager agent.
 That image did not include Podman or any other container runtime, so any attempt to run managed applications will fail unless you first update your devices to a suitable system image.
 
 .. Create a temporary working directory, and copy example files to it.
@@ -117,7 +117,7 @@ $ *cd temp-managedapp*
 $ **cp -r ../rhde-rhem-samples/managedapp/* .**
 --
 
-.. Review the containerfile.
+.. Review the Containerfile.
 It adds the container-tools meta-package, which includes Podman.
 It also includes the qemu-guest-agent, which should resolve clock skew issues of local VMs.
 +
@@ -127,7 +127,7 @@ $ *cat Containerfile*
 include::1@samples:managedapp:example$Containerfile[]
 --
 
-.. Copy from the working directory of the enrollment image some auxiliary files which you neeed to include in your bootc container image, such as the private registry CAs and SSH keys.
+.. Copy from the working directory of the enrollment image some auxiliary files which you need to include in your bootc container image, such as the private registry CAs and SSH keys.
 +
 [source,console,subs="verbatim,quotes"]
 --
@@ -225,7 +225,7 @@ include::1@samples:managedapp:example$webapp.yaml[]
 
 .. Apply the manifests to your Edge Manager server.
 +
-NOTE: The status of the fleet may be `Unknown` for a while, while Edge Manager fetches the configation files from the Git repository.
+NOTE: The status of the fleet may be `Unknown` for a while, while Edge Manager fetches the configuration files from the Git repository.
 +
 [source,console,subs="verbatim,quotes"]
 --
@@ -233,6 +233,10 @@ $ *flightctl apply -f webapp.yaml*
 webapp.yaml: applying repository/webapp: 201 Created
 $ *flightctl apply -f frontend.yaml*
 frontend.yaml: applying fleet/frontend: 201 Created
+--
++
+[source,console,subs="verbatim,quotes"]
+--
 $ *flightctl get fleet frontend*
 NAME            OWNER   SELECTOR        VALID
 frontend        <none>  role=frontend   True
@@ -266,7 +270,7 @@ device/{edge-1-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa} edited
 --
 
 .. Wait until the device status changes to `UptoDate`.
-Notice that the device now displays a `Helthty` status on the `APPLICATIONS` column, instead of `NoApplications`.
+Notice that the device now displays a `Healthty` status on the `APPLICATIONS` column, instead of `NoApplications`.
 +
 [source,console,subs="verbatim,quotes,attributes"]
 --
@@ -275,30 +279,23 @@ NAME                                                    ALIAS   OWNER           
 {edge-1-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}    edge-1  Fleet/frontend  Online  UpToDate        *Healthy*
 --
 
-.. Alternatively, you could verify the status of all devices in the fleet.
-+
-[source,console,subs="verbatim,quotes,attributes"]
---
-$ *flightctl get --field-selector metadata.owner=Fleet/frontend*
-{edge-1-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}    edge-1  Fleet/frontend  Online  UpToDate        *Healthy*
---
-
-.. Show the "message of day" to prove that the device got the settings from the git configuration provider.
+.. Open another terminal and open a SSH session to your `edge-1` VM.
+Verify that you get the expected "message of day", proving that the device got the settings from the git configuration provider.
+Keep that SSH session open, as you will return to it.
 +
 [source,console,subs="verbatim,quotes"]
 --
+$ *cd temp-managedapp*
 $ *ssh -i ../temp-enroll/edge-key -p 8122 core@127.0.0.1*
 Managed device running a containerized web app
 
 Last login: Wed Mar 11 19:30:01 2026 from 172.25.250.254
-[core@enroll ~]$ *exit*
-logout
-Connection to 127.0.0.1 closed.
+[core@enroll ~]$
 --
 
 6. Verify the application is accessible, then simulate downtime in the application to show how Edge Manager reacts.
 
-.. Access the mock of your web application.
+.. On your _development machine_, access the mock of your web application.
 +
 [source,console,subs="verbatim,quotes"]
 --
@@ -306,33 +303,24 @@ $ *curl 127.0.0.1:8108*
 Mock web app running PHP 8.0.30
 --
 
-.. Find the container id of the application container and stop it.
+.. On your `edge-1` VM, find the container id of the application container and stop it.
++
+NOTE: Remember that the password for the `core` user is `redhat123`.
 +
 [source,console,subs="verbatim,quotes"]
 --
-$ *flightctl console device $UUID -- podman ps*
+$ *sudo podman ps*
 CONTAINER ID  IMAGE                                      COMMAND               CREATED         STATUS         PORTS                 NAMES
 *ac31d8eae297*  registry.lab.example.com:5000/webapp:v1.0  /bin/sh -c php-fp...  12 minutes ago  Up 12 minutes  0.0.0.0:80->8080/tcp  systemd-httpd-317337-app
 --
 +
 [source,console,subs="verbatim,quotes"]
 --
-$ *flightctl console device $UUID -- podman kill _ac31d8eae297_*
+$ *sudo podman kill _ac31d8eae297_*
 ac31d8eae297
 --
 
-.. Alternatively, you can open a SSH session to your local VM and run podman from a root prompt.
-+
-[source,console,subs="verbatim,quotes"]
---
-$ *ssh -i ../temp-enroll/edge-key -p 8122 core@127.0.0.1*
-...
-[core@enroll ~]$ *sudo -i*
-[root@enroll ~]#
---
-
-.. Verify that Edge Manager reports a change in application status.
-It may take a few moments until you can see the change.
+.. On your _development machine_, wait until Edge Manager reports a change in application status.
 +
 [source,console,subs="verbatim,quotes,attributes"]
 --
@@ -359,6 +347,7 @@ NAME                                                    ALIAS   OWNER           
 --
 
 .. If you wish, you can verify that the application is again accessible and a new container is running on the managed device.
+You can now close the SSH session on your `edge-1` VM.
 
 You demonstrated that Edge Manager can deploy, monitor, and keep containerized application running on managed devices.
 This give organizations the flexibility of managing application life cycles independently of operating systems updates, if they wish.
