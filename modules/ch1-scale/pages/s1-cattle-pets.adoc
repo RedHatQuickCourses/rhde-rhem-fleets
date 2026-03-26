@@ -53,9 +53,10 @@ The following figure provides the life cycle of a managed device, from the persp
 
 image::device-life-cycle.svg[title="Simplified conceptual life cycle of a device managed by Edge Manager"]
 
-First, a device must be provisioned, by installing RHEL and the Edge Manager agent. Then, it can be enrolled into Edge Manager, and from now on it is a managed device, which can be configured and monitored by Edge Manager.
+First, a device must be provisioned, by installing RHEL and the Edge Manager agent using image mode.
+Then, it can be enrolled into Edge Manager, and from now on it is a managed device, which can be configured and monitored by Edge Manager.
 
-Any kind of update to a managed device, for example: operating system updates, changes to its configuration files, or application updates, equivalent from Edge Manager's perspective.
+Any kind of update to a managed device, for example: operating system updates, changes to its configuration files, or application updates, are equivalent from Edge Manager's perspective.
 They all mean applying a different configuration to a managed device.
 
 At some point, the device is decommissioned, and it is not configured nor monitored anymore, but still exists as an Edge Manager API resource until that resource is deleted.
