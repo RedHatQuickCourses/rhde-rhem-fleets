@@ -16,21 +16,21 @@ include::ch2-fleets:partial$before-you-begin.adoc[]
 
 == Instructions
 
-You will create a fleet which contains both inline and git configuration files, and, more importantly, a single-container application.
+You will create a fleet that contains both inline and git configuration files, and, more importantly, a single-container application.
 Then you will join a device to the new fleet, verify that the application is running, and simulate unexpected application downtime.
 
 The inline configurations provide credentials to access a private registry.
 The private registry, in turn, provides:
 
-* a bootc container image, which is ready to run containerized application using Podman;
-* an application container, which runs a simple PHP application.
+* A bootc container image, which is ready to run containerized application using Podman;
+* An application container, which runs a simple PHP application.
 
-The git configuration is not really necessary for this simplistic scenario, it just shows that you use multiple configuration providers on the same fleet resource.
+The git configuration is not really necessary for this simplistic scenario; it just shows that you use multiple configuration providers on the same fleet resource.
 
 include::ch1-scale:partial$set-permissive.adoc[]
 
 1. On your _development machine_, verify that you have the prerequisites from the xref:ch1-scale:s3-environment-lab.adoc[first lab].
-If any of the prerequisites are missing, please return to the first lab and ensure that you did not skip any step.
+If any of the prerequisites are missing, please return to the first lab and ensure that you did not skip any steps.
 
 .. Verify that you have a clone of the course samples repository.
 +
@@ -53,7 +53,7 @@ $ *virsh list --all*
  3    edge-3   running
 --
 
-.. If your VMs are not running, start them, but ensuring they are booting from power on instead of resumed from saved state.
+.. If your VMs are not running, start them, but ensure they are booting from power on instead of resumed from saved state.
 +
 [source,console,subs="verbatim,quotes"]
 --
@@ -72,8 +72,8 @@ Domain 'edge-1' started
 # repeat for the remaining VMs
 --
 
-.. Give your local VMs a few moments to finish boot.
-Then, log in on Edge Manager as a non-administrator and verify that there are two managed devices, which are on-line and up-to-date.
+.. Give your local VMs a few moments to finish booting.
+Then, log in on Edge Manager as a non-administrator and verify that there are two managed devices, which are online and up-to-date.
 +
 [source,console,subs="verbatim,quotes"]
 --
@@ -91,7 +91,7 @@ NAME                                                    ALIAS   OWNER           
 {edge-1-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}    edge-1  Fleet/warehouse  Online  UpToDate        NoApplications
 --
 
-.. If you devices keep displaying as off-line for too long, it might be related to clock skew.
+.. If you devices keep displaying as offline for too long, it might be related to clock skew.
 In that case, stop each of your local VMs and return to the beginning of this lab.
 +
 NOTE: Clock skew prevents a device from synchronizing with Edge Manager, and is known to happen if your ROLE classroom is stopped without first shutting down local VMs on your _development machine_ and later your VMs are restarted from saved state.
@@ -103,7 +103,7 @@ Domain 'edge-1' destroyed
 # repeat for the remaining VMs
 --
 
-2. Build and publish a bootc container image which includes a container runtime.
+2. Build and publish a bootc container image that includes a container runtime.
 +
 Remember that the enrollment image, which you used at the beginning of this course, provided only a minimum RHEL system with the Edge Manager agent.
 That image did not include Podman or any other container runtime, so any attempt to run managed applications will fail unless you first update your devices to a suitable system image.
@@ -127,7 +127,7 @@ $ *cat Containerfile*
 include::1@samples:managedapp:example$Containerfile[]
 --
 
-.. Copy from the working directory of the enrollment image some auxiliary files which you need to include in your bootc container image, such as the private registry CAs and SSH keys.
+.. From the working directory of the enrollment image, copy some auxiliary files which you need to include in your bootc container image, such as the private registry CAs and SSH keys.
 +
 [source,console,subs="verbatim,quotes"]
 --
@@ -136,7 +136,7 @@ $ *cp ../temp-enroll/edge-key.pub .*
 $ *cp -r ../temp-enroll/rpms .*
 --
 
-.. Log in on the Red Hat container registry, so you can pull the RHEL 9 base bootc container, and build your new bootc container image.
+.. Log in to the Red Hat container registry, so you can pull the RHEL 9 base bootc container and build your new bootc container image.
 +
 [source,console,subs="verbatim,quotes"]
 --
@@ -154,7 +154,7 @@ Successfully tagged localhost/rhem-containers:latest
 {rhem-containers-v1-shaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}
 --
 
-.. Log in on your private container registry and publish your new bootc container image there.
+.. Log in to your private container registry and publish your new bootc container image there.
 +
 [source,console,subs="verbatim,quotes,attributes"]
 --
@@ -165,10 +165,10 @@ $ *skopeo copy containers-storage:localhost/rhem-containers:latest docker://regi
 Writing manifest to image destination
 --
 
-3. Build and publish a container image which contains a PHP web application.
+3. Build and publish a container image that contains a PHP web application.
 
 .. Review the contents of the PHP application.
-It just displays the version of its PHP runtime.
+It only displays the version of its PHP runtime.
 +
 [source,console,subs="verbatim,quotes"]
 --
@@ -190,9 +190,9 @@ $ *skopeo copy containers-storage:localhost/webapp:latest docker://registry.lab.
 Writing manifest to image destination
 --
 
-4. Create a fleet which uses the new bootc container and also defines a single-container application.
+4. Create a fleet that uses the new bootc container and also defines a single-container application.
 
-.. Review the fleet manifest, which uses all three configuration providers taught in this course series, just to show you can mix and match them at your convenience.
+.. Review the fleet manifest, which uses all three configuration providers covered in this course series, to demonstrate that you are able to mix them at your convenience.
 +
 [source,console,subs="verbatim,quotes"]
 --
@@ -212,7 +212,7 @@ $ *sed -i "s|REPLACE_WITH_OSTREE_AUTH_JSON|$AUTH_JSON|" frontend.yaml*
 $ *sed -i "s|REPLACE_WITH_ROOT_AUTH_JSON|$AUTH_JSON|" frontend.yaml*
 --
 
-.. Review your fleet manifest and ensure it does not contains any `REPLACE` markers anymore.
+.. Review your fleet manifest and ensure it no longer contains any `REPLACE` markers.
 
 .. Review the repository manifest, which defines the `webapp` git repository referenced by the `frontend` fleet.
 It points to the course samples repository.
@@ -246,8 +246,9 @@ frontend        <none>  role=frontend   True
 
 .. Edit the `edge-1` device manifest so its labels match the new fleet selector.
 +
-Edit any existing with key `role`, or add it it doesn't exist.
-Also ensure you remove any label with key `location`, to prevent the device matching multiple other fleets, from previous labs.
+Edit any existing label with key `role`.
+If there is no label with that key, add one.
+Also ensure you remove any label with key `location`, to prevent the device matching multiple other fleets from previous labs.
 +
 [source,console,subs="verbatim,quotes,attributes"]
 --
@@ -270,7 +271,7 @@ device/{edge-1-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa} edited
 --
 
 .. Wait until the device status changes to `UptoDate`.
-Notice that the device now displays a `Healthty` status on the `APPLICATIONS` column, instead of `NoApplications`.
+Notice that the device now displays a `Healthy` status in the `APPLICATIONS` column, instead of `NoApplications`.
 +
 [source,console,subs="verbatim,quotes,attributes"]
 --
@@ -280,7 +281,7 @@ NAME                                                    ALIAS   OWNER           
 --
 
 .. Open another terminal and open a SSH session to your `edge-1` VM.
-Verify that you get the expected "message of day", proving that the device got the settings from the git configuration provider.
+Verify that you get the expected "message of day"; proving that the device got the settings from the git configuration provider.
 Keep that SSH session open, as you will return to it.
 +
 [source,console,subs="verbatim,quotes"]
@@ -329,7 +330,7 @@ NAME                                                    ALIAS   OWNER           
 {edge-1-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}    edge-1  Fleet/frontend  Online  UpToDate        *Error*
 --
 
-.. Verify that your web application is indeed off-line.
+.. Verify that your web application is indeed offline.
 +
 [source,console,subs="verbatim,quotes"]
 --
@@ -349,8 +350,8 @@ NAME                                                    ALIAS   OWNER           
 .. If you wish, you can verify that the application is again accessible and a new container is running on the managed device.
 You can now close the SSH session on your `edge-1` VM.
 
-You demonstrated that Edge Manager can deploy, monitor, and keep containerized application running on managed devices.
-This give organizations the flexibility of managing application life cycles independently of operating systems updates, if they wish.
+You demonstrated that Edge Manager can deploy, monitor, and keep containerized applications running on managed devices.
+This gives organizations the flexibility of managing application lifecycles independently of operating systems updates, if they wish.
 
 == What's next
 

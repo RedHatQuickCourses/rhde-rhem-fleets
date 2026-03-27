@@ -4,6 +4,4 @@ Goal::
 
 Configure and Manage Containerized Applications
 
-WARNING: Pending Review.
-
 This chapter demonstrates how to deploy and manage containerized applications on device fleets using Red Hat Edge Manager's applications feature and Podman.

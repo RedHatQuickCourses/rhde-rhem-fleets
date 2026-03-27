@@ -8,8 +8,6 @@ Objective::
 
 Practice troubleshooting by creating scenarios with health issues, then extract diagnostic information using Edge Manager.
 
-WARNING: Pending Review
-
 == Before you begin
 
 include::ch2-fleets:partial$before-you-begin.adoc[]
@@ -23,7 +21,7 @@ Finally, you will resolve the disk condition and verify that Edge Manager report
 include::ch1-scale:partial$set-permissive.adoc[]
 
 1. On your _developer machine_, verify that you have the prerequisites from the xref:ch1-scale:s3-environment-lab.adoc[first lab].
-If any of the prerequisites are missing, please return to the first lab and ensure that you did not skip any step.
+If any of the prerequisites are missing, please return to the first lab and ensure that you did not skip any steps.
 
 .. Verify that you have a clone of the course samples repository.
 +
@@ -46,7 +44,7 @@ $ *virsh list --all*
  3    edge-3   running
 --
 
-.. If your VMs are not running, start them, but ensuring they are booting from power on instead of resumed from saved state.
+.. If your VMs are not running, start them, but ensure they are booting from power on instead of resumed from saved state.
 +
 [source,console,subs="verbatim,quotes"]
 --
@@ -65,8 +63,8 @@ Domain 'edge-1' started
 # repeat for the remaining VMs
 --
 
-.. Give your local VMs a few moments to finish boot.
-Then, log in on Edge Manager as a non-administrator and verify that there are two managed devices, which are on-line and up-to-date.
+.. Give your local VMs a few moments to finish booting.
+Then, log in on Edge Manager as a non-administrator and verify that there are two managed devices, which are online and up-to-date.
 +
 [source,console,subs="verbatim,quotes"]
 --
@@ -84,7 +82,7 @@ NAME                                                    ALIAS   OWNER           
 {edge-1-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}    edge-1  Fleet/pos       Online  UpToDate        NoApplications
 --
 
-.. If you devices keep displaying as off-line for too long, it might be related to clock skew.
+.. If your devices keep displaying as offline for too long, it might be related to clock skew.
 In that case, stop each of your local VMs and return to the beginning of this lab.
 +
 NOTE: Clock skew prevents a device from synchronizing with Edge Manager, and is known to happen if your ROLE classroom is stopped without first shutting down local VMs on your _development machine_ and later your VMs are restarted from saved state.
@@ -170,7 +168,7 @@ NAME                                                    ALIAS   OWNER           
 +
 // It seems I cannot do it from the web UI on 1.0.2
 
-.. Create a temporary working directory, and copy example files to it.
+.. Create a temporary working directory and copy example files to it.
 +
 [source,console,subs="verbatim,quotes"]
 --
@@ -180,14 +178,14 @@ $ **cp -r ../rhde-rhem-samples/monitor/* .**
 --
 
 .. Review the new manifest for the `warehouse` fleet.
-It adds a disk space monitor, which trigger alerts when the disk is 50% and 80% full.
+It adds a disk space monitor, which triggers alerts when the disk is 50% and 80% full.
 +
-NOTE: the sampling interval and duration used in the example may not be suitable for production environments, but are intended to trigger events very quickly, so this lab doesn't take too long to complete.
+NOTE: The sampling interval and duration used in the example may not be suitable for production environments, but are intended to trigger events quickly, so this lab doesn't take too long to complete.
 +
 IMPORTANT: In image mode systems, the root (`/`) directory is a bind mount.
 The real root disk is mounted on the '/sysroot' directory.
 Your test VMs do not set any other disk partitions, so `/var` and `/etc` are in the same root disk.
-The only other disk partition is the `/boot` filesystem, which we can ignore for a disk monitor.
+The only other disk partition is the `/boot` filesystem, which you can ignore for a disk monitor.
 +
 [source,console,subs="verbatim,quotes"]
 --
@@ -250,7 +248,7 @@ Last login: Wed Mar 18 23:25:16 2026 from 172.25.250.254
 managed device: edge-2$
 --
 
-.. On your _managed device_, create a file which consumes about 50% of the available disk capacity.
+.. On your _managed device_, create a file that consumes about 50% of the available disk capacity.
 +
 [source,console,subs="verbatim,quotes"]
 --
@@ -268,7 +266,7 @@ Filesystem      Size  Used Avail Use% Mounted on
 /dev/vda2        19G  9.7G  9.3G  52% /sysroot
 --
 
-.. On your _development machine_, wait a few moments and verify that the device displays a degraded status, and its disk monitor displays a warming status.
+.. On your _development machine_, wait a few moments and verify that the device displays a degraded status, and its disk monitor displays a warning status.
 +
 [source,console,subs="verbatim,quotes,attributes"]
 --
@@ -289,14 +287,14 @@ Log in as `student` using the `student` password.
 Verify that the menu:Overview[] page indicates one degraded device (yellow) on its *Device status* graph.
 
 .. Enter the menu:Fleets[] page and click the `warehouse` fleet to enter its details page.
-Scroll down and verify that its its *Device status* graph also shows one degraded device.
+Scroll down and verify that its *Device status* graph also shows one degraded device.
 
 .. Finally, enter the menu:Devices[] page and verify that the `edge-2` device displays a warning icon and a `Degraded` status.
-Click the warning icon or its status messages to see a pop-up which states disk utilization reached a warning level.
+Click the warning icon or its status messages to see a pop-up, which states disk utilization has reached a warning level.
 
 5. Fill in the disk the same device even more, to trigger an error state.
 
-.. On your _managed device_ create another file, which reduces available capacity to less than 10% of the total disk capacity.
+.. On your _managed device_, create another file, which reduces available capacity to less than 10% of the total disk capacity.
 +
 [source,console,subs="verbatim,quotes"]
 --
