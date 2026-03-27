@@ -175,7 +175,7 @@
 <dl>
 <dt class="hdlist1">Objective</dt>
 <dd>
-<p>Learn how to deploy applications on devices and fleets using the container application type and understand how Edge Manager integrates with Podman.</p>
+<p>Learn how to deploy applications on devices and fleets by using the container application type and understand how Edge Manager integrates with Podman.</p>
 </dd>
 </dl>
 </div>
@@ -227,7 +227,7 @@ If you do that, your applications would not be managed by Edge Manager.</p>
 </div>
 <div class="paragraph">
 <p>Edge Manager monitors the status of applications it manages and can report a healthy or unhealthy state for each of them.
-In the case of single containers, that Edge Manager starts directly using Podman, it also restarts applications which fail with an error status.
+In the case of single containers that Edge Manager starts directly using Podman, it also restarts applications that terminate with an error status.
 In the case of containers started by quadlets, restarting depends on the configuration on the quadlets themselves.</p>
 </div>
 </div>
@@ -238,15 +238,15 @@ In the case of containers started by quadlets, restarting depends on the configu
 <div class="paragraph">
 <p>Unlike fetching configuration files from a Git repository, which is performed only by an Edge Manager server and never by its agents, managed devices must pull container images directly from a container image registry.
 This means managed devices require credentials for accessing such container image registries.
-The location you store those credentials depend on the Linux user under which each containerized application runs.</p>
+The location where you store those credentials depends on the Linux user under which each containerized application runs.</p>
 </div>
 <div class="paragraph">
-<p>For example: if a containerized applications runs as the root user, registry authentication is stored at <code>/root/.config/containers/auth.json</code>.
-Notice this is different from the bootc registry authentication file, required to pull bootc container images, stored at <code>/etc/ostree/auth.json</code>.</p>
+<p>For example: if a containerized application runs as the root user, registry authentication is stored at <code>/root/.config/containers/auth.json</code>.
+Notice this is different from the bootc registry authentication file required to pull bootc container images, stored at <code>/etc/ostree/auth.json</code>.</p>
 </div>
 <div class="paragraph">
 <p>It is up to the user providing these files in a bootc container image, at provisioning time (from ignition or kickstart), by an on-boarding process, or by any other means.
-You can provide those files using Edge Manager itself, but in that case it is recommended that you use inline configurations to avoid leaking secrets in a Git repository.</p>
+You can provide those files using Edge Manager itself, but, in that case, it is recommended that you use inline configurations to avoid leaking secrets in a Git repository.</p>
 </div>
 </div>
 </div>
@@ -255,14 +255,14 @@ You can provide those files using Edge Manager itself, but in that case it is re
 <div class="sectionbody">
 <div class="paragraph">
 <p>With single container applications, it is recommended that you refer to non-floating tags or container image hashes so you can effectively control application updates from Edge Manager.
-Using a floating tag may lead to devices running different versions of the container image, depending on which one was associated to the floating tag at the time each device first pulled it.</p>
+Using a floating tag may lead to devices running different versions of the container image, depending on which one was associated with the floating tag at the time each device first pulled it.</p>
 </div>
 <div class="paragraph">
-<p>With quadlet applications, you could consider using quadlet features to auto-update containers on devices, but that means Edge Manager would have no control of when those updates happen nor which version of a container is effectively running on each of its managed devices.
-It is recommended that you avoid using such features, like it is recommended that you disable the bootc auto-update timer and let Edge Manager control updates to the system image running on managed devices.</p>
+<p>With quadlet applications, you could consider using quadlet features to auto-update containers on devices, but that means Edge Manager would have no control of when those updates happen or which version of a container is effectively running on each of its managed devices.
+It is recommended that you avoid using such features, as it is recommended that you disable the bootc auto-update timer and let Edge Manager control updates to the system image running on managed devices.</p>
 </div>
 <div class="paragraph">
-<p>It is out of scope of this course, but worthy knowing that Edge Manager update policies affect application updates as well as operating system images and configurations, enabling you to rolling out updates progressively to a fleet of devices or to implement strategies such as A/B testing, in conjunction with device labels and configuration templating.</p>
+<p>It is out of scope of this course, but worth knowing that Edge Manager update policies affect application updates as well as operating system images and configurations, enabling you to roll out updates progressively to a fleet of devices or to implement strategies such as A/B testing, in conjunction with device labels and configuration templating.</p>
 </div>
 </div>
 </div>

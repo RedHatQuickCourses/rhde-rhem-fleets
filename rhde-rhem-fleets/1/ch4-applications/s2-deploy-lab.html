@@ -231,7 +231,7 @@ If you skipped any of the previous labs, or if you had to destroy and recreate y
 <h2 id="_instructions"><a class="anchor" href="#_instructions"></a>Instructions</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>You will create a fleet which contains both inline and git configuration files, and, more importantly, a single-container application.
+<p>You will create a fleet that contains both inline and git configuration files, and, more importantly, a single-container application.
 Then you will join a device to the new fleet, verify that the application is running, and simulate unexpected application downtime.</p>
 </div>
 <div class="paragraph">
@@ -241,15 +241,15 @@ The private registry, in turn, provides:</p>
 <div class="ulist">
 <ul>
 <li>
-<p>a bootc container image, which is ready to run containerized application using Podman;</p>
+<p>A bootc container image, which is ready to run containerized application using Podman;</p>
 </li>
 <li>
-<p>an application container, which runs a simple PHP application.</p>
+<p>An application container, which runs a simple PHP application.</p>
 </li>
 </ul>
 </div>
 <div class="paragraph">
-<p>The git configuration is not really necessary for this simplistic scenario, it just shows that you use multiple configuration providers on the same fleet resource.</p>
+<p>The git configuration is not really necessary for this simplistic scenario; it just shows that you use multiple configuration providers on the same fleet resource.</p>
 </div>
 <div class="admonitionblock important">
 <table>
@@ -281,7 +281,7 @@ Only your <em>development machine</em> needs SELinux set to permissive mode.</p>
 <ol class="arabic">
 <li>
 <p>On your <em>development machine</em>, verify that you have the prerequisites from the <a href="../ch1-scale/s3-environment-lab.html" class="xref page">first lab</a>.
-If any of the prerequisites are missing, please return to the first lab and ensure that you did not skip any step.</p>
+If any of the prerequisites are missing, please return to the first lab and ensure that you did not skip any steps.</p>
 <div class="olist loweralpha">
 <ol class="loweralpha" type="a">
 <li>
@@ -308,7 +308,7 @@ antora.yml  config  enroll ...</code></pre>
 </div>
 </li>
 <li>
-<p>If your VMs are not running, start them, but ensuring they are booting from power on instead of resumed from saved state.</p>
+<p>If your VMs are not running, start them, but ensure they are booting from power on instead of resumed from saved state.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-console" data-lang="console">$ <strong>virsh list --all</strong>
@@ -328,8 +328,8 @@ Domain 'edge-1' started
 </div>
 </li>
 <li>
-<p>Give your local VMs a few moments to finish boot.
-Then, log in on Edge Manager as a non-administrator and verify that there are two managed devices, which are on-line and up-to-date.</p>
+<p>Give your local VMs a few moments to finish booting.
+Then, log in on Edge Manager as a non-administrator and verify that there are two managed devices, which are online and up-to-date.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl login -u student -p student https://servera.lab.example.com:3443</strong>
@@ -348,7 +348,7 @@ g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g    edge-2  Fleet/warehouse 
 </div>
 </li>
 <li>
-<p>If you devices keep displaying as off-line for too long, it might be related to clock skew.
+<p>If you devices keep displaying as offline for too long, it might be related to clock skew.
 In that case, stop each of your local VMs and return to the beginning of this lab.</p>
 <div class="admonitionblock note">
 <table>
@@ -374,7 +374,7 @@ Domain 'edge-1' destroyed
 </div>
 </li>
 <li>
-<p>Build and publish a bootc container image which includes a container runtime.</p>
+<p>Build and publish a bootc container image that includes a container runtime.</p>
 <div class="paragraph">
 <p>Remember that the enrollment image, which you used at the beginning of this course, provided only a minimum RHEL system with the Edge Manager agent.
 That image did not include Podman or any other container runtime, so any attempt to run managed applications will fail unless you first update your devices to a suitable system image.</p>
@@ -416,7 +416,7 @@ RUN update-ca-trust</code></pre>
 </div>
 </li>
 <li>
-<p>Copy from the working directory of the enrollment image some auxiliary files which you need to include in your bootc container image, such as the private registry CAs and SSH keys.</p>
+<p>From the working directory of the enrollment image, copy some auxiliary files which you need to include in your bootc container image, such as the private registry CAs and SSH keys.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-console" data-lang="console">$ <strong>cp ../temp-enroll/domain.crt .</strong>
@@ -426,7 +426,7 @@ $ <strong>cp -r ../temp-enroll/rpms .</strong></code></pre>
 </div>
 </li>
 <li>
-<p>Log in on the Red Hat container registry, so you can pull the RHEL 9 base bootc container, and build your new bootc container image.</p>
+<p>Log in to the Red Hat container registry, so you can pull the RHEL 9 base bootc container and build your new bootc container image.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-console" data-lang="console">$ <strong>podman login registry.redhat.io</strong>
@@ -445,7 +445,7 @@ b78ad6382056022b5430359c9a3ad488464c2c8466219113784611b355d28f17</code></pre>
 </div>
 </li>
 <li>
-<p>Log in on your private container registry and publish your new bootc container image there.</p>
+<p>Log in to your private container registry and publish your new bootc container image there.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-console" data-lang="console">$ <strong>podman login -u student -p redhat registry.lab.example.com:5000</strong>
@@ -460,12 +460,12 @@ Writing manifest to image destination</code></pre>
 </div>
 </li>
 <li>
-<p>Build and publish a container image which contains a PHP web application.</p>
+<p>Build and publish a container image that contains a PHP web application.</p>
 <div class="olist loweralpha">
 <ol class="loweralpha" type="a">
 <li>
 <p>Review the contents of the PHP application.
-It just displays the version of its PHP runtime.</p>
+It only displays the version of its PHP runtime.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-console" data-lang="console">$ <strong>cat index.php</strong>
@@ -492,11 +492,11 @@ Writing manifest to image destination</code></pre>
 </div>
 </li>
 <li>
-<p>Create a fleet which uses the new bootc container and also defines a single-container application.</p>
+<p>Create a fleet that uses the new bootc container and also defines a single-container application.</p>
 <div class="olist loweralpha">
 <ol class="loweralpha" type="a">
 <li>
-<p>Review the fleet manifest, which uses all three configuration providers taught in this course series, just to show you can mix and match them at your convenience.</p>
+<p>Review the fleet manifest, which uses all three configuration providers covered in this course series, to demonstrate that you are able to mix them at your convenience.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-console" data-lang="console">$ <strong>cat frontend.yaml</strong>
@@ -552,7 +552,7 @@ $ <strong>sed -i "s|REPLACE_WITH_ROOT_AUTH_JSON|$AUTH_JSON|" frontend.yaml</stro
 </div>
 </li>
 <li>
-<p>Review your fleet manifest and ensure it does not contains any <code>REPLACE</code> markers anymore.</p>
+<p>Review your fleet manifest and ensure it no longer contains any <code>REPLACE</code> markers.</p>
 </li>
 <li>
 <p>Review the repository manifest, which defines the <code>webapp</code> git repository referenced by the <code>frontend</code> fleet.
@@ -610,8 +610,9 @@ frontend        &lt;none&gt;  role=frontend   True</code></pre>
 <li>
 <p>Edit the <code>edge-1</code> device manifest so its labels match the new fleet selector.</p>
 <div class="paragraph">
-<p>Edit any existing with key <code>role</code>, or add it it doesn&#8217;t exist.
-Also ensure you remove any label with key <code>location</code>, to prevent the device matching multiple other fleets, from previous labs.</p>
+<p>Edit any existing label with key <code>role</code>.
+If there is no label with that key, add one.
+Also ensure you remove any label with key <code>location</code>, to prevent the device matching multiple other fleets from previous labs.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -636,7 +637,7 @@ device/1u63hvsgtua9tjjbmla9bgh5h2s77cb8esepphnf68m3ocf8qfng edited</code></pre>
 </li>
 <li>
 <p>Wait until the device status changes to <code>UptoDate</code>.
-Notice that the device now displays a <code>Healthty</code> status on the <code>APPLICATIONS</code> column, instead of <code>NoApplications</code>.</p>
+Notice that the device now displays a <code>Healthy</code> status in the <code>APPLICATIONS</code> column, instead of <code>NoApplications</code>.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl get device $UUID</strong>
@@ -647,7 +648,7 @@ NAME                                                    ALIAS   OWNER           
 </li>
 <li>
 <p>Open another terminal and open a SSH session to your <code>edge-1</code> VM.
-Verify that you get the expected "message of day", proving that the device got the settings from the git configuration provider.
+Verify that you get the expected "message of day"; proving that the device got the settings from the git configuration provider.
 Keep that SSH session open, as you will return to it.</p>
 <div class="listingblock">
 <div class="content">
@@ -715,7 +716,7 @@ NAME                                                    ALIAS   OWNER           
 </div>
 </li>
 <li>
-<p>Verify that your web application is indeed off-line.</p>
+<p>Verify that your web application is indeed offline.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-console" data-lang="console">$ <strong>curl 127.0.0.1:8108</strong>
@@ -743,8 +744,8 @@ You can now close the SSH session on your <code>edge-1</code> VM.</p>
 </ol>
 </div>
 <div class="paragraph">
-<p>You demonstrated that Edge Manager can deploy, monitor, and keep containerized application running on managed devices.
-This give organizations the flexibility of managing application life cycles independently of operating systems updates, if they wish.</p>
+<p>You demonstrated that Edge Manager can deploy, monitor, and keep containerized applications running on managed devices.
+This gives organizations the flexibility of managing application lifecycles independently of operating systems updates, if they wish.</p>
 </div>
 </div>
 </div>

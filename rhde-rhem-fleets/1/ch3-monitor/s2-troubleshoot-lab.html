@@ -179,18 +179,6 @@
 </dd>
 </dl>
 </div>
-<div class="admonitionblock warning">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-warning" title="Warning"></i>
-</td>
-<td class="content">
-Pending Review
-</td>
-</tr>
-</table>
-</div>
 </div>
 </div>
 <div class="sect1">
@@ -266,7 +254,7 @@ Only your <em>development machine</em> needs SELinux set to permissive mode.</p>
 <ol class="arabic">
 <li>
 <p>On your <em>developer machine</em>, verify that you have the prerequisites from the <a href="../ch1-scale/s3-environment-lab.html" class="xref page">first lab</a>.
-If any of the prerequisites are missing, please return to the first lab and ensure that you did not skip any step.</p>
+If any of the prerequisites are missing, please return to the first lab and ensure that you did not skip any steps.</p>
 <div class="olist loweralpha">
 <ol class="loweralpha" type="a">
 <li>
@@ -293,7 +281,7 @@ antora.yml  config  enroll ...</code></pre>
 </div>
 </li>
 <li>
-<p>If your VMs are not running, start them, but ensuring they are booting from power on instead of resumed from saved state.</p>
+<p>If your VMs are not running, start them, but ensure they are booting from power on instead of resumed from saved state.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-console" data-lang="console">$ <strong>virsh list --all</strong>
@@ -313,8 +301,8 @@ Domain 'edge-1' started
 </div>
 </li>
 <li>
-<p>Give your local VMs a few moments to finish boot.
-Then, log in on Edge Manager as a non-administrator and verify that there are two managed devices, which are on-line and up-to-date.</p>
+<p>Give your local VMs a few moments to finish booting.
+Then, log in on Edge Manager as a non-administrator and verify that there are two managed devices, which are online and up-to-date.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl login -u student -p student https://servera.lab.example.com:3443</strong>
@@ -333,7 +321,7 @@ g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g    edge-2  Fleet/warehouse 
 </div>
 </li>
 <li>
-<p>If you devices keep displaying as off-line for too long, it might be related to clock skew.
+<p>If your devices keep displaying as offline for too long, it might be related to clock skew.
 In that case, stop each of your local VMs and return to the beginning of this lab.</p>
 <div class="admonitionblock note">
 <table>
@@ -444,7 +432,7 @@ g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g    edge-2  Fleet/warehouse 
 <div class="olist loweralpha">
 <ol class="loweralpha" type="a">
 <li>
-<p>Create a temporary working directory, and copy example files to it.</p>
+<p>Create a temporary working directory and copy example files to it.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-console" data-lang="console">$ <strong>mkdir temp-monitor</strong>
@@ -455,7 +443,7 @@ $ <strong>cp -r ../rhde-rhem-samples/monitor/* .</strong></code></pre>
 </li>
 <li>
 <p>Review the new manifest for the <code>warehouse</code> fleet.
-It adds a disk space monitor, which trigger alerts when the disk is 50% and 80% full.</p>
+It adds a disk space monitor, which triggers alerts when the disk is 50% and 80% full.</p>
 <div class="admonitionblock note">
 <table>
 <tr>
@@ -463,7 +451,7 @@ It adds a disk space monitor, which trigger alerts when the disk is 50% and 80% 
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-the sampling interval and duration used in the example may not be suitable for production environments, but are intended to trigger events very quickly, so this lab doesn&#8217;t take too long to complete.
+The sampling interval and duration used in the example may not be suitable for production environments, but are intended to trigger events quickly, so this lab doesn&#8217;t take too long to complete.
 </td>
 </tr>
 </table>
@@ -478,7 +466,7 @@ the sampling interval and duration used in the example may not be suitable for p
 In image mode systems, the root (<code>/</code>) directory is a bind mount.
 The real root disk is mounted on the '/sysroot' directory.
 Your test VMs do not set any other disk partitions, so <code>/var</code> and <code>/etc</code> are in the same root disk.
-The only other disk partition is the <code>/boot</code> filesystem, which we can ignore for a disk monitor.
+The only other disk partition is the <code>/boot</code> filesystem, which you can ignore for a disk monitor.
 </td>
 </tr>
 </table>
@@ -586,7 +574,7 @@ managed device: edge-2$</code></pre>
 </div>
 </li>
 <li>
-<p>On your <em>managed device</em>, create a file which consumes about 50% of the available disk capacity.</p>
+<p>On your <em>managed device</em>, create a file that consumes about 50% of the available disk capacity.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-console" data-lang="console">$ <strong>df -h /sysroot</strong>
@@ -605,7 +593,7 @@ Filesystem      Size  Used Avail Use% Mounted on
 </div>
 </li>
 <li>
-<p>On your <em>development machine</em>, wait a few moments and verify that the device displays a degraded status, and its disk monitor displays a warming status.</p>
+<p>On your <em>development machine</em>, wait a few moments and verify that the device displays a degraded status, and its disk monitor displays a warning status.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl get device --field-selector metadata.owner=Fleet/warehouse</strong>
@@ -628,11 +616,11 @@ Verify that the <b class="menuref">Overview</b> page indicates one degraded devi
 </li>
 <li>
 <p>Enter the <b class="menuref">Fleets</b> page and click the <code>warehouse</code> fleet to enter its details page.
-Scroll down and verify that its its <strong>Device status</strong> graph also shows one degraded device.</p>
+Scroll down and verify that its <strong>Device status</strong> graph also shows one degraded device.</p>
 </li>
 <li>
 <p>Finally, enter the <b class="menuref">Devices</b> page and verify that the <code>edge-2</code> device displays a warning icon and a <code>Degraded</code> status.
-Click the warning icon or its status messages to see a pop-up which states disk utilization reached a warning level.</p>
+Click the warning icon or its status messages to see a pop-up, which states disk utilization has reached a warning level.</p>
 </li>
 </ol>
 </div>
@@ -642,7 +630,7 @@ Click the warning icon or its status messages to see a pop-up which states disk 
 <div class="olist loweralpha">
 <ol class="loweralpha" type="a">
 <li>
-<p>On your <em>managed device</em> create another file, which reduces available capacity to less than 10% of the total disk capacity.</p>
+<p>On your <em>managed device</em>, create another file, which reduces available capacity to less than 10% of the total disk capacity.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-console" data-lang="console">$ <strong>df -h /sysroot</strong>
