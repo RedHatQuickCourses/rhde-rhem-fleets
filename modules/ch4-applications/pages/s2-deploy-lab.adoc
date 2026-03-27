@@ -8,8 +8,6 @@ Objective::
 
 Deploy a containerized application to a device fleet and observe its rollout and operation.
 
-WARNING: Pending Review
-
 == Before you begin
 
 include::ch2-fleets:partial$before-you-begin.adoc[]
