@@ -179,18 +179,6 @@
 </dd>
 </dl>
 </div>
-<div class="admonitionblock warning">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-warning" title="Warning"></i>
-</td>
-<td class="content">
-Pending Review
-</td>
-</tr>
-</table>
-</div>
 </div>
 </div>
 <div class="sect1">
@@ -219,7 +207,7 @@ Alternatively, you can open a shell or a console directly on the <code>servera</
 <div class="sectionbody">
 <div class="paragraph">
 <p>You will create fleets, using both the Edge Manager web UI and its CLI, and put devices on those fleets.
-You will also switch devices between different fleets, and observe how those changes affect managed device configurations.
+You will also switch devices between different fleets and observe how those changes affect managed device configurations.
 For simplicity, you will use only inline configurations.</p>
 </div>
 <div class="admonitionblock important">
@@ -298,8 +286,8 @@ Domain 'edge-2' started</code></pre>
 </div>
 </li>
 <li>
-<p>Give your local VMs a few moments to finish boot.
-Then, log in on Edge Manager as a non-administrator and verify that there are two managed devices, which are on-line and up-to-date.</p>
+<p>Give your local VMs a few moments to finish booting.
+Then, log in to Edge Manager as a non-administrator and verify that there are two managed devices, which are online and up-to-date.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl login -u student -p student https://servera.lab.example.com:3443</strong>
@@ -317,7 +305,7 @@ g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g    edge-2  &lt;none&gt;  On
 </div>
 </li>
 <li>
-<p>If you devices keep displaying as off-line for too long, it might be related to clock skew.
+<p>If your devices keep displaying as offline for too long, it might be related to clock skew.
 In that case, stop each of your local VMs and return to the beginning of this lab.</p>
 <div class="admonitionblock note">
 <table>
@@ -326,7 +314,7 @@ In that case, stop each of your local VMs and return to the beginning of this la
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-Clock skew prevents a device from synchronizing with Edge Manager, and is known to happen if your ROLE classroom is stopped without first shutting down local VMs on your <em>development machine</em> and later your VMs are restarted from saved state.
+Clock skew prevents a device from synchronizing with Edge Manager, and is known to happen if your ROLE classroom is stopped without first shutting down local VMs on your <em>development machine</em> and, later, your VMs are restarted from saved state.
 </td>
 </tr>
 </table>
@@ -345,7 +333,7 @@ Domain 'edge-2' destroyed</code></pre>
 </li>
 <li>
 <p>Create a device fleet, using the web UI.
-The process is very similar to editing a device configuration, if you remember the activity from the first course.</p>
+The process is similar to editing a device configuration, if you remember that activity from the first course.</p>
 <div class="paragraph">
 <p>You will create a fleet with a device template that sets two configuration files, using the inline configuration provider: A pre-login banner (an "issue" message), and a lifecycle hook that enables login using the serial console.</p>
 </div>
@@ -353,13 +341,13 @@ The process is very similar to editing a device configuration, if you remember t
 <ol class="loweralpha" type="a">
 <li>
 <p>On your <em>development machine</em>, start a web browser and open <code>https://servera.lab.example.com</code>.
-Log in on Edge Manager as <code>student</code> using the <code>student</code> password.
+Log in to Edge Manager as <code>student</code> using the <code>student</code> password.
 On the left pane, click <b class="menuref">Fleets</b>.
 It should display a page which states "No fleets yet".</p>
 </li>
 <li>
 <p>Click <b class="menuref">Create fleet</b>.
-Name your new fleet as <code>store</code> and, under <strong>Device selector</strong>, click on <b class="menuref">Add label</b>.
+Name your new fleet as <code>store</code> and, under <strong>Device selector</strong>, click <b class="menuref">Add label</b>.
 Type <code>location=store</code> as the device selector, and press <kbd>Tab</kbd> to leave the text box.
 Ignore the warning that "There are no devices matching these labels" and click <b class="menuref">Next</b>.</p>
 <div class="admonitionblock important">
@@ -376,7 +364,7 @@ Ensure you added a label under <strong>Device selector</strong> instead of under
 </div>
 </li>
 <li>
-<p>Under <strong>Host configuration (files)</strong>, click <b class="menuref">Add configuration</b> and type <code>store</code> on the <strong>Source name</strong> field.
+<p>Under <strong>Host configuration (files)</strong>, click <b class="menuref">Add configuration</b> and enter <code>store</code> in the <strong>Source name</strong> field.
 Select <code>Inline configuration</code> as the <strong>Source type</strong> field.</p>
 </li>
 <li>
@@ -388,12 +376,12 @@ Access by non-authorized personnel is strictly forbidden.</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Also ensure that there is a blank line at the end of the multi-line text box.</p>
+<p>Ensure that there is a blank line at the end of the multi-line text box.</p>
 </div>
 </li>
 <li>
 <p>Scroll down and click <b class="menuref">Add file</b> to create <strong>File 2</strong>.
-Type <code>/etc/flightctl/hooks.d/afterupdating/enable-serial-console.yaml</code> as the <strong>File path</strong> field, and type the following on the <strong>Content</strong> field:</p>
+Enter <code>/etc/flightctl/hooks.d/afterupdating/enable-serial-console.yaml</code> as the <strong>File path</strong> field, and enter the following in the <strong>Content</strong> field:</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-console" data-lang="console">- run: /usr/bin/systemctl enable serial-getty@ttyS0.service --now</code></pre>
@@ -408,13 +396,13 @@ You should get a details page for a fleet in the <code>Valid</code> state and wi
 </div>
 </li>
 <li>
-<p>Alter the labels on the first managed device so it joins the fleet and verify it got the fleet configuration.</p>
+<p>Alter the labels on the first managed device so it joins the fleet and verify it received the fleet configuration.</p>
 <div class="olist loweralpha">
 <ol class="loweralpha" type="a">
 <li>
 <p>Switch to a terminal and attempt to open the serial console of your local VM.
-It does not display a log in prompt, no matter which keys you press.
-Your only alternative is detaching from the VM console using <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>]</kbd></span>.</p>
+It does not display a login prompt, no matter which keys you press.
+Your only alternative is detaching from the VM console by using <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>]</kbd></span>.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-console" data-lang="console">$ <strong>virsh console edge-1</strong>
@@ -426,11 +414,11 @@ Escape character is ^] (Ctrl + ])
 </div>
 </li>
 <li>
-<p>Back to your web browser, click <b class="menuref">Devices</b> on the left pane.
+<p>Go back to your web browser, click <b class="menuref">Devices</b> on the left pane.
 Then click on the menu icon (three vertical dots) for the <code>edge-1</code> managed device and select <b class="menuref">Edit device configurations</b>.</p>
 </li>
 <li>
-<p>Click on <b class="menuref">Add label</b> and type <code>location=store</code> on the text box.
+<p>Click in <b class="menuref">Add label</b> and enter <code>location=store</code> in the text box.
 Press <kbd>Tab</kbd> to close the text box and notice that the page displays a green check mark under <strong>Fleet name</strong>, acknowledging that the new label makes the device a member of the <code>store</code> fleet.</p>
 </li>
 <li>
@@ -442,8 +430,8 @@ Wait until it changes to <code>Up-to-date</code>.</p>
 </li>
 <li>
 <p>Switch to a terminal and attempt again to open the serial console of your <code>edge-1</code> local VM.
-You may have to press <kbd>Enter</kbd> a few times to get a log in prompt.
-After you get the prompt, press <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>D</kbd></span> to reset the log in process and view the banner messages.</p>
+You may have to press <kbd>Enter</kbd> a few times to get a login prompt.
+After you get the prompt, press <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>D</kbd></span> to reset the login process and view the banner messages.</p>
 <div class="paragraph">
 <p>You should see the standard banner from Edge Manager, which displays a QR code used to enroll or manage the device, and the warning from your custom issue file.</p>
 </div>
@@ -511,7 +499,7 @@ enroll login:
 <div class="olist loweralpha">
 <ol class="loweralpha" type="a">
 <li>
-<p>Create a temporary working directory, and copy example files to it.</p>
+<p>Create a temporary working directory and copy example files to it.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-console" data-lang="console">$ <strong>mkdir temp-fleet</strong>
@@ -589,7 +577,7 @@ Connection to 127.0.0.1 closed.</code></pre>
 </div>
 </li>
 <li>
-<p>Attempt to access the virtual console of the device, and verify that you cannot get a log in prompt.
+<p>Attempt to access the virtual console of the device and verify that you cannot get a login prompt.
 Press <kbd>Enter</kbd> a few times and detach from the VM using <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>]</kbd></span>.</p>
 <div class="listingblock">
 <div class="content">
@@ -635,7 +623,7 @@ device/g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g edited</code></pre>
 </li>
 <li>
 <p>Wait until the device status changes to <code>Up-to-Date</code>.
-Notice that the device now displays as belonging to a fleet: see column <code>OWNER</code>.</p>
+Notice that the device now displays as belonging to a fleet: see the <code>OWNER</code> column.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl get device $UUID -o wide</strong>
@@ -645,7 +633,7 @@ g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g    edge-2  Fleet/store     
 </div>
 </li>
 <li>
-<p>Open an SSH connection to the device, verify that its post-login banner is gone, and terminate the SSH connection.</p>
+<p>Open an SSH connection to the device, verify that its post-login banner is gone and terminate the SSH connection.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-console" data-lang="console">$ <strong>ssh -i ../temp-enroll/edge-key -p 8222 core@127.0.0.1</strong>
@@ -658,8 +646,8 @@ Connection to 127.0.0.1 closed.</code></pre>
 </li>
 <li>
 <p>Access the virtual console of the device, and verify that the pre-login banner displays after the QR code.
-Press <kbd>Enter</kbd> a few times to get a log in prompt and press <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>D</kbd></span> to initialize a new log in process and see the banners.
-You do not need to log in, just detach from the VM using <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>]</kbd></span>.</p>
+Press <kbd>Enter</kbd> a few times to get a login prompt and press <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>D</kbd></span> to initialize a new login process and see the banners.
+You do not need to log in; just detach from the VM using <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>]</kbd></span>.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-console" data-lang="console">$ <strong>virsh console edge-2</strong>
@@ -686,7 +674,7 @@ enroll login:
 </div>
 </li>
 <li>
-<p>Provision a third managed device, and set its labels so it joins the fleet at enrollment.</p>
+<p>Provision a third managed device and set its labels so it joins the fleet at enrollment.</p>
 <div class="olist loweralpha">
 <ol class="loweralpha" type="a">
 <li>
@@ -704,7 +692,7 @@ g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g    edge-2  Fleet/store     
 </div>
 </li>
 <li>
-<p>Use the script in the <code>temp-enroll</code> directory, from the first lab, to provision a third test VM.
+<p>Use the script in the <code>temp-enroll</code> directory from the first lab to provision a third test VM.
 Detach from its virtual console when VM creation is complete by pressing <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>]</kbd></span>.</p>
 <div class="listingblock">
 <div class="content">
@@ -721,7 +709,7 @@ Escape character is ^] (Ctrl + ])</code></pre>
 </div>
 </li>
 <li>
-<p>Log in on Edge Manager as an administrator and approve the enrollment request, but setting the <code>location</code> label to match the fleet.</p>
+<p>Log in to Edge Manager as an administrator and approve the enrollment request, but setting the <code>location</code> label to match the fleet.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl get enrollmentrequest</strong>
@@ -765,8 +753,8 @@ mpr39vjcj5fup095de4pqnld6h4snt2ud79g74p7spv5i00jjid0    edge-3  Fleet/store     
 </li>
 <li>
 <p>Verify that the new device displays a pre-login banner, proving it already contains the fleet&#8217;s configurations.
-Press <kbd>Enter</kbd> to get a log in prompt and press <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>D</kbd></span> to initialize a new log in process and see the banners.
-Then detach from the VM using <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>]</kbd></span>.</p>
+Press <kbd>Enter</kbd> to get a login prompt and press <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>D</kbd></span> to initialize a new login process and see the banners.
+Then detach from the VM by using <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>]</kbd></span>.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-console" data-lang="console">$ <strong>virsh console edge-3</strong>
@@ -788,11 +776,11 @@ enroll login:
 </div>
 </li>
 <li>
-<p>Create a second fleet, using the CLI, and move a device to it, so we can see how it affects previous configurations from its old fleet.</p>
+<p>Create a second fleet, using the CLI, and move a device to it, so you can see how it affects previous configurations from its old fleet.</p>
 <div class="olist loweralpha">
 <ol class="loweralpha" type="a">
 <li>
-<p>Return to the working directory of this lab, and log in on Edge Manager as a non-administrator, to maintain a good security posture.</p>
+<p>Return to the working directory of this lab, and log in to Edge Manager as a non-administrator, to maintain a good security posture.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-console" data-lang="console">$ <strong>cd ../temp-fleet</strong>
@@ -1044,7 +1032,7 @@ Unfortunately, the web UI does not display a warning on the fleets themselves.
 </div>
 </li>
 <li>
-<p>There is also a script that just count the number of devices with the condition.</p>
+<p>There is also a script that just counts the number of devices with the condition.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-console" data-lang="console">$ <strong>cat count-devices-multipleowners.sh</strong>
@@ -1142,7 +1130,7 @@ device/1u63hvsgtua9tjjbmla9bgh5h2s77cb8esepphnf68m3ocf8qfng edited</code></pre>
 </div>
 </li>
 <li>
-<p>Verify that the device does belong to any fleet, and wait until it is <code>Up-to-Date</code>.</p>
+<p>Verify that the device does belong to any fleet, and then wait until it is <code>Up-to-Date</code>.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl get device $UUID -o wide</strong>

@@ -179,25 +179,13 @@
 </dd>
 </dl>
 </div>
-<div class="admonitionblock warning">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-warning" title="Warning"></i>
-</td>
-<td class="content">
-Pending Review
-</td>
-</tr>
-</table>
-</div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="_before_you_begin"><a class="anchor" href="#_before_you_begin"></a>Before you begin</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>You need a <em>development machine</em> running RHEL, and hosting a few local VMs which stand in for managed devices.
+<p>You need a <em>development machine</em> running RHEL and hosting a few local VMs that stand in for managed devices.
 These local VMs are already provisioned and enrolled in Edge Manager.</p>
 </div>
 <div class="paragraph">
@@ -219,9 +207,9 @@ Alternatively, you can open a shell or a console directly on the <code>servera</
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-This lab does not require the outcomes of any of the previous labs, you could perform just the first lab and skip to here.
+This lab does not require the outcomes of any of the previous labs; you could complete only the first lab and skip to here.
 The example outputs of commands assume that you are performing all labs sequentially, in the same environment.
-If you skipped any of previous labs, or if you had to destroy and recrete your enviromnent, your actual outputs may display different sets of VMs, devices, and fleets, but that should not affect the expected outcomes of this lab.
+If you skipped any of the previous labs, or if you had to destroy and recreate your environment, your actual outputs may display different sets of VMs, devices, and fleets, but that should not affect the expected outcomes of this lab.
 </td>
 </tr>
 </table>
@@ -264,7 +252,7 @@ Only your <em>development machine</em> needs SELinux set to permissive mode.</p>
 <ol class="arabic">
 <li>
 <p>On your <em>developer machine</em>, verify that you have the prerequisites from the <a href="../ch1-scale/s3-environment-lab.html" class="xref page">first lab</a>.
-If any of the prerequisites are missing, please return to the first lab and ensure that you did not skip any step.</p>
+If any of the prerequisites are missing, please return to the first lab and ensure that you did not skip any steps.</p>
 <div class="olist loweralpha">
 <ol class="loweralpha" type="a">
 <li>
@@ -291,7 +279,7 @@ antora.yml  config  enroll ...</code></pre>
 </div>
 </li>
 <li>
-<p>If your VMs are not running, start them, but ensuring they are booting from power on instead of resumed from saved state.</p>
+<p>If your VMs are not running, start them, but ensure they are booting from power on instead of resumed from saved state.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-console" data-lang="console">$ <strong>virsh list --all</strong>
@@ -311,8 +299,8 @@ Domain 'edge-1' started
 </div>
 </li>
 <li>
-<p>Give your local VMs a few moments to finish boot.
-Then, log in on Edge Manager as a non-administrator and verify that there are two managed devices, which are on-line and up-to-date.</p>
+<p>Give your local VMs a few moments to finish booting.
+Then, log in to Edge Manager as a non-administrator and verify that there are two managed devices, which are online and up-to-date.</p>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code class="language-console" data-lang="console">$ <strong>flightctl login -u student -p student https://servera.lab.example.com:3443</strong>
@@ -331,7 +319,7 @@ g7ombcqk46tqq458j9uju454441mf1lgt9qqqva8ti0fnvosm57g    edge-2  Fleet/store     
 </div>
 </li>
 <li>
-<p>If you devices keep displaying as off-line for too long, it might be related to clock skew.
+<p>If your devices keep displaying as offline for too long, it might be related to clock skew.
 In that case, stop each of your local VMs and return to the beginning of this lab.</p>
 <div class="admonitionblock note">
 <table>
@@ -362,20 +350,20 @@ Domain 'edge-1' destroyed
 <ol class="loweralpha" type="a">
 <li>
 <p>On your <em>development machine</em>, start a web browser and open <code>https://servera.lab.example.com</code>.
-Log in on Edge Manager as <code>student</code> using the <code>student</code> password.
+Log in to Edge Manager as <code>student</code> using the <code>student</code> password.
 On the left pane, click <b class="menuref">Repositories</b>.
-It should display a page which states "No repositories yet".</p>
+It should display a page that states "No repositories yet".</p>
 </li>
 <li>
 <p>Click <b class="menuref">Create repository</b>.
-Name your repository as <code>samples</code> and, for the <strong>Repository URL</strong>, type <code>https://github.com/RedHatQuickCourses/rhde-rhem-samples.git</code> which is the URL of the samples repository of this course.</p>
+Name your repository <code>samples</code> and, for the <strong>Repository URL</strong>, enter <code>https://github.com/RedHatQuickCourses/rhde-rhem-samples.git</code> which is the URL of the samples repository of this course.</p>
 </li>
 <li>
 <p>Uncheck <b class="menuref">Use resource syncs</b> and click <b class="menuref">Create repository</b>.</p>
 </li>
 <li>
 <p>The repository details page shows the repository with a status of <code>Sync pending</code>.
-After a few moments the status of the repository should change to <code>Accessible</code>.</p>
+After a few moments, the status of the repository should change to <code>Accessible</code>.</p>
 <div class="paragraph">
 <p>If you experience any errors, click the status icons for a descriptive message of the error and make any required fix.</p>
 </div>
@@ -388,11 +376,11 @@ After a few moments the status of the repository should change to <code>Accessib
 <div class="olist loweralpha">
 <ol class="loweralpha" type="a">
 <li>
-<p>Still on the repository details page, click on the value of the <strong>Url</strong>, that is, click on <code>https://github.com/RedHatQuickCourses/rhde-rhem-samples.git</code>.
-It opens a new browser tab on GitHub.</p>
+<p>Still on the repository details page, click the value of the <strong>Url</strong>, that is, click <code>https://github.com/RedHatQuickCourses/rhde-rhem-samples.git</code>.
+It opens a new browser tab in GitHub.</p>
 </li>
 <li>
-<p>Click <code>pos/etc</code> and see it contains a single file named <code>motd</code>.
+<p>Click <code>pos/etc</code> and notice it contains a single file named <code>motd</code>.
 Open the file and view its contents.
 Then return to the browser tab with the Edge Manager web UI.</p>
 </li>
@@ -400,25 +388,25 @@ Then return to the browser tab with the Edge Manager web UI.</p>
 </div>
 </li>
 <li>
-<p>Create a fleet which refers to the repository source.</p>
+<p>Create a fleet that refers to the repository source.</p>
 <div class="olist loweralpha">
 <ol class="loweralpha" type="a">
 <li>
-<p>On the left pane, click <b class="menuref">Fleets</b> and then click <b class="menuref">Create fleet</b>.
-Name your new fleet as <code>pos</code> and, under <strong>Device selector</strong>, click on <b class="menuref">Add label</b>.
-Type <code>role=pos</code> as the device selector, and press <kbd>Tab</kbd> to leave the text box.
+<p>On the left pane, click <b class="menuref">Fleets</b>, and then click <b class="menuref">Create fleet</b>.
+Name your new fleet as <code>pos</code> and, under <strong>Device selector</strong>, click <b class="menuref">Add label</b>.
+Enter <code>role=pos</code> as the device selector, and press <kbd>Tab</kbd> to leave the text box.
 Ignore the warning that "There are no devices matching these labels" and click <b class="menuref">Next</b>.</p>
 </li>
 <li>
-<p>Under <strong>Host configuration (files)</strong>, click <b class="menuref">Add configuration</b> and type <code>pos</code> on the <strong>Source name</strong> field.
+<p>Under <strong>Host configuration (files)</strong>, click <b class="menuref">Add configuration</b> and enter <code>pos</code> in the <strong>Source name</strong> field.
 Select <code>Git configuration</code> as the <strong>Source type</strong> field and select <code>samples</code> as the <strong>Repository</strong>.</p>
 </li>
 <li>
-<p>Type <code>main</code> as the <strong>Branch/tag/commit</strong> field, and <code>/pos</code> as the <strong>Path</strong>.</p>
+<p>Enter <code>main</code> as the <strong>Branch/tag/commit</strong> field, and <code>/pos</code> as the <strong>Path</strong>.</p>
 </li>
 <li>
 <p>Click <b class="menuref">Next</b> until you reach the end of the <strong>Create fleet</strong> assistant and click <b class="menuref">Create fleet</b>.
-You should get a details page for a fleet in the <code>Valid</code> state and with no devices.</p>
+You should notice a details page for a fleet in the <code>Valid</code> state and with no devices.</p>
 </li>
 </ol>
 </div>
@@ -434,8 +422,8 @@ You should get a details page for a fleet in the <code>Valid</code> state and wi
 <p>On the device details page, click <b class="menuref">Add label</b> and type <code>role=pos</code>, then press <kbd>Tab</kbd>.</p>
 </li>
 <li>
-<p>Verify that the details page now display the <strong>Fleet name</strong> as <code>pos</code> and scroll down to see the <strong>Update status</strong> heading.
-Wait until the status change to <code>Up-to-Date</code>.</p>
+<p>Verify that the details page now displays the <strong>Fleet name</strong> as <code>pos</code> and scroll down to see the <strong>Update status</strong> heading.
+Wait until the status changes to <code>Up-to-Date</code>.</p>
 </li>
 <li>
 <p>Click the <b class="menuref">Terminal</b> tab and verify that the <code>/etc/motd</code> file has been changed.</p>
@@ -475,27 +463,27 @@ Keep two browser tabs open, one on the Edge Manager web UI, another on GitHub.
 <p>Once logged in on GitHub, visit <a href="https://github.com/RedHatQuickCourses/rhde-rhem-samples.git" class="bare">https://github.com/RedHatQuickCourses/rhde-rhem-samples.git</a> and click <b class="menuref">Fork</b> on the top bar to create a fork of the samples repository on your personal GitHub account.</p>
 </li>
 <li>
-<p>On your personal fork of the samples repository, click <b class="menuref">Code</b> and then click on the copy icon, to copy the URL of your fork to the clipboard.</p>
+<p>On your personal fork of the samples repository, click <b class="menuref">Code</b>, and then click on the copy icon, to copy the URL of your fork to the clipboard.</p>
 </li>
 <li>
 <p>Switch to the Edge Manager web UI and click <b class="menuref">Repositories</b>.
-Click on the actions menu icon (three vertical dots) for the <code>pos</code> repository and then click <b class="menuref">Edit repository</b>.</p>
+Click on the actions menu icon (three vertical dots) for the <code>pos</code> repository, and then click <b class="menuref">Edit repository</b>.</p>
 </li>
 <li>
 <p>Paste the URL of your personal fork as the <strong>Repository URL</strong> and click <b class="menuref">Save</b>.</p>
 </li>
 <li>
-<p>Switch to GitHub, and navigate to the <code>/pos/etc/motd</code> file.
+<p>Switch to GitHub and navigate to the <code>/pos/etc/motd</code> file.
 Click the pen icon to edit the file.</p>
 </li>
 <li>
 <p>Change the first line of text to <code>This is the <strong>enhanced</strong> point-of-sale terminal.</code> and click <b class="menuref">Commit changes</b>.
-Accept the default commit message and other defaults, and click again on <b class="menuref">Commit changes</b>.</p>
+Accept the default commit message and other defaults, and click <b class="menuref">Commit changes</b> again.</p>
 </li>
 <li>
-<p>Click on the short commit ID, which displays near the <strong>History</strong> icon, to the right of the commit message, above the file contents.
+<p>Click the short commit ID, which displays near the <strong>History</strong> icon, to the right of the commit message, above the file contents.
 GitHub shows a diff view of the changes from your commit.
-Click on the copy icon, to the top right, next to the commit ID, to copy the full commit ID to the clipboard.</p>
+Click the copy icon, to the top right, next to the commit ID, to copy the full commit ID to the clipboard.</p>
 </li>
 </ol>
 </div>
@@ -505,7 +493,7 @@ Click on the copy icon, to the top right, next to the commit ID, to copy the ful
 <div class="olist loweralpha">
 <ol class="loweralpha" type="a">
 <li>
-<p>Switch to the Edge Manager web UI, and click <b class="menuref">Fleet</b> to enter the fleets page, and click the actions menu of the <code>pos</code> fleet.
+<p>Switch to the Edge Manager web UI, click <b class="menuref">Fleet</b> to enter the fleets page, and click the actions menu of the <code>pos</code> fleet.
 Select <b class="menuref">Edit fleet configurations</b> and click <b class="menuref">Next</b> to enter the <strong>Device template</strong> page.</p>
 </li>
 <li>
@@ -513,7 +501,7 @@ Select <b class="menuref">Edit fleet configurations</b> and click <b class="menu
 Click <b class="menuref">Next</b> until you reach the <strong>Review and save</strong> page and click <b class="menuref">Save</b>.</p>
 </li>
 <li>
-<p>Click on <b class="menuref">Devices</b> to enter the devices page and wait until the <code>edge-1</code> managed device is <code>Up-to-Date</code>.
+<p>Click <b class="menuref">Devices</b> to enter the devices page and wait until the <code>edge-1</code> managed device is <code>Up-to-Date</code>.
 Then click <code>edge-1</code> to enter its device details page.</p>
 </li>
 <li>
@@ -544,20 +532,8 @@ Alternatively, you could have created a tag on your git repository fork, and set
 <p>Now that you have organized your devices into fleets which pull configuration files from a git repository, the next chapter explores how to monitor device and fleet status, troubleshoot issues, and extract meaningful data from Red Hat Edge Manager.</p>
 </div>
 <div class="paragraph">
-<p>The next chapter also provides an example of creating and managing fleets configurations using Git repositories by using the CLI.
+<p>The next chapter also provides an example of creating and managing fleet configurations that reference Git repositories by using the CLI.
 Unlike the previous lab, which demonstrated both web UI and CLI management of fleets, using inline configurations, this lab uses only the web UI to make it shorter.</p>
-</div>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-note" title="Note"></i>
-</td>
-<td class="content">
-Review previous statements in case we scope down or remove the monitoring chapter.
-</td>
-</tr>
-</table>
 </div>
 </div>
 </div>

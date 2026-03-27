@@ -179,18 +179,6 @@
 </dd>
 </dl>
 </div>
-<div class="admonitionblock warning">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-warning" title="Warning"></i>
-</td>
-<td class="content">
-Pending Review.
-</td>
-</tr>
-</table>
-</div>
 </div>
 </div>
 <div class="sect1">
@@ -215,8 +203,8 @@ If something can be configured in an individual device, it can be configured the
 <h2 id="_labels_and_selectors_in_a_fleet"><a class="anchor" href="#_labels_and_selectors_in_a_fleet"></a>Labels and selectors in a fleet</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>All Edge Manager resource types can declare labels, which are pairs of keys and their respective values.
-Most of the times, Edge Manager ignores these labels, which are left for the user to organize collections of resources and them query them based on the values of their labels by using <em>selectors</em> in CLI commands and API requests.</p>
+<p>All Edge Manager resource types can declare <em>labels</em>, which are pairs of keys and their respective values.
+Most of the time, Edge Manager ignores these labels, which are left for the user to organize collections of resources and then query them based on the values of their labels by using <em>selectors</em> in CLI commands and API requests.</p>
 </div>
 <div class="paragraph">
 <p>Using the web UI, you specify a label as <code>key=value</code> where both <code>key</code> and <code>value</code> are strings.
@@ -249,7 +237,7 @@ They are unrelated to each other.
 The labels of a fleet itself are in its <code>metadata.label</code> field, while the selector of a fleet is in its <code>spec.selector</code> field.</p>
 </div>
 <div class="paragraph">
-<p>See the YAML snippet of a fleet resource which sets the label <code>region=pacific</code> and the selector <code>class=terminal</code>:</p>
+<p>In the following example, notice the YAML snippet of a fleet resource, which sets the label <code>region=pacific</code> and the selector <code>class=terminal</code>:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -269,7 +257,7 @@ spec:
 </div>
 </div>
 <div class="paragraph">
-<p>So, of a fleet declares a selector <code>class=terminal</code>, it matches any device containing a label <code>class=terminal</code> and these devices belong to the fleet.
+<p>So, if a fleet declares a selector <code>class=terminal</code>, it matches any device containing a label <code>class=terminal</code> and these devices belong to the fleet.
 See a YAML snippet of a device resource which matches the previous fleet:</p>
 </div>
 <div class="listingblock">
@@ -291,7 +279,7 @@ spec:
 In that case, all of them must match for a device to belong to the fleet.</p>
 </div>
 <div class="paragraph">
-<p>A device may set many other labels which are not in any fleet selector and they are ignored.</p>
+<p>A device may set many other labels that are not in any fleet selector and they are ignored.</p>
 </div>
 <div class="admonitionblock important">
 <table>
@@ -300,18 +288,18 @@ In that case, all of them must match for a device to belong to the fleet.</p>
 <i class="fa icon-important" title="Important"></i>
 </td>
 <td class="content">
-A device may belong to one and only one fleet.
+A device may belong to only one fleet.
 </td>
 </tr>
 </table>
 </div>
 <div class="paragraph">
-<p>If the labels on a device match multiple fleets, them the device enters an error state and these fleets are said to overlap.
+<p>If the labels on a device match multiple fleets, then the device enters an error state and these fleets are said to overlap.
 The device gets no updates until the overlap is resolved.</p>
 </div>
 <div class="paragraph">
 <p>The error state of "overlapping fleets" is only visible on the affected device resources by means of the <code>MultipleOwners</code> condition.
-The corresponding fleet resources provide no indication that there is any overlap, even when you create multiple fleets containing exactly the same selectors.</p>
+The corresponding fleet resources provide no indication that there is any overlap, even when you create multiple fleets containing the same selectors.</p>
 </div>
 </div>
 </div>
@@ -320,11 +308,11 @@ The corresponding fleet resources provide no indication that there is any overla
 <div class="sectionbody">
 <div class="paragraph">
 <p>The device template in a fleet resource supports a subset of the <a href="https://pkg.go.dev/text/template" target="_blank" rel="noopener">Go template</a> syntax, which enables text substitutions on the values of its fields, usually by referring to the values of labels from matching devices.
-That is, the actual value of a template vary for different devices on the same fleet.</p>
+That is, the actual value of a template varies for different devices on the same fleet.</p>
 </div>
 <div class="paragraph">
-<p>The allowed places of Go templates vary depending on the configuration provider.
-For example, the inline configuration providers allows Go templates in the content of any configuration file.
+<p>The places Go templates are allowed vary, depending on the configuration provider.
+For example, the inline configuration provider allows Go templates in the content of any configuration file.
 Another example, the Git configuration provider allows Go templates on the branch/commit and path fields, but NOT inside the file contents retrieved from a Git repository.</p>
 </div>
 </div>
@@ -337,19 +325,19 @@ Another example, the Git configuration provider allows Go templates on the branc
 Any time you change the selectors in a fleet resource, and anytime you change the labels on a device resource, you may change membership of devices within fleets.</p>
 </div>
 <div class="paragraph">
-<p>This is convenient when enrolling devices, because when you approve an enrollment request you can also set labels for the device.
-This way a device is enrolled and join a fleet at the same time.</p>
+<p>This is convenient when enrolling devices, because when you approve an enrollment request, you can also set labels for the device.
+This way a device is enrolled and joins a fleet at the same time.</p>
 </div>
 <div class="paragraph">
 <p>But it also means it is easy to inadvertently make a device leave or switch fleets when you change its labels.</p>
 </div>
 <div class="paragraph">
-<p>Consider the following scenarios of devices and fleets:</p>
+<p>Consider the following scenarios related to  devices and fleets:</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p><em>If a device was managed as an individual device and joins a fleet</em>, all configurations set at the device level are discarded, and replaced by configurations from the fleet.
+<p><em>If a device is managed as an individual device, and then joins a fleet</em>, all configurations set at the device level are discarded, and replaced by configurations from the fleet.
 You cannot mix device and fleet configurations on the same managed device.</p>
 </li>
 <li>
@@ -357,12 +345,12 @@ You cannot mix device and fleet configurations on the same managed device.</p>
 </li>
 <li>
 <p><em>If a device leaves a fleet, but does not join any other fleet</em>, it retains its latest rendered configuration.
-This way, if you remove a device inadvertently from a fleet, there&#8217;s no downtime, and you can rejoin the the device to its previous fleet without any impact.</p>
+This way, if you remove a device inadvertently from a fleet, there&#8217;s no downtime, and you can rejoin the device to its previous fleet without any impact.</p>
 </li>
 </ul>
 </div>
 <div class="paragraph">
-<p>The overall theme is that Edge Manager clears after itself automatically, and you do not have to worry about left overs when a device changes its fleet membership.
+<p>The overall theme is that Edge Manager clears after itself automatically, and you do not have to worry about leftovers when a device changes its fleet membership.
 The only exception, when a device leaves a fleet and retains its configuration, is similar to when a device is decommissioned, and also retains its last configuration.</p>
 </div>
 </div>
@@ -397,14 +385,14 @@ Be aware that such interactive configurations are not undone when a device joins
 <div class="sectionbody">
 <div class="paragraph">
 <p>The Git configuration provider enables Edge Manager to fetch configuration file contents from a Git repository, instead of having these contents inline in a device or fleet resource, enabling an approach of configuration-as-code.
-Only the Edge Manager server access Git servers.
+Only the Edge Manager server accesses Git servers.
 Managed devices get file contents from Edge Manager and do not contact any Git server.</p>
 </div>
 <div class="paragraph">
-<p>The Git configuration provider is very convenient because most IT professionals already know Git and use it on their development and automation workflows.</p>
+<p>The Git configuration provider is very convenient because most IT professionals already know Git and use it in their development and automation workflows.</p>
 </div>
 <div class="paragraph">
-<p>It also enables different teams to manage rollout of configurations and the actual configurations settings: the first team gets permissions to operate Edge Manager itself, while the second team gets permissions to commit and push to the Git repository.</p>
+<p>Using Git also enables different teams to manage rollout of configurations and the actual configurations settings: the first team gets permissions to operate Edge Manager itself, while the second team gets permissions to commit and push to the Git repository.</p>
 </div>
 <div class="paragraph">
 <p>Another advantage of the Git configuration provider is that configuration files are actual files on the Git repository.
@@ -458,10 +446,10 @@ When you create a fleet or device resource which references git or image reposit
 </div>
 <div class="paragraph">
 <p>If you wish to update a device to a new bootc container image, or to new configuration files stored in a Git repository, you must update the device or fleet resource themselves.
-Only then Edge Manager applies new configuration on managed devices.</p>
+Only then Edge Manager does apple new configuration on managed devices.</p>
 </div>
 <div class="paragraph">
-<p>That means you should maintain non-floating tags for you container images, and reference those tags explicitly in your device or fleet resources.
+<p>That means you should maintain non-floating tags for your container images, and reference those tags explicitly in your device or fleet resources.
 Alternatively, you could refer to image hashes.</p>
 </div>
 <div class="paragraph">
