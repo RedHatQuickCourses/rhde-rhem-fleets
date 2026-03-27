@@ -8,8 +8,6 @@ Objective::
 
 Set up and configure the classroom environment for practicing Red Hat Edge Manager fleet management.
 
-WARNING: Pending Review
-
 == Before you begin
 
 You need a customer portal account with access to a Red Hat Enterprise Linux (RHEL) subscription.
@@ -32,10 +30,10 @@ Alternatively, you can open a shell or a console directly on the `servera` VM.
 
 == Instructions
 
-You will verify that Edge Manager is installed and running on your _server machine_; that you can log in on Edge Manager from your _development machine_; and also that you have all files required to provision and enroll new managed devices, such as: a custom bootc container image, SSH keys, and a custom installation ISO.
+You will verify that Edge Manager is installed and running on your _server machine_; that you can log in to Edge Manager from your _development machine_; and also that you have all files required to provision and enroll new managed devices, such as: a custom bootc container image, SSH keys, and a custom installation ISO.
 
-All that should be already available, if you are continuing straight from the https://redhatquickcourses.github.io/rhde-rhem-devices/[first course^] without deleting and creating a new classroom environment, and you would skip most steps on this lab.
-In that case, this lab also provides some cleaning instructions, so you are not impacted by left overs from the first course.
+All that should be already available, if you are continuing straight from the https://redhatquickcourses.github.io/rhde-rhem-devices/[first course^] without deleting and creating a new classroom environment, and you would skip most steps in this lab.
+In that case, this lab also provides some cleaning instructions, so you are not impacted by leftovers from the first course.
 
 If you are starting from a new classroom environment, this lab provides step-by-step instructions to prepare all the necessary prerequisites for this course, so you do not have to return to the first course.
 
@@ -53,7 +51,7 @@ include::ch1-scale:partial$set-permissive.adoc[]
 
 1. On your _development machine_, download the sample code for this course.
 
-.. Ensure that you are on your home directory and verify if you have the course samples repository.
+.. Ensure that you are on your home directory and verify that you have the course samples repository.
 +
 [source,console,subs="verbatim,quotes"]
 --
@@ -100,7 +98,7 @@ $ *which skopeo*
 /usr/bin/skopeo
 --
 
-.. If any of them is not, install the corresponding package.
+.. If either of them is not, install the corresponding package.
 +
 [source,console,subs="verbatim,quotes"]
 --
@@ -185,7 +183,7 @@ The system has been registered with ID: aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee
 The registered system name is: workstation
 --
 
-.. Log in on the Red Hat container registry.
+.. Log in to the Red Hat container registry.
 Use the same Red Hat login that you used with subscription manager.
 +
 [source,console,subs="verbatim,quotes"]
@@ -224,7 +222,7 @@ a93aa271855242ac292133fb261c2132dd88859abb7edc29fb5681d30db422f2
 4. Install the Edge Manager services on your _server machine_.
 
 .. Open an SSH session or a terminal on your _server machine_.
-Make sure your current shell is on the right machine before you proceed.
+Make sure your current shell is on the correct machine before you proceed.
 +
 [source,console,subs="verbatim,quotes"]
 --
@@ -268,11 +266,11 @@ $ *sudo dnf config-manager --add-repo https://rpm.flightctl.io/flightctl-epel.re
 Adding repo from: https://rpm.flightctl.io/flightctl-epel.repo
 --
 +
-NOTE: In this case, there is no need to register `servera` because the Flight Control services package contains no dependencies other than a container engine (Podman) and the classroom environment contains a mirror of the RHEL 9 packages, which the `servera` VM is preconfigured to use.
+NOTE: In this case, there is no need to register `servera` because the Flight Control services package contains no dependencies other than a container engine (Podman), and the classroom environment contains a mirror of the RHEL 9 packages, which the `servera` VM is preconfigured to use.
 
-.. Alternatively, register your _server machine_ with Red Hat subscription manager and log in on the Red Hat container registries as the `root` user.
+.. Alternatively, register your _server machine_ with Red Hat subscription manager and log in to the Red Hat container registries as the `root` user.
 +
-NOTE: This requires using a Red Hat login entitled to a Red Hat Device Edge product subscription or other product subscription which provides Red Hat Edge Manager packages.
+NOTE: This requires using a Red Hat login entitled to a Red Hat Device Edge product subscription or other product subscription that provides Red Hat Edge Manager packages.
 +
 [source,console,subs="verbatim,quotes"]
 --
@@ -411,12 +409,12 @@ $ **sudo dnf install ~/Downloads/flightctl-cli*rpm**
 Complete!
 --
 
-6. Configure users for the Edge Manager services, on the its PAM issuer container.
+6. Configure users for the Edge Manager services, on the PAM issuer container.
 
-.. Verify that you can log in on Edge Manager, from your _development machine_, as a regular user and also as an administrator.
-If you do, you can skip to *step 7*
+.. Verify that you can log in to Edge Manager, from your _development machine_, as a regular user and also as an administrator.
+If you do, you can skip to *step 7*.
 +
-IMPORTANT: If you see the prompt "Use insecure connections?" answer *N* and let the log in attempt fail.
+IMPORTANT: If you see the prompt "Use insecure connections?", answer *N* and let the log in attempt fail.
 +
 [source,console,subs="verbatim,quotes"]
 --
@@ -475,7 +473,7 @@ $ *sudo cp ca-bundle.crt /etc/pki/ca-trust/source/anchors/*
 $ *sudo update-ca-trust extract*
 --
 
-.. Verify that you can now log in on the Edge Manager server.
+.. Verify that you can now log in to the Edge Manager server.
 +
 [source,console,subs="verbatim,quotes"]
 --
@@ -493,7 +491,7 @@ Client Version: v1.0.2
 Server Version: v1.0.2
 --
 
-7. Create an enrollment image for provisioning managed devices and enrolling them using late binding.
+7. Create an enrollment image for provisioning managed devices and enroll them using late binding.
 
 .. On your _development machine_, verify that you already have the enrollment ISO and SSH key to provision managed devices.
 Look for files named `rhem-enroll.iso` and `edge-key` on the `temp-enroll` directory.
@@ -507,7 +505,7 @@ $ *ls*
 Containerfile  bib-iso.sh  config.toml  config.yaml  edge-key  edge-key.pub  output  rhem-enroll.iso  virt-install.sh
 --
 
-.. If not, log in on your private registry and verify that the bootc enrollment image is available there.
+.. If not, log in to your private registry and verify that the bootc enrollment image is available there.
 If it is, you can skip to *step 8*.
 +
 [source,console,subs="verbatim,quotes,attributes"]
@@ -570,7 +568,7 @@ flightctl-selinux-1.0.2-1.el9.x86_64.rpm
 --
 
 .. Review the `Containerfile` that builds a minimal enrollment image.
-If you need explanations about what is included in this image, please review the https://redhatquickcourses.github.io/rhde-rhem-devices/rhde-rhem-devices/1/ch3-enroll/s2-enroll-lab.html[previous course].
+If you need information about what is included in this image, please review the https://redhatquickcourses.github.io/rhde-rhem-devices/rhde-rhem-devices/1/ch3-enroll/s2-enroll-lab.html[previous course].
 +
 //TODO: adapt instructions for using online product packages [may not work with 1.0.0] and/or an offline mirror
 +
@@ -682,7 +680,7 @@ Results saved in .
 $ *cp output/bootiso/install.iso rhem-enroll.iso*
 --
 
-9. Destroy any VM and Edge Manager resources which may exist, as left overs from the previous course.
+9. Destroy any VM and Edge Manager resources that may exist as leftovers from the previous course.
 
 .. Verify that there are no local VMs.
 +
@@ -744,9 +742,9 @@ $ *flightctl get device*
 NAME    ALIAS   OWNER   SYSTEM  UPDATED APPLICATIONS
 --
 
-.. If there are any devices, decomission and delete each of them.
+.. If there are any managed devices, decommission and delete each of them.
 +
-IMPORTANT: This and the next substeps ensure that labs from this course labs are not impacted by left overs from labs of the previous course.
+IMPORTANT: This and the next substeps ensure that labs from this course are not affected by leftovers from labs of the previous course.
 +
 [source,console,subs="verbatim,quotes"]
 --
@@ -806,13 +804,13 @@ $ *flightctl delete enrollmentrequest $UUID*
 Deletion request for enrollmentrequest "mpr39vjcj5fup095de4pqnld6h4snt2ud79g74p7spv5i00jjid0" completed
 --
 
-10. Provision and enroll two new VMs which stand-in for managed devices.
+10. Provision and enroll two new VMs, which stand in for managed devices.
 +
-NOTE: If you need help understand and troubleshooting managed device enrollment, please refer to the https://redhatquickcourses.github.io/rhde-rhem-devices/rhde-rhem-devices/1/ch3-enroll/s2-enroll-lab.html[first course^].
+NOTE: If you need help understanding and troubleshooting managed device enrollment, please refer to the https://redhatquickcourses.github.io/rhde-rhem-devices/rhde-rhem-devices/1/ch3-enroll/s2-enroll-lab.html[first course^].
 
 .. Use the provided script to invoke `virt-install` to create a local test VM, booting it from the ISO.
 +
-At the end of the instalation, press kbd:[Ctrl+\]] to leave the text console of the VM and return to your host shell.
+At the end of the installation, press kbd:[Ctrl+\]] to leave the text console of the VM and return to your host shell.
 +
 [source,console,subs="verbatim,quotes,macros"]
 --
@@ -844,7 +842,7 @@ NAME                                                    APPROVAL        APPROVER
 
 .. Approve the enrollment request, setting a few labels on the managed device.
 +
-Be sure you use the same UUID you got from the previous step to refer to the enrollment request.
+NOTE: Be sure you use the same UUID you got from the previous step to refer to the enrollment request.
 +
 [source,console,subs="verbatim,quotes,attributes"]
 --
@@ -914,8 +912,8 @@ NAME                                                    ALIAS   OWNER   SYSTEM  
 {edge-2-uuid-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}    edge-2  <none>  Online  UpToDate        NoApplications  alias=edge-2,rhel=9.6,type=noapps
 --
 
-You now have a minimaly configured Edge Manager service and two local VMs which act as managed devices, that are fully provisioned and enrolled into Edge Manager.
-This environment is the starting point for all activities in the next chapters.
+You now have a minimally configured Edge Manager service and two local VMs, which act as managed devices, that are fully provisioned and enrolled in Edge Manager.
+This environment is the starting point for all activities in the following chapters.
 
 == What's next
 
