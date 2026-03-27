@@ -17,27 +17,27 @@ IMPORTANT: Red Hat associates must enroll using the https://training-lms.redhat.
 
 On completing this course, you should be able to:
 
-* Understand the challenges of managing edge devices at scale
+* Understand the challenges of managing edge devices at scale.
 
-* Create and manage fleets of managed devices
+* Create and manage fleets of managed devices.
 
-* Monitor and troubleshoot devices and fleets
+* Monitor and troubleshoot devices and fleets.
 
-* Configure and manage containerized applications
+* Configure and manage containerized applications.
 
 == Audience
 
 * Operations-focused customer roles, who manage edge devices, but are not usually in-person at edge sites:
 
-  ** System Administrations (IT and OT)
+  ** System Administrators (IT and OT)
 
   ** Site Reliability Engineers (SREs)
 
   ** Platform Engineers and DevOps Engineers
 
-* Red Hat and Partner roles that perform demonstrations, PoC and PoV of Red Hat Edge Manager as part of a sales motion, such as Solutions Architects.
+* Red Hat and Partner roles that perform demonstrations, PoC, and PoV of Red Hat Edge Manager as part of a sales motion, such as Solutions Architects.
 
-* Red Hat and Partner roles that implement and support Red Hat Edge Manager on customers, such as Services Consultants, Technical Account Managers, and Customer Support Engineers.
+* Red Hat and Partner roles that implement and support Red Hat Edge Manager for customers, such as Services Consultants, Technical Account Managers, and Customer Support Engineers.
 
 == Prerequisites
 
@@ -57,18 +57,18 @@ Notice that no prior knowledge about Kubernetes and OpenShift is assumed or requ
 
 == Classroom environment
 
-You can perform all activities in this course using the virtual classroom lab from HOL019: Image Mode with Red Hat Device Edge Quick Course Series, in the Red Hat Online Learning Environment (ROLE), which is shared with the quick courses about image mode with Red Hat Device Edge and will be updated in the future to better support Red Hat Edge Manager and other Red Hat Device Edge training.
+You can perform all activities in this course by using the virtual classroom lab from HOL019: Image Mode with Red Hat Device Edge Quick Course Series, in the Red Hat Online Learning Environment (ROLE), which is shared with the quick courses about image mode with Red Hat Device Edge and will be updated in the future to better support Red Hat Edge Manager and other Red Hat Device Edge training.
 
-NOTE:	The Red Hat Edge Manager quick courses use ROLE for their virtual classroom labs only, and hosts course materials outside of ROLE, as GitHub pages. 
+NOTE:	The Red Hat Edge Manager quick courses use ROLE for their virtual classroom labs only, and host course materials outside of ROLE, as GitHub pages. 
 
 === For Red Hat associates and partners
 
-If you are a Red Hat associate or partner, you must first enroll in the virtual classroom lab, by using one of the following links:
+If you are a Red Hat associate or partner, you must first enroll in the virtual classroom lab by using one of the following links:
 
 * https://training-lms.redhat.com/sso/saml/auth/rhlpint?RelayState=deeplinkoffering=84932767[HOL019 for Red Hat associates^] on the Red Hat Learning Portal
 * https://training-lms.redhat.com/sso/saml/auth/rhopen?RelayState=deeplinkoffering=84932768[HOL019 for Red Hat partners^] on Red Hat Partner Connect
 
-After you enroll to HOL019 once, you can use the following links for subsequent access to the virtual classroom lab directly on Red Hat Online Learning (ROLE):
+After you enroll in HOL019 once, you can use the following links for subsequent access to the virtual classroom lab directly in the Red Hat Online Learning Environment (ROLE):
 
 * https://role.rhu.redhat.com/rol-rhu/app/courses/hol019-10.0/[HOL019 for Red Hat associates^] on ROLE
 * https://rol.redhat.com/rol/app/courses/hol019-10.0/[HOL019 for Red Hat partners^] on ROLE
