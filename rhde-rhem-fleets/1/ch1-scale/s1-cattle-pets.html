@@ -179,25 +179,13 @@
 </dd>
 </dl>
 </div>
-<div class="admonitionblock warning">
-<table>
-<tr>
-<td class="icon">
-<i class="fa icon-warning" title="Warning"></i>
-</td>
-<td class="content">
-Pending Review.
-</td>
-</tr>
-</table>
-</div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="_review_of_red_hat_edge_manager"><a class="anchor" href="#_review_of_red_hat_edge_manager"></a>Review of Red Hat Edge Manager</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Managing infrastructure and applications at the edge is complex given the edge technology landscape.
+<p>Managing infrastructure and applications at the edge is complex, given the edge technology landscape.
 Organizations face challenges with connectivity, device management, diversity in hardware, operational management, scalability, and security.
 To effectively manage fleets of edge devices, solutions must provide a simple, scalable experience that reduces costs and enhances control, security, and visibility for customers.</p>
 </div>
@@ -212,7 +200,7 @@ Built for modern, containerized environments, it simplifies device and applicati
 <div class="sect2">
 <h3 id="_architecture_of_red_hat_edge_manager"><a class="anchor" href="#_architecture_of_red_hat_edge_manager"></a>Architecture of Red Hat Edge Manager</h3>
 <div class="paragraph">
-<p>The main components of Edge Manager are composed its API server, which fronts a collection of microservices and maintains state about managed devices, and its agent, which runs on each managed device.</p>
+<p>The main components of Edge Manager are its <em>API server</em>, which fronts a collection of microservices and maintains state about managed devices, and its <em>agent</em>, which runs on each managed device.</p>
 </div>
 <div class="imageblock">
 <div class="content">
@@ -230,41 +218,41 @@ First, by using a shared enrollment-time certificate, and then by using a per-de
 The system images of managed devices must already include the Edge Manager agent before these devices can be enrolled.</p>
 </div>
 <div class="paragraph">
-<p>The push-based approach of Edge Manager makes it suitable for handing edge devices with inconsistent or low-bandwidth network connectivity.
+<p>The push-based approach of Edge Manager makes it suitable for handling edge devices with inconsistent or low-bandwidth network connectivity.
 Even if the agent loses connection to its server, it can still keep its last known state and, when connection is restored, the agent can fetch any configuration change and apply it locally.</p>
 </div>
 <div class="paragraph">
 <p>Edge Manager provides both a web UI and a CLI to perform management operations, including enrolling, configuring, and decommissioning managed devices.</p>
 </div>
 <div class="paragraph">
-<p>Edge Manager can be deployed stand-alone on RHEL and on OpenShift, or integrated with either Red Hat Advanced Cluster Management or Red Hat Ansible Automation Platforms.
+<p>Edge Manager can be deployed stand-alone on RHEL and on OpenShift, or integrated with either Red Hat Advanced Cluster Management or Red Hat Ansible Automation Platform.
 In all these deployment models, Edge Manager provides a consistent set of features and APIs.</p>
 </div>
 <div class="paragraph">
-<p>Though Edge Manager can integrate its web UI, authentication, and authorization with other management platforms, such as Advanced Cluster Management, it retains its own database of device state and offers the same management API for edge devices.</p>
+<p>Although Edge Manager can integrate its web UI, authentication, and authorization with other management platforms, such as Advanced Cluster Management, it retains its own database of device state and offers the same management API for edge devices.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_managed_device_life_cycle"><a class="anchor" href="#_managed_device_life_cycle"></a>Managed device life cycle</h3>
+<h3 id="_managed_device_lifecycle"><a class="anchor" href="#_managed_device_lifecycle"></a>Managed device lifecycle</h3>
 <div class="paragraph">
-<p>The following figure provides the life cycle of a managed device, from the perspective of Edge Manager.</p>
+<p>The following figure provides the lifecycle of a managed device, from the perspective of Edge Manager.</p>
 </div>
 <div class="imageblock">
 <div class="content">
 <img src="_images/device-life-cycle.svg" alt="device life cycle">
 </div>
-<div class="title">Figure 2. Simplified conceptual life cycle of a device managed by Edge Manager</div>
+<div class="title">Figure 2. Simplified conceptual lifecycle of a device managed by Edge Manager</div>
 </div>
 <div class="paragraph">
 <p>First, a device must be provisioned, by installing RHEL and the Edge Manager agent using image mode.
 Then, it can be enrolled into Edge Manager, and from now on it is a managed device, which can be configured and monitored by Edge Manager.</p>
 </div>
 <div class="paragraph">
-<p>Any kind of update to a managed device, for example: operating system updates, changes to its configuration files, or application updates, are equivalent from Edge Manager&#8217;s perspective.
+<p>Any kind of update to a managed device (for example: operating system updates, changes to its configuration files, or application updates) are equivalent from Edge Manager&#8217;s perspective.
 They all mean applying a different configuration to a managed device.</p>
 </div>
 <div class="paragraph">
-<p>At some point, the device is decommissioned, and it is not configured nor monitored anymore, but still exists as an Edge Manager API resource until that resource is deleted.</p>
+<p>At some point, the device is decommissioned, and it is neither configured nor monitored anymore, but still exists as an Edge Manager API resource until that resource is deleted.</p>
 </div>
 <div class="paragraph">
 <p>An enrolled device contains an empty configuration, if it was enrolled as an individually managed device, or it can be configured right at enrollment time, if it joins a fleet.</p>
@@ -273,7 +261,7 @@ They all mean applying a different configuration to a managed device.</p>
 <div class="sect2">
 <h3 id="_gitops_for_the_operating_system"><a class="anchor" href="#_gitops_for_the_operating_system"></a>GitOps for the operating system</h3>
 <div class="paragraph">
-<p>Edge Manager enables GitOps-style management to edge devices by controls three aspects of a device configuration:</p>
+<p>Edge Manager enables GitOps-style management for edge devices by controlling three aspects of device configuration:</p>
 </div>
 <div class="ulist">
 <ul>
@@ -281,7 +269,7 @@ They all mean applying a different configuration to a managed device.</p>
 <p>The operating system image, that is, the bootc container image the device boots with.</p>
 </li>
 <li>
-<p>Operating system and application configuration files, stored the edge device.</p>
+<p>Operating system and application configuration files, stored on the edge device.</p>
 </li>
 <li>
 <p>Containerized applications running on the device.</p>
@@ -289,11 +277,11 @@ They all mean applying a different configuration to a managed device.</p>
 </ul>
 </div>
 <div class="paragraph">
-<p>Edge Manager apply these three aspects atomically, meaning that any change on the configuration of a managed device is either applied in its entirety or the device is considered outdated.</p>
+<p>Edge Manager applies these three aspects atomically, meaning that any change on the configuration of a managed device is either applied in its entirety or the device is considered outdated.</p>
 </div>
 <div class="paragraph">
 <p>If there are multiple changes, the agent first stages all artifacts it needs on the device, including new and changed configuration files and any new container images.
-Only when all content is already staged, the agent switches to the new configuration.
+Only when all content is already staged, does the agent switch to the new configuration.
 Switching may require rebooting managed devices, but Edge Manager is smart enough to apply updates by just reloading system services, such as the System daemon, whenever possible.</p>
 </div>
 <div class="paragraph">
@@ -322,7 +310,7 @@ You change device settings by changing the configuration stated by these API res
 All devices on a fleet boot from the same operating system image, contain the same set of managed configuration files, and run the same managed applications.</p>
 </div>
 <div class="paragraph">
-<p>Consider that most edge locations, such as a retail store, include a potentially large number of devices which should be configured in exactly the same way, for example: multiple point-of-sale systems.
+<p>Consider that most edge locations, such as a retail store, include a potentially large number of devices that should be configured in exactly the same way, for example: multiple point-of-sale systems.
 Edge Manager allows defining the required configuration only once, and then applying it to a number of devices automatically.</p>
 </div>
 <div class="paragraph">
@@ -332,15 +320,15 @@ Templating also provides flexibility of different approaches for fleet definitio
 </div>
 </div>
 <div class="sect1">
-<h2 id="_managing_devices_as_appliances_versus_separation_of_concerns"><a class="anchor" href="#_managing_devices_as_appliances_versus_separation_of_concerns"></a>Managing devices as appliances versus separation of concerns</h2>
+<h2 id="_managing_devices_as_appliances_vs_separation_of_concerns"><a class="anchor" href="#_managing_devices_as_appliances_vs_separation_of_concerns"></a>Managing devices as appliances vs. separation of concerns</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>You are not required to manage applications using Edge Manager.
 It is a common approach to embed applications into an operating system image, so updating the bootc container image of a device updates both its operating system and its applications at once.</p>
 </div>
 <div class="paragraph">
-<p>But many organizations prefer to have different teams that manage the operating system patching and that manage application code and their dependencies.
-Packaging and running applications as containers is currently the preferred way of enabling such separation of concerns and let infrastructure teams manage the operating system lifecycle independently of development teams that their application life cycles.</p>
+<p>Many organizations, however, prefer to have different teams that manage the operating system patching from those that manage application code and their dependencies.
+Packaging and running applications as containers is currently the preferred way of enabling such separation of concerns and allowing infrastructure teams manage to the operating system lifecycle independently of development teams and their application lifecycles.</p>
 </div>
 <div class="paragraph">
 <p>Edge Manager supports such separation of concerns by explicitly managing containerized applications which it deploys and monitors on managed devices, be these devices managed individually or as members of fleets.</p>
