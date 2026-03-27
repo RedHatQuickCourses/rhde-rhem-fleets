@@ -112,3 +112,5 @@ Training Content Architect +
 Red Hat - Product Portfolio Marketing & Learning
 
 Special thanks to Ken Osborn, Sam Batschelet, and Sean O'Keffe for their support while designing and writing this course.
+
+Thanks also to Celia Amador for her review of early drafts of this course.
