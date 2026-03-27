@@ -8,8 +8,6 @@ Objective::
 
 Configure multiple devices, which belong to fleets, from files stored in a git repository.
 
-WARNING: Pending Review
-
 == Before you begin
 
 include::ch2-fleets:partial$before-you-begin.adoc[]
@@ -21,7 +19,7 @@ You will create a fleet using the Git configuration provider, and then you will 
 include::ch1-scale:partial$set-permissive.adoc[]
 
 1. On your _developer machine_, verify that you have the prerequisites from the xref:ch1-scale:s3-environment-lab.adoc[first lab].
-If any of the prerequisites are missing, please return to the first lab and ensure that you did not skip any step.
+If any of the prerequisites are missing, please return to the first lab and ensure that you did not skip any steps.
 
 .. Verify that you have a clone of the course samples repository.
 +
@@ -44,7 +42,7 @@ $ *virsh list --all*
  3    edge-3   running
 --
 
-.. If your VMs are not running, start them, but ensuring they are booting from power on instead of resumed from saved state.
+.. If your VMs are not running, start them, but ensure they are booting from power on instead of resumed from saved state.
 +
 [source,console,subs="verbatim,quotes"]
 --
@@ -63,8 +61,8 @@ Domain 'edge-1' started
 # repeat for the remaining VMs
 --
 
-.. Give your local VMs a few moments to finish boot.
-Then, log in on Edge Manager as a non-administrator and verify that there are two managed devices, which are on-line and up-to-date.
+.. Give your local VMs a few moments to finish booting.
+Then, log in to Edge Manager as a non-administrator and verify that there are two managed devices, which are online and up-to-date.
 +
 [source,console,subs="verbatim,quotes"]
 --
@@ -82,7 +80,7 @@ NAME                                                    ALIAS   OWNER           
 {edge-1-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}    edge-1  <none>           Online  UpToDate        NoApplications
 --
 
-.. If you devices keep displaying as off-line for too long, it might be related to clock skew.
+.. If your devices keep displaying as offline for too long, it might be related to clock skew.
 In that case, stop each of your local VMs and return to the beginning of this lab.
 +
 NOTE: Clock skew prevents a device from synchronizing with Edge Manager, and is known to happen if your ROLE classroom is stopped without first shutting down local VMs on your _development machine_ and later your VMs are restarted from saved state.
@@ -97,12 +95,12 @@ Domain 'edge-1' destroyed
 2. Configure a repository source, using the web UI.
 
 .. On your _development machine_, start a web browser and open `\https://servera.lab.example.com`.
-Log in on Edge Manager as `student` using the `student` password.
+Log in to Edge Manager as `student` using the `student` password.
 On the left pane, click menu:Repositories[].
-It should display a page which states "No repositories yet".
+It should display a page that states "No repositories yet".
 
 .. Click menu:Create repository[].
-Name your repository as `samples` and, for the *Repository URL*, type `\https://github.com/RedHatQuickCourses/rhde-rhem-samples.git` which is the URL of the samples repository of this course.
+Name your repository `samples` and, for the *Repository URL*, enter `\https://github.com/RedHatQuickCourses/rhde-rhem-samples.git` which is the URL of the samples repository of this course.
 
 .. Uncheck menu:Use resource syncs[] and click menu:Create repository[].
 +
@@ -113,7 +111,7 @@ Scroll down
 ////
 
 .. The repository details page shows the repository with a status of `Sync pending`.
-After a few moments the status of the repository should change to `Accessible`.
+After a few moments, the status of the repository should change to `Accessible`.
 +
 If you experience any errors, click the status icons for a descriptive message of the error and make any required fix.
 +
@@ -124,31 +122,31 @@ and the status of the resource sync should change to `Synced`
 
 3. Explore the contents of the samples repository.
 
-.. Still on the repository details page, click on the value of the *Url*, that is, click on `\https://github.com/RedHatQuickCourses/rhde-rhem-samples.git`. 
-It opens a new browser tab on GitHub.
+.. Still on the repository details page, click the value of the *Url*, that is, click `\https://github.com/RedHatQuickCourses/rhde-rhem-samples.git`. 
+It opens a new browser tab in GitHub.
 
-.. Click `pos/etc` and see it contains a single file named `motd`.
+.. Click `pos/etc` and notice it contains a single file named `motd`.
 Open the file and view its contents.
 Then return to the browser tab with the Edge Manager web UI.
 
-4. Create a fleet which refers to the repository source.
+4. Create a fleet that refers to the repository source.
 
-.. On the left pane, click menu:Fleets[] and then click menu:Create fleet[].
-Name your new fleet as `pos` and, under *Device selector*, click on menu:Add label[].
-Type `role=pos` as the device selector, and press kbd:[Tab] to leave the text box. 
+.. On the left pane, click menu:Fleets[], and then click menu:Create fleet[].
+Name your new fleet as `pos` and, under *Device selector*, click menu:Add label[].
+Enter `role=pos` as the device selector, and press kbd:[Tab] to leave the text box. 
 Ignore the warning that "There are no devices matching these labels" and click menu:Next[].
 
-.. Under *Host configuration (files)*, click menu:Add configuration[] and type `pos` on the *Source name* field. 
+.. Under *Host configuration (files)*, click menu:Add configuration[] and enter `pos` in the *Source name* field. 
 Select `Git configuration` as the *Source type* field and select `samples` as the *Repository*.
 
-.. Type `main` as the *Branch/tag/commit* field, and `/pos` as the *Path*.
+.. Enter `main` as the *Branch/tag/commit* field, and `/pos` as the *Path*.
 +
 // Why typing the same data which was already provided for the resource sync?
 +
 // Maybe use with a fork, so students can make their own commits and pushes?
 
 .. Click menu:Next[] until you reach the end of the *Create fleet* assistant and click menu:Create fleet[].
-You should get a details page for a fleet in the `Valid` state and with no devices.
+You should notice a details page for a fleet in the `Valid` state and with no devices.
 
 5. Add a device to your new fleet.
 
@@ -156,8 +154,8 @@ You should get a details page for a fleet in the `Valid` state and with no devic
 
 .. On the device details page, click menu:Add label[] and type `role=pos`, then press kbd:[Tab].
 
-.. Verify that the details page now display the *Fleet name* as `pos` and scroll down to see the *Update status* heading.
-Wait until the status change to `Up-to-Date`.
+.. Verify that the details page now displays the *Fleet name* as `pos` and scroll down to see the *Update status* heading.
+Wait until the status changes to `Up-to-Date`.
 
 .. Click the menu:Terminal[] tab and verify that the `/etc/motd` file has been changed.
 +
@@ -178,34 +176,34 @@ NOTE: Keep two browser tabs open, one on the Edge Manager web UI, another on Git
 
 .. Once logged in on GitHub, visit https://github.com/RedHatQuickCourses/rhde-rhem-samples.git and click menu:Fork[] on the top bar to create a fork of the samples repository on your personal GitHub account.
 
-.. On your personal fork of the samples repository, click menu:Code[] and then click on the copy icon, to copy the URL of your fork to the clipboard.
+.. On your personal fork of the samples repository, click menu:Code[], and then click on the copy icon, to copy the URL of your fork to the clipboard.
 
 .. Switch to the Edge Manager web UI and click menu:Repositories[].
-Click on the actions menu icon (three vertical dots) for the `pos` repository and then click menu:Edit repository[].
+Click on the actions menu icon (three vertical dots) for the `pos` repository, and then click menu:Edit repository[].
 
 .. Paste the URL of your personal fork as the *Repository URL* and click menu:Save[].
 
-.. Switch to GitHub, and navigate to the `/pos/etc/motd` file.
+.. Switch to GitHub and navigate to the `/pos/etc/motd` file.
 Click the pen icon to edit the file.
 
 .. Change the first line of text to `This is the *enhanced* point-of-sale terminal.` and click menu:Commit changes[].
-Accept the default commit message and other defaults, and click again on menu:Commit changes[].
+Accept the default commit message and other defaults, and click menu:Commit changes[] again.
 +
 // Should commit to a branch?
 
-.. Click on the short commit ID, which displays near the *History* icon, to the right of the commit message, above the file contents.
+.. Click the short commit ID, which displays near the *History* icon, to the right of the commit message, above the file contents.
 GitHub shows a diff view of the changes from your commit.
-Click on the copy icon, to the top right, next to the commit ID, to copy the full commit ID to the clipboard.
+Click the copy icon, to the top right, next to the commit ID, to copy the full commit ID to the clipboard.
 
 7. Update the fleet definition to refer to your commit.
 
-.. Switch to the Edge Manager web UI, and click menu:Fleet[] to enter the fleets page, and click the actions menu of the `pos` fleet.
+.. Switch to the Edge Manager web UI, click menu:Fleet[] to enter the fleets page, and click the actions menu of the `pos` fleet.
 Select menu:Edit fleet configurations[] and click menu:Next[] to enter the *Device template* page.
 
 .. Scroll down to *Branch/tag/commit* and paste the full commit ID.
 Click menu:Next[] until you reach the *Review and save* page and click menu:Save[].
 
-.. Click on menu:Devices[] to enter the devices page and wait until the `edge-1` managed device is `Up-to-Date`.
+.. Click menu:Devices[] to enter the devices page and wait until the `edge-1` managed device is `Up-to-Date`.
 Then click `edge-1` to enter its device details page.
 
 .. Click the menu:Terminal[] tab and verify that the `/etc/motd` file has been changed.
@@ -226,10 +224,8 @@ Alternatively, you could have created a tag on your git repository fork, and set
 
 Now that you have organized your devices into fleets which pull configuration files from a git repository, the next chapter explores how to monitor device and fleet status, troubleshoot issues, and extract meaningful data from Red Hat Edge Manager.
 
-The next chapter also provides an example of creating and managing fleets configurations using Git repositories by using the CLI.
+The next chapter also provides an example of creating and managing fleet configurations that reference Git repositories by using the CLI.
 Unlike the previous lab, which demonstrated both web UI and CLI management of fleets, using inline configurations, this lab uses only the web UI to make it shorter.
-
-NOTE: Review previous statements in case we scope down or remove the monitoring chapter.
 
 ////
 UPDATE: tasks related to git split from the previous lab.

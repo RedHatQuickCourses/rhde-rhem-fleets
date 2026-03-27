@@ -8,8 +8,6 @@ Objective::
 
 Configure multiple device fleets and assign devices to fleets using labels and selectors.
 
-WARNING: Pending Review
-
 == Before you begin
 
 You need a _development machine_ running RHEL, and hosting a few local VMs which stand in for managed devices.
@@ -27,7 +25,7 @@ Alternatively, you can open a shell or a console directly on the `servera` VM.
 == Instructions
 
 You will create fleets, using both the Edge Manager web UI and its CLI, and put devices on those fleets.
-You will also switch devices between different fleets, and observe how those changes affect managed device configurations.
+You will also switch devices between different fleets and observe how those changes affect managed device configurations.
 For simplicity, you will use only inline configurations.
 
 include::ch1-scale:partial$set-permissive.adoc[]
@@ -74,8 +72,8 @@ $ *virsh start edge-2 --force-boot*
 Domain 'edge-2' started
 --
 
-.. Give your local VMs a few moments to finish boot.
-Then, log in on Edge Manager as a non-administrator and verify that there are two managed devices, which are on-line and up-to-date.
+.. Give your local VMs a few moments to finish booting.
+Then, log in to Edge Manager as a non-administrator and verify that there are two managed devices, which are online and up-to-date.
 +
 [source,console,subs="verbatim,quotes"]
 --
@@ -92,10 +90,10 @@ NAME                                                    ALIAS   OWNER   SYSTEM  
 {edge-1-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}    edge-1  <none>  Online  UpToDate       NoApplications
 --
 
-.. If you devices keep displaying as off-line for too long, it might be related to clock skew.
+.. If your devices keep displaying as offline for too long, it might be related to clock skew.
 In that case, stop each of your local VMs and return to the beginning of this lab.
 +
-NOTE: Clock skew prevents a device from synchronizing with Edge Manager, and is known to happen if your ROLE classroom is stopped without first shutting down local VMs on your _development machine_ and later your VMs are restarted from saved state.
+NOTE: Clock skew prevents a device from synchronizing with Edge Manager, and is known to happen if your ROLE classroom is stopped without first shutting down local VMs on your _development machine_ and, later, your VMs are restarted from saved state.
 +
 [source,console,subs="verbatim,quotes"]
 --
@@ -106,23 +104,23 @@ Domain 'edge-2' destroyed
 --
 
 2. Create a device fleet, using the web UI.
-The process is very similar to editing a device configuration, if you remember the activity from the first course.
+The process is similar to editing a device configuration, if you remember that activity from the first course.
 +
 You will create a fleet with a device template that sets two configuration files, using the inline configuration provider: A pre-login banner (an "issue" message), and a lifecycle hook that enables login using the serial console.
 
 .. On your _development machine_, start a web browser and open `\https://servera.lab.example.com`.
-Log in on Edge Manager as `student` using the `student` password.
+Log in to Edge Manager as `student` using the `student` password.
 On the left pane, click menu:Fleets[].
 It should display a page which states "No fleets yet".
 
 .. Click menu:Create fleet[]. 
-Name your new fleet as `store` and, under *Device selector*, click on menu:Add label[].
+Name your new fleet as `store` and, under *Device selector*, click menu:Add label[].
 Type `location=store` as the device selector, and press kbd:[Tab] to leave the text box. 
 Ignore the warning that "There are no devices matching these labels" and click menu:Next[].
 +
 IMPORTANT: Ensure you added a label under *Device selector* instead of under *Fleet labels*.
 
-.. Under *Host configuration (files)*, click menu:Add configuration[] and type `store` on the *Source name* field. 
+.. Under *Host configuration (files)*, click menu:Add configuration[] and enter `store` in the *Source name* field. 
 Select `Inline configuration` as the *Source type* field.
 
 .. Under *File 1*, type `/etc/issue.d/warning.issue` as the *File path* field, and type the following on the *Content* field:
@@ -133,10 +131,10 @@ This is managed device {{ .metadata.labels.alias }}
 Access by non-authorized personnel is strictly forbidden.
 --
 +
-Also ensure that there is a blank line at the end of the multi-line text box.
+Ensure that there is a blank line at the end of the multi-line text box.
 
 .. Scroll down and click menu:Add file[] to create *File 2*.
-Type `/etc/flightctl/hooks.d/afterupdating/enable-serial-console.yaml` as the *File path* field, and type the following on the *Content* field:
+Enter `/etc/flightctl/hooks.d/afterupdating/enable-serial-console.yaml` as the *File path* field, and enter the following in the *Content* field:
 +
 [source,console,subs="verbatim,quotes"]
 --
@@ -146,11 +144,11 @@ Type `/etc/flightctl/hooks.d/afterupdating/enable-serial-console.yaml` as the *F
 .. Click menu:Next[] until you reach the end of the *Create fleet* assistant and click menu:Create fleet[].
 You should get a details page for a fleet in the `Valid` state and with no devices.
 
-3. Alter the labels on the first managed device so it joins the fleet and verify it got the fleet configuration.
+3. Alter the labels on the first managed device so it joins the fleet and verify it received the fleet configuration.
 
 .. Switch to a terminal and attempt to open the serial console of your local VM.
-It does not display a log in prompt, no matter which keys you press.
-Your only alternative is detaching from the VM console using kbd:[Ctrl+\]].
+It does not display a login prompt, no matter which keys you press.
+Your only alternative is detaching from the VM console by using kbd:[Ctrl+\]].
 +
 [source,console,subs="verbatim,quotes,macros"]
 --
@@ -161,10 +159,10 @@ kbd:[Enter]
 kbd:[Ctrl+\]]
 --
 
-.. Back to your web browser, click menu:Devices[] on the left pane.
+.. Go back to your web browser, click menu:Devices[] on the left pane.
 Then click on the menu icon (three vertical dots) for the `edge-1` managed device and select menu:Edit device configurations[].
 
-.. Click on menu:Add label[] and type `location=store` on the text box.
+.. Click in menu:Add label[] and enter `location=store` in the text box.
 Press kbd:[Tab] to close the text box and notice that the page displays a green check mark under *Fleet name*, acknowledging that the new label makes the device a member of the `store` fleet.
 
 .. Click menu:Next[] until you reach the last page of the assistant, and click menu:save[].
@@ -173,8 +171,8 @@ Press kbd:[Tab] to close the text box and notice that the page displays a green 
 Wait until it changes to `Up-to-date`.
 
 .. Switch to a terminal and attempt again to open the serial console of your `edge-1` local VM.
-You may have to press kbd:[Enter] a few times to get a log in prompt.
-After you get the prompt, press kbd:[Ctrl+D] to reset the log in process and view the banner messages.
+You may have to press kbd:[Enter] a few times to get a login prompt.
+After you get the prompt, press kbd:[Ctrl+D] to reset the login process and view the banner messages.
 +
 You should see the standard banner from Edge Manager, which displays a QR code used to enroll or manage the device, and the warning from your custom issue file.
 +
@@ -234,7 +232,7 @@ kbd:[Ctrl+\]]
 
 4. Configure the second managed device, using the CLI, so you can later see the impact on its previous configuration, when that same device joins a fleet.
 
-.. Create a temporary working directory, and copy example files to it.
+.. Create a temporary working directory and copy example files to it.
 +
 [source,console,subs="verbatim,quotes"]
 --
@@ -291,7 +289,7 @@ logout
 Connection to 127.0.0.1 closed.
 --
 
-.. Attempt to access the virtual console of the device, and verify that you cannot get a log in prompt.
+.. Attempt to access the virtual console of the device and verify that you cannot get a login prompt.
 Press kbd:[Enter] a few times and detach from the VM using kbd:[Ctrl+\]].
 +
 [source,console,subs="verbatim,quotes,macros"]
@@ -330,7 +328,7 @@ device/{edge-2-uuid-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb} edited
 --
 
 .. Wait until the device status changes to `Up-to-Date`.
-Notice that the device now displays as belonging to a fleet: see column `OWNER`.
+Notice that the device now displays as belonging to a fleet: see the `OWNER` column.
 +
 [source,console,subs="verbatim,quotes,attributes"]
 --
@@ -339,7 +337,7 @@ NAME                                                    ALIAS   OWNER           
 {edge-2-uuid-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb}    edge-2  Fleet/store     Online  UpToDate        NoApplications  location=store,rhel=9.6,type=noapps,alias=edge-2
 --
 
-.. Open an SSH connection to the device, verify that its post-login banner is gone, and terminate the SSH connection.
+.. Open an SSH connection to the device, verify that its post-login banner is gone and terminate the SSH connection.
 +
 [source,console,subs="verbatim,quotes"]
 --
@@ -351,8 +349,8 @@ Connection to 127.0.0.1 closed.
 --
 
 .. Access the virtual console of the device, and verify that the pre-login banner displays after the QR code.
-Press kbd:[Enter] a few times to get a log in prompt and press kbd:[Ctrl+D] to initialize a new log in process and see the banners.
-You do not need to log in, just detach from the VM using kbd:[Ctrl+\]].
+Press kbd:[Enter] a few times to get a login prompt and press kbd:[Ctrl+D] to initialize a new login process and see the banners.
+You do not need to log in; just detach from the VM using kbd:[Ctrl+\]].
 +
 [source,console,subs="verbatim,quotes,attributes,macros"]
 --
@@ -375,7 +373,7 @@ enroll login:
 kbd:[Ctrl+\]]
 --
 
-6. Provision a third managed device, and set its labels so it joins the fleet at enrollment.
+6. Provision a third managed device and set its labels so it joins the fleet at enrollment.
 
 .. By now, you should have one fleet with two devices.
 +
@@ -390,7 +388,7 @@ NAME                                                    ALIAS   OWNER           
 {edge-1-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa}    edge-1  Fleet/store     Online  UpToDate        NoApplications  alias=edge-1,location=store,rhel=9.6,type=noapps
 --
 
-.. Use the script in the `temp-enroll` directory, from the first lab, to provision a third test VM.
+.. Use the script in the `temp-enroll` directory from the first lab to provision a third test VM.
 Detach from its virtual console when VM creation is complete by pressing kbd:[Ctrl+\]].
 +
 [source,console,subs="verbatim,quotes"]
@@ -406,7 +404,7 @@ Connected to domain 'edge-3'
 Escape character is ^] (Ctrl + ])
 --
 
-.. Log in on Edge Manager as an administrator and approve the enrollment request, but setting the `location` label to match the fleet.
+.. Log in to Edge Manager as an administrator and approve the enrollment request, but setting the `location` label to match the fleet.
 +
 [source,console,subs="verbatim,quotes,attributes"]
 --
@@ -447,8 +445,8 @@ NAME                                                    ALIAS   OWNER           
 --
 
 .. Verify that the new device displays a pre-login banner, proving it already contains the fleet's configurations.
-Press kbd:[Enter] to get a log in prompt and press kbd:[Ctrl+D] to initialize a new log in process and see the banners.
-Then detach from the VM using kbd:[Ctrl+\]].
+Press kbd:[Enter] to get a login prompt and press kbd:[Ctrl+D] to initialize a new login process and see the banners.
+Then detach from the VM by using kbd:[Ctrl+\]].
 +
 [source,console,subs="verbatim,quotes,macros"]
 --
@@ -466,9 +464,9 @@ enroll login:
 kbd:[Ctrl+\]]
 --
 
-7. Create a second fleet, using the CLI, and move a device to it, so we can see how it affects previous configurations from its old fleet.
+7. Create a second fleet, using the CLI, and move a device to it, so you can see how it affects previous configurations from its old fleet.
 
-.. Return to the working directory of this lab, and log in on Edge Manager as a non-administrator, to maintain a good security posture.
+.. Return to the working directory of this lab, and log in to Edge Manager as a non-administrator, to maintain a good security posture.
 +
 [source,console,subs="verbatim,quotes"]
 --
@@ -645,7 +643,7 @@ Labels: {"alias":"edge-1","location":"store","rhel":"9.6","type":"noapps"}
 NOTE: The web UI displays a warning icon on all devices having this and other conditions, making it easier to spot issues with devices.
 Unfortunately, the web UI does not display a warning on the fleets themselves.
 
-.. There is also a script that just count the number of devices with the condition.
+.. There is also a script that just counts the number of devices with the condition.
 +
 [source,console,subs="verbatim,quotes,attributes"]
 --
@@ -729,7 +727,7 @@ metadata:
 device/{edge-1-uuid-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa} edited
 --
 
-.. Verify that the device does belong to any fleet, and wait until it is `Up-to-Date`.
+.. Verify that the device does belong to any fleet, and then wait until it is `Up-to-Date`.
 +
 [source,console,subs="verbatim,quotes,attributes"]
 --
